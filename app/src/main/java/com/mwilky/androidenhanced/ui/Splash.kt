@@ -1,4 +1,4 @@
-package com.mwilky.androidenhanced
+package com.mwilky.androidenhanced.ui
 
 import android.content.Context
 import android.os.Build
@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavController
+import com.mwilky.androidenhanced.DataStoreManager
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,8 @@ fun SplashScreen(navController: NavController, context: Context) {
     // This will remember the result of isCurrentDeviceSupported()
     val isDeviceSupported = remember { mutableStateOf(false) }
 
-    // LaunchedEffect will run the block of code inside it only once when the composable is first composed
+    // LaunchedEffect will run the block of code inside it only once when the
+    // composable is first composed
     LaunchedEffect(true) {
         // Get the result of isCurrentDeviceSupported()
         isDeviceSupported.value = isCurrentDeviceSupported()
@@ -53,7 +55,7 @@ private suspend fun isCurrentDeviceSupported(): Boolean {
 
     // URL of the online file containing the supported device names
     val onlineFileURL =
-        "https://raw.githubusercontent.com/mwilky/android-enhanced_xposed" +
+        "https://raw.githubusercontent.com/mwilky/jetpack-android-enhanced" +
                 "/master/supported_devices"
 
     return withContext(Dispatchers.IO) {

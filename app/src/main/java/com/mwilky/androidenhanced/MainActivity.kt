@@ -34,9 +34,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
@@ -63,91 +66,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeScreen(navController : NavController, context : Context) {
-    // Pressing back on Homescreen should close the app, rather than going back to onboarding
-    HandleBackButton {
-        (context as? Activity)?.finish()
-    }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(
-                scrollBehavior= scrollBehavior,
-                title = {
-                    Text(
-                        buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("Android")
-                            }
-
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Light)) {
-                                append(" Enhanced")
-                            }
-                        }
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* doSomething() */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                }
-            )
-        },
-        content = {
-            CustomList(paddingValues = it)
-        }
-    )
-
-}
-
-@Composable
-fun CustomList(paddingValues: PaddingValues) {
-    val numbers = remember { mutableStateListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)}
-
-    LazyColumn(modifier = Modifier.padding(top = paddingValues.calculateTopPadding())) {
-        items(items = numbers, key = {it.hashCode() }) {
-
-        }
-    }
-}
-
-@Composable
-fun HandleBackButton(onBackPressed: () -> Unit) {
-    val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
-    val backCallback = rememberUpdatedState(onBackPressed)
-
-    DisposableEffect(backCallback.value) {
-        val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                backCallback.value()
-            }
-        }
-
-        onBackPressedDispatcherOwner?.onBackPressedDispatcher?.addCallback(callback)
-        onDispose {
-            callback.remove()
-        }
-    }
-}
-
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun HomeScreenPreview() {
-    AndroidEnhancedTheme {
-        val navController = rememberNavController()
-        // Get the context using LocalContext
-        val context = LocalContext.current
-        HomeScreen(navController, context)
     }
 }
