@@ -25,14 +25,14 @@ fun SplashScreen(navController: NavController, context: Context) {
     // This will remember the result of isCurrentDeviceSupported()
     val isDeviceSupported = remember { mutableStateOf(false) }
 
-    // LaunchedEffect will run the block of code inside it only once when the
-    // composable is first composed
-    LaunchedEffect(true) {
+    val dataStoreManager = DataStoreManager(context)
+
+    // Collect the Flow using LaunchedEffect with a key "collectSupportedStatus"
+    LaunchedEffect("collectSupportedStatus") {
         // Get the result of isCurrentDeviceSupported()
         isDeviceSupported.value = isCurrentDeviceSupported()
 
         // Save the value to DataStore
-        val dataStoreManager = DataStoreManager(context)
         dataStoreManager.saveIsDeviceSupported(isDeviceSupported.value)
 
         // Read the value of onboardingCompletedKey from DataStore
@@ -46,6 +46,11 @@ fun SplashScreen(navController: NavController, context: Context) {
         } else {
             navController.navigate(Screen.Onboarding.route)
         }
+
+        // Observe the isCurrentDeviceSupported() changes and update the state
+        dataStoreManager.isDeviceSupportedFlow.collect { isSupported ->
+            isDeviceSupported.value = isSupported
+        }
     }
 }
 
@@ -55,8 +60,7 @@ private suspend fun isCurrentDeviceSupported(): Boolean {
 
     // URL of the online file containing the supported device names
     val onlineFileURL =
-        "https://raw.githubusercontent.com/mwilky/jetpack-android-enhanced" +
-                "/master/supported_devices"
+        "https://raw.githubusercontent.com/mwilky/renovate-helpers/master/supported_devices"
 
     return withContext(Dispatchers.IO) {
         try {
@@ -72,6 +76,7 @@ private suspend fun isCurrentDeviceSupported(): Boolean {
 
             // Extract the device names and check if the current device is supported
             val supportedDevices = content.split(",").map { it.trim() }
+            if (DEBUG) Log.d(TAG, "Supported device from online repo are: $supportedDevices")
             val isSupported = currentDeviceName in supportedDevices
 
             // Close resources
