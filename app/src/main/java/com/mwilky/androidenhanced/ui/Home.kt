@@ -161,7 +161,7 @@ fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavCon
                     EnvironmentProp(
                         icon = Icons.Outlined.Build,
                         label = "Module:",
-                        value = /*if (isPremiumFeatures) "Unlocked" else*/ "Activated"
+                        value = "Loaded"
                     ),
                     EnvironmentProp(
                         icon = Icons.Outlined.Create,
@@ -324,7 +324,7 @@ fun EnvironmentItem(
         )
         Text(
             text = prop.value,
-            lineHeight = 10.sp,
+            lineHeight = 16.sp,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,

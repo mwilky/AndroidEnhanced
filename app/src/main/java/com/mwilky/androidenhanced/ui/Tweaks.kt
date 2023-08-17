@@ -2,38 +2,27 @@ package com.mwilky.androidenhanced.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,25 +32,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mwilky.androidenhanced.DataStoreManager
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
-import com.mwilky.androidenhanced.dataclasses.EnvironmentProp
-import com.mwilky.androidenhanced.dataclasses.TweaksCard
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import com.mwilky.androidenhanced.xposed.XposedInit.Companion.SYSTEMUI_PREFS
-import de.robv.android.xposed.XposedBridge.log
+
 
 class Tweaks {
     companion object {
         fun readSwitchState(context: Context, key: String, prefs: String): Boolean {
             return try {
-                val sharedPreferences =
-                    context.getSharedPreferences(prefs, Context.MODE_WORLD_READABLE)
+                val prefContext = context.createDeviceProtectedStorageContext()
+                val sharedPreferences = prefContext.getSharedPreferences(prefs, MODE_PRIVATE)
                 sharedPreferences.getBoolean(key, false)
-            } catch (e: SecurityException) {
+            } catch (e: Exception) {
                 Log.e(TAG, "readSwitchState error: $e")
                 false
             }
@@ -69,10 +54,10 @@ class Tweaks {
 
         fun writeSwitchState(context: Context, key: String, prefs: String, state: Boolean) {
             try {
-                val sharedPreferences =
-                    context.getSharedPreferences(prefs, Context.MODE_WORLD_READABLE)
+                val prefContext = context.createDeviceProtectedStorageContext()
+                val sharedPreferences = prefContext.getSharedPreferences(prefs, MODE_PRIVATE)
                 sharedPreferences.edit().putBoolean(key, state).apply()
-            } catch (e: SecurityException) {
+            } catch (e: Exception) {
                 Log.e(TAG, "writeSwitchState error: $e")
             }
         }
