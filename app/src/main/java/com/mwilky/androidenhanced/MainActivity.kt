@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.crossbowffs.remotepreferences.BuildConfig
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 
 class MainActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "DEBUG: Android Enhanced"
-        const val DEBUG = true
+        const val DEBUG = BuildConfig.DEBUG
     }
 
     private lateinit var dataStoreManager : DataStoreManager

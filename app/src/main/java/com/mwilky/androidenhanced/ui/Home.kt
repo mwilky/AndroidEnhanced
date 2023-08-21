@@ -2,7 +2,6 @@ package com.mwilky.androidenhanced.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -269,7 +268,8 @@ fun WelcomeText(
             .padding(16.dp)
     ) {
         Text(
-            text = "$greetingMessage, $name",
+            //text = "$greetingMessage, $name",
+            text = "$greetingMessage",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
         )
