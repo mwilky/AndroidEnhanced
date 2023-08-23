@@ -71,7 +71,7 @@ fun OnboardingScreen(navController: NavController, context: Context) {
         )
         //Secondary Text
         Text(
-            text = "Welcome to Android Enhanced! This app relies on Xposed framework. " +
+            text = "Welcome to Android Enhanced! This app heavily relies on Xposed framework. " +
                     "Functionality will be limited without it...",
             style = TextStyle(
                 fontSize = 16.sp,
