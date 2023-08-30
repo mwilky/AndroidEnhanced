@@ -31,20 +31,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.sendBooleanBroadcast
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
+import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
-import com.mwilky.androidenhanced.xposed.XposedInit.Companion.SYSTEMUI_PREFS
 
 
 class Tweaks {
     companion object {
-        fun readSwitchState(context: Context, key: String, prefs: String): Boolean {
+        fun readSwitchState(context: Context, key: String): Boolean {
             return try {
-                val prefContext = context.createDeviceProtectedStorageContext()
-                val sharedPreferences = prefContext.getSharedPreferences(prefs, MODE_PRIVATE)
+                val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
+                val sharedPreferences = deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
                 sharedPreferences.getBoolean(key, false)
             } catch (e: Exception) {
                 Log.e(TAG, "readSwitchState error: $e")
@@ -52,10 +56,10 @@ class Tweaks {
             }
         }
 
-        fun writeSwitchState(context: Context, key: String, prefs: String, state: Boolean) {
+        fun writeSwitchState(context: Context, key: String, state: Boolean) {
             try {
-                val prefContext = context.createDeviceProtectedStorageContext()
-                val sharedPreferences = prefContext.getSharedPreferences(prefs, MODE_PRIVATE)
+                val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
+                val sharedPreferences = deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
                 sharedPreferences.edit().putBoolean(key, state).apply()
             } catch (e: Exception) {
                 Log.e(TAG, "writeSwitchState error: $e")
@@ -109,6 +113,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
             .padding(top = topPadding.calculateTopPadding())
     ) {
         val statusbar = "Statusbar"
+        val buttons = "Buttons"
 
         when (screen) {
             //Pages
@@ -117,10 +122,23 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                 item {
                     TweakSwitch(
                         context,
-                        "First Switch",
+                        "Test Switch",
                         "",
-                        "key_one",
-                        SYSTEMUI_PREFS
+                        "key_one"
+                    )
+                }
+            }
+
+            buttons -> {
+                //Tweaks Items
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.longPressPowerTorchScreenOffTitle),
+                        stringResource(
+                            R.string.longPressPowerTorchScreenOffSummary),
+                        torchPowerScreenOff
                     )
                 }
             }
@@ -130,8 +148,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
 }
 
 @Composable
-fun TweakSwitch(context: Context, label: String, description: String, key: String, prefs: String) {
-    var switchState by remember { mutableStateOf(readSwitchState(context, key, prefs)) }
+fun TweakSwitch(context: Context, label: String, description: String, key: String) {
+    var switchState by remember { mutableStateOf(readSwitchState(context, key)) }
 
     Row(
         modifier = Modifier.fillMaxSize(),
@@ -139,15 +157,21 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
+            modifier = Modifier
+                .weight(1f) // Take available horizontal space
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp
+                ),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .padding(start = 16.dp,
-                        end = 16.dp
+                    .padding(
+                        start = 16.dp
                     )
             )
             if (description != "") {
@@ -167,10 +191,12 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
             checked = switchState,
             onCheckedChange = {
                 switchState = !switchState
-                writeSwitchState(context, key, prefs, switchState)
+                writeSwitchState(context, key, switchState)
+                sendBooleanBroadcast(context, key, switchState)
                 },
             modifier = Modifier
-                .padding(start = 16.dp,
+                .padding(
+                    start = 16.dp,
                     end = 16.dp
                 )
         )

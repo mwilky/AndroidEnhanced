@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Base.Theme.AndroidEnhanced" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Base.Theme.AndroidEnhanced" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash</item>
     </style>
 
     <style name="Theme.AndroidEnhanced" parent="Base.Theme.AndroidEnhanced" />

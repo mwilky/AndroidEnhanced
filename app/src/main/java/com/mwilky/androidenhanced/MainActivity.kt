@@ -7,18 +7,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.crossbowffs.remotepreferences.BuildConfig
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 
 class MainActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "DEBUG: Android Enhanced"
-        const val DEBUG = BuildConfig.DEBUG
+        const val DEBUG = true
     }
 
     private lateinit var dataStoreManager : DataStoreManager
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         dataStoreManager = DataStoreManager(this)
         setContent {
