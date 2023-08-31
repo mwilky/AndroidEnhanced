@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.mwilky.androidenhanced.DataStoreManager
 import com.mwilky.androidenhanced.dataclasses.EnvironmentProp
 import com.mwilky.androidenhanced.dataclasses.TweaksCard
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
@@ -126,9 +125,6 @@ fun HomeScreen(navController: NavController, context: Context) {
 
 @Composable
 fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavController ) {
-    val context = LocalContext.current
-    val dataStoreManager = DataStoreManager(context)
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(start = 8.dp, end = 8.dp),

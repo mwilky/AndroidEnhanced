@@ -1,6 +1,7 @@
 package com.mwilky.androidenhanced.ui
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,20 +24,19 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.mwilky.androidenhanced.DataStoreManager
+import com.mwilky.androidenhanced.BroadcastUtils
+import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-
-private lateinit var dataStore: DataStoreManager
 
 @Composable
 fun OnboardingScreen(navController: NavController, context: Context) {
-    dataStore = DataStoreManager(context)
+    val deviceProtectedStorageContext: Context = context.createDeviceProtectedStorageContext()
+    val sharedPreferences: SharedPreferences =
+        deviceProtectedStorageContext.getSharedPreferences(
+            BroadcastUtils.PREFS, Context.MODE_PRIVATE
+        )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -86,11 +86,7 @@ fun OnboardingScreen(navController: NavController, context: Context) {
         Button(
             onClick = {
                 //Set onboarding complete
-                CoroutineScope(Dispatchers.IO).launch {
-                    dataStore.dataStore.edit { preferences ->
-                        preferences[DataStoreManager.onboardingCompletedKey] = true
-                    }
-                }
+                sharedPreferences.edit().putBoolean(ISONBOARDINGCOMPLETEDKEY, true).apply()
                 //Go to Home-screen
                 navController.navigate(Screen.Home.route)
             },

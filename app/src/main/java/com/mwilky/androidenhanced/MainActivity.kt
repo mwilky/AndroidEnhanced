@@ -17,11 +17,9 @@ class MainActivity : ComponentActivity() {
         const val DEBUG = true
     }
 
-    private lateinit var dataStoreManager : DataStoreManager
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        dataStoreManager = DataStoreManager(this)
         setContent {
             AndroidEnhancedTheme {
                 // A surface container using the 'background' color from the theme

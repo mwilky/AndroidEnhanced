@@ -1,9 +1,9 @@
 package com.mwilky.androidenhanced
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
@@ -12,13 +12,13 @@ import androidx.core.os.BuildCompat
 import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
+import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons
 
 class BroadcastUtils: BroadcastReceiver() {
     companion object {
 
         const val PREFS = "prefs"
-        const val torchPowerScreenOff = "bool_LongPressPowerTorchScreenOff"
 
         @SuppressLint("UnspecifiedRegisterReceiverFlag")
         fun registerBroadcastReceiver(mContext: Context, key: String, registeredClass: String) {
@@ -45,7 +45,8 @@ class BroadcastUtils: BroadcastReceiver() {
         fun sendBooleanBroadcast(
             context: Context,
             key: String,
-            value: Boolean) {
+            value: Boolean
+        ) {
             Intent().also { intent ->
                 intent.action = key
                 intent.putExtra(key, value)
@@ -76,7 +77,7 @@ class BroadcastUtils: BroadcastReceiver() {
         val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
         val sharedPreferences: SharedPreferences =
             deviceProtectedStorageContext.getSharedPreferences(
-                PREFS, Application.MODE_PRIVATE
+                PREFS, MODE_PRIVATE
             )
         val allPrefs = sharedPreferences.all
         for ((key, value) in allPrefs) {

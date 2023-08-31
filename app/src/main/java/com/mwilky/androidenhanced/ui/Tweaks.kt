@@ -1,6 +1,5 @@
 package com.mwilky.androidenhanced.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.util.Log
@@ -36,9 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.sendBooleanBroadcast
-import com.mwilky.androidenhanced.BroadcastUtils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.R
+import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 
@@ -68,7 +67,6 @@ class Tweaks {
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Tweaks(navController: NavController, context: Context, screen : String) {

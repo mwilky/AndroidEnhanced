@@ -1,11 +1,7 @@
 package com.mwilky.androidenhanced
 
 import android.content.Context
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +12,6 @@ import com.mwilky.androidenhanced.ui.HomeScreen
 import com.mwilky.androidenhanced.ui.OnboardingScreen
 import com.mwilky.androidenhanced.ui.SplashScreen
 import com.mwilky.androidenhanced.ui.Tweaks
-import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 
 @Composable
 fun Navigation(context: Context) {
