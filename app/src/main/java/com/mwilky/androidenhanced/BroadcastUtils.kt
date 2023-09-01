@@ -12,6 +12,7 @@ import androidx.core.os.BuildCompat
 import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons
 
@@ -25,12 +26,18 @@ class BroadcastUtils: BroadcastReceiver() {
             val myReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     val value = intent.getBooleanExtra(key, false)
+
                     //Set behaviour for each tweak change here
-                    //
-                    //Torch on power key whilst screen
-                    if (key == torchPowerScreenOff) {
-                        Buttons.mTorchPowerScreenOff = value
-                        Buttons.updateSupportLongPressPowerWhenNonInteractive(value)
+                    when (key) {
+                        //Torch on power key whilst screen
+                        torchPowerScreenOff -> {
+                            Buttons.mTorchPowerScreenOff = value
+                            Buttons.updateSupportLongPressPowerWhenNonInteractive(value)
+                        }
+                        //Torch auto off when screen on
+                        torchAutoOffScreenOn -> {
+                            Buttons.mTorchAutoOff = value
+                        }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")
                 }

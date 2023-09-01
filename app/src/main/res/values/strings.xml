@@ -3,4 +3,6 @@
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>
+    <string name="torchAutoOffScreenOnTitle">Torch auto off</string>
+    <string name="torchAutoOffScreenOnSummary">Automatically turn the torch off when the screen is turned on</string>
 </resources>

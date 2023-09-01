@@ -37,6 +37,7 @@ import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.sendBooleanBroadcast
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.R
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
@@ -130,6 +131,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
             buttons -> {
                 //Tweaks Items
                 item {
+                    TweaksSectionHeader(label = "Power Button")
+                }
+                
+                item {
                     TweakSwitch(
                         context,
                         stringResource(
@@ -137,6 +142,16 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                         stringResource(
                             R.string.longPressPowerTorchScreenOffSummary),
                         torchPowerScreenOff
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.torchAutoOffScreenOnTitle),
+                        stringResource(
+                            R.string.torchAutoOffScreenOnSummary),
+                        torchAutoOffScreenOn
                     )
                 }
             }
@@ -150,17 +165,17 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
     var switchState by remember { mutableStateOf(readSwitchState(context, key)) }
 
     Row(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp,
+                bottom = 16.dp
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
             modifier = Modifier
-                .weight(1f) // Take available horizontal space
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp
-                ),
+                .weight(1f), // Take available horizontal space
             verticalArrangement = Arrangement.Center
         ) {
             Text(
@@ -199,4 +214,21 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
                 )
         )
     }
+}
+
+@Composable
+fun TweaksSectionHeader(label: String) {
+    val label = label
+    Text(
+        text = label,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .padding(
+                start = 16.dp,
+                end = 32.dp,
+                top = 16.dp,
+                bottom = 16.dp
+            ),
+    )
 }
