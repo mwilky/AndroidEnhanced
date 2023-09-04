@@ -7,4 +7,7 @@
     <string name="torchAutoOffScreenOnSummary">Automatically turn the torch off when the screen is turned on</string>
     <string name="volKeyMediaControlTitle">Volume key media control</string>
     <string name="volKeyMediaControlSummary">Control media playback by long pressing volume keys whilst screen is off</string>
+<!--    Misc-->
+    <string name="allowAllRotationsTitle">Allow all rotations</string>
+    <string name="allowAllRotationsSummary">Allow rotating the device at a 180 degree angle</string>
 </resources>

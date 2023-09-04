@@ -16,6 +16,7 @@ class XposedInit : IXposedHookLoadPackage {
         when(lpparam?.packageName) {
             FRAMEWORK_PACKAGE -> {
                 Buttons.init(lpparam.classLoader)
+                Misc.init(lpparam.classLoader)
             }
         }
     }

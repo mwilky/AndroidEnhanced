@@ -192,7 +192,7 @@ class Buttons {
 
                 PhoneWindowManagerObject = param.thisObject
 
-                val mContext: Context = getObjectField(PhoneWindowManagerObject,
+                val mContext: Context = getObjectField(param.thisObject,
                     "mContext")
                         as Context
 

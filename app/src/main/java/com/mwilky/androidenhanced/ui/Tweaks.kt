@@ -37,6 +37,7 @@ import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.sendBooleanBroadcast
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.R
+import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
@@ -114,6 +115,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
     ) {
         val statusbar = "Statusbar"
         val buttons = "Buttons"
+        val misc = "Miscellaneous"
 
         when (screen) {
             //Pages
@@ -165,6 +167,22 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                         stringResource(
                             R.string.volKeyMediaControlSummary),
                         volKeyMediaControl
+                    )
+                }
+            }
+            misc -> {
+                //Tweaks Items
+                item {
+                    TweaksSectionHeader(label = "General")
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.allowAllRotationsTitle),
+                        stringResource(
+                            R.string.allowAllRotationsSummary),
+                        allowAllRotations
                     )
                 }
             }
