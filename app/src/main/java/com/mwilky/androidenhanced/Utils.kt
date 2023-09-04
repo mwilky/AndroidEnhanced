@@ -19,6 +19,7 @@ class Utils(context: Context, handler: Handler) {
         //Tweak Values
         const val torchPowerScreenOff = "bool_LongPressPowerTorchScreenOff"
         const val torchAutoOffScreenOn = "bool_TorchAutoOffScreenOn"
+        const val volKeyMediaControl = "bool_VolKeyMediaControl"
     }
 
     private val mContext: Context = context

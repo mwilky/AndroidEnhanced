@@ -39,6 +39,7 @@ import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
+import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 
@@ -133,7 +134,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                 item {
                     TweaksSectionHeader(label = "Power Button")
                 }
-                
                 item {
                     TweakSwitch(
                         context,
@@ -152,6 +152,19 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                         stringResource(
                             R.string.torchAutoOffScreenOnSummary),
                         torchAutoOffScreenOn
+                    )
+                }
+                item {
+                    TweaksSectionHeader(label = "Volume Button")
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.volKeyMediaControlTitle),
+                        stringResource(
+                            R.string.volKeyMediaControlSummary),
+                        volKeyMediaControl
                     )
                 }
             }
@@ -228,7 +241,7 @@ fun TweaksSectionHeader(label: String) {
                 start = 16.dp,
                 end = 32.dp,
                 top = 16.dp,
-                bottom = 16.dp
+                bottom = 8.dp
             ),
     )
 }
