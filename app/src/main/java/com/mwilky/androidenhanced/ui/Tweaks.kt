@@ -135,7 +135,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
             buttons -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(label = "Power Button")
+                    TweaksSectionHeader(label = stringResource(id = R.string.powerButton))
                 }
                 item {
                     TweakSwitch(
@@ -158,7 +158,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                     )
                 }
                 item {
-                    TweaksSectionHeader(label = "Volume Button")
+                    TweaksSectionHeader(label = stringResource(id = R.string.volumeButton))
                 }
                 item {
                     TweakSwitch(
@@ -174,7 +174,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
             misc -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(label = "General")
+                    TweaksSectionHeader(label = stringResource(id = R.string.general))
                 }
                 item {
                     TweakSwitch(
@@ -209,7 +209,8 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 16.dp,
+            .padding(
+                top = 16.dp,
                 bottom = 16.dp
             ),
         verticalAlignment = Alignment.CenterVertically,

@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Android Enhanced</string>
+<!--    Tweaks Categories-->
+    <string name="general">General</string>
+    <string name="powerButton">Power Button</string>
+    <string name="volumeButton">Volume Button</string>
+
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>
