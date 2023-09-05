@@ -13,6 +13,7 @@ import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
+import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
@@ -22,6 +23,7 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPressPowerWhenNonInteractive
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
+import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
 import de.robv.android.xposed.XposedBridge.log
 
@@ -55,6 +57,10 @@ class BroadcastUtils: BroadcastReceiver() {
                         allowAllRotations -> {
                             mAllowAllRotations = value
                             updateAllowAllRotations(value)
+                        }
+                        //Disable Secure Screenshots
+                        disableSecureScreenshots -> {
+                            mDisableSecureScreenshots = value
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")

@@ -21,6 +21,7 @@ class Utils(context: Context, handler: Handler) {
         const val torchAutoOffScreenOn = "bool_TorchAutoOffScreenOn"
         const val volKeyMediaControl = "bool_VolKeyMediaControl"
         const val allowAllRotations = "bool_AllowAllRotations"
+        const val disableSecureScreenshots = "bool_DisableSecureScreenshots"
     }
 
     private val mContext: Context = context

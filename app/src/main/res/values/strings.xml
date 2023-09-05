@@ -10,4 +10,6 @@
 <!--    Misc-->
     <string name="allowAllRotationsTitle">Allow all rotations</string>
     <string name="allowAllRotationsSummary">Allow rotating the device at a 180 degree angle</string>
+    <string name="disableSecureScreenshotsTitle">Disable secure screenshots</string>
+    <string name="disableSecureScreenshotsSummary">Disable the security feature that restricts taking screenshots in secure apps</string>
 </resources>
