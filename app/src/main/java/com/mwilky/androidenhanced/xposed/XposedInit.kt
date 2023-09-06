@@ -18,6 +18,9 @@ class XposedInit : IXposedHookLoadPackage {
                 Buttons.init(lpparam.classLoader)
                 Misc.init(lpparam.classLoader)
             }
+            SYSTEMUI_PACKAGE -> {
+                Statusbar.init(lpparam.classLoader)
+            }
         }
     }
 

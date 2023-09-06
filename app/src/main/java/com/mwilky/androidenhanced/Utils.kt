@@ -17,11 +17,14 @@ class Utils(context: Context, handler: Handler) {
         const val ISDEVICESUPPORTEDKEY = "isDeviceSupported"
         const val ISONBOARDINGCOMPLETEDKEY = "isOnboardingComplete"
         //Tweak Values
+        //Framework
         const val torchPowerScreenOff = "bool_LongPressPowerTorchScreenOff"
         const val torchAutoOffScreenOn = "bool_TorchAutoOffScreenOn"
         const val volKeyMediaControl = "bool_VolKeyMediaControl"
         const val allowAllRotations = "bool_AllowAllRotations"
         const val disableSecureScreenshots = "bool_DisableSecureScreenshots"
+        //SystemUI
+        const val doubleTapToSleep = "bool_DoubleTapToSleep"
     }
 
     private val mContext: Context = context

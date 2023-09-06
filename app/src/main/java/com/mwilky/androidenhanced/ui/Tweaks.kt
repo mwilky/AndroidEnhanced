@@ -39,6 +39,7 @@ import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
+import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
@@ -89,7 +90,9 @@ fun Tweaks(navController: NavController, context: Context, screen : String) {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = { navController.popBackStack() }
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "back"
@@ -123,19 +126,33 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
             statusbar -> {
                 //Tweaks Items
                 item {
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.gestures
+                        )
+                    )
+                }
+                item {
                     TweakSwitch(
                         context,
-                        "Test Switch",
-                        "",
-                        "key_one"
+                        stringResource(
+                            id = R.string.doubleTapToSleepTitle
+                        ),
+                        stringResource(
+                            id = R.string.doubleTapToSleepSummary
+                        ),
+                        doubleTapToSleep
                     )
                 }
             }
-
             buttons -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(label = stringResource(id = R.string.powerButton))
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.powerButton
+                        )
+                    )
                 }
                 item {
                     TweakSwitch(
@@ -158,7 +175,11 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                     )
                 }
                 item {
-                    TweaksSectionHeader(label = stringResource(id = R.string.volumeButton))
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.volumeButton
+                        )
+                    )
                 }
                 item {
                     TweakSwitch(
@@ -174,7 +195,11 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
             misc -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(label = stringResource(id = R.string.general))
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.general
+                        )
+                    )
                 }
                 item {
                     TweakSwitch(

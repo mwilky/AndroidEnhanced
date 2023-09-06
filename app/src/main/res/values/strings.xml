@@ -4,7 +4,10 @@
     <string name="general">General</string>
     <string name="powerButton">Power Button</string>
     <string name="volumeButton">Volume Button</string>
-
+    <string name="gestures">Gestures</string>
+<!--    Statusbar-->
+    <string name="doubleTapToSleepTitle">Double tap to sleep</string>
+    <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>
