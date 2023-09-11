@@ -6,6 +6,7 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Message
+import android.os.PowerManager
 import android.telecom.TelecomManager
 import android.util.Log
 import android.view.Display
@@ -60,6 +61,7 @@ class Buttons {
 
         //Torch
         private const val MSG_TOGGLE_TORCH = 100
+        private const val WAKE_REASON_LIFT = 16
 
         //Vol Key Media
         private const val MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 200
@@ -418,6 +420,8 @@ class Buttons {
         private val updateGlobalWakefulnessLocked_hook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
 
+                val wakeReason = param.args[1]
+
                 val mHandler =
                     getObjectField(param.thisObject, "mHandler")
                             as Handler
@@ -428,11 +432,14 @@ class Buttons {
                 ) as Int
 
                 if (recalculateGlobalWakefulnessLocked == 1) {
-                    if (mTorchAutoOff && isTorchEnabled) {
-                        mHandler.removeMessages(MSG_TOGGLE_TORCH)
-                        val obtainMessage: Message = mHandler.obtainMessage(MSG_TOGGLE_TORCH)
-                        obtainMessage.isAsynchronous = true
-                        obtainMessage.sendToTarget()
+                    //Do not toggle torch if woken by lifting device
+                    if (wakeReason != WAKE_REASON_LIFT) {
+                        if (mTorchAutoOff && isTorchEnabled) {
+                            mHandler.removeMessages(MSG_TOGGLE_TORCH)
+                            val obtainMessage: Message = mHandler.obtainMessage(MSG_TOGGLE_TORCH)
+                            obtainMessage.isAsynchronous = true
+                            obtainMessage.sendToTarget()
+                        }
                     }
                 }
             }
