@@ -15,6 +15,7 @@ import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
+import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
@@ -26,7 +27,8 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPres
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleep
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.doubleTapToSleepEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarBrightnessControlEnabled
 import de.robv.android.xposed.XposedBridge.log
 
 class BroadcastUtils: BroadcastReceiver() {
@@ -66,7 +68,11 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                         //Double tap to sleep
                         doubleTapToSleep -> {
-                            mDoubleTapToSleep = value
+                            doubleTapToSleepEnabled = value
+                        }
+                        //Statusbar Brightness Control
+                        statusBarBrightnessControl -> {
+                            statusbarBrightnessControlEnabled = value
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")

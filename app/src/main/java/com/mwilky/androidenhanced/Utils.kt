@@ -25,6 +25,7 @@ class Utils(context: Context, handler: Handler) {
         const val disableSecureScreenshots = "bool_DisableSecureScreenshots"
         //SystemUI
         const val doubleTapToSleep = "bool_DoubleTapToSleep"
+        const val statusBarBrightnessControl = "bool_StatusbarBrightnessControl"
     }
 
     private val mContext: Context = context

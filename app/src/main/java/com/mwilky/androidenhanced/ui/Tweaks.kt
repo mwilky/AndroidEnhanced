@@ -40,6 +40,7 @@ import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
+import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
@@ -142,6 +143,18 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String) {
                             id = R.string.doubleTapToSleepSummary
                         ),
                         doubleTapToSleep
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            id = R.string.statusbarBrightnessControlTitle
+                        ),
+                        stringResource(
+                            id = R.string.statusbarBrightnessControlSummary
+                        ),
+                        statusBarBrightnessControl
                     )
                 }
             }
