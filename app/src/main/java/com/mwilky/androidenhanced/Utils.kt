@@ -26,6 +26,7 @@ class Utils(context: Context, handler: Handler) {
         //SystemUI
         const val doubleTapToSleep = "bool_DoubleTapToSleep"
         const val statusBarBrightnessControl = "bool_StatusbarBrightnessControl"
+        const val statusBarClockPosition = "int_StatusbarClockPosition"
     }
 
     private val mContext: Context = context

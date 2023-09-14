@@ -1,9 +1,10 @@
 package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
-import android.app.StatusBarManager
+import android.app.Fragment
 import android.content.Context
 import android.hardware.display.DisplayManager
+import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
@@ -13,10 +14,11 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
@@ -29,7 +31,6 @@ import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -46,10 +47,15 @@ class Statusbar {
             "com.android.systemui.statusbar.phone.PhoneStatusBarViewController"
         private const val CENTRAL_SURFACES_IMPL_CLASS =
             "com.android.systemui.statusbar.phone.CentralSurfacesImpl"
+        private const val COLLAPSED_STATUSBAR_FRAGMENT_CLASS =
+            "com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment"
+        private const val HEADS_UP_APPEARANCE_CONTROLLER_CLASS =
+            "com.android.systemui.statusbar.phone.HeadsUpAppearanceController"
 
         // Tweak Variables
         var doubleTapToSleepEnabled: Boolean = false
         var statusbarBrightnessControlEnabled: Boolean = false
+        var statusbarClockPosition: Int = 0
 
         // Class Objects
         lateinit var notificationPanelViewController: Any
@@ -59,6 +65,7 @@ class Statusbar {
         lateinit var centralSurfacesImpl: Any
         lateinit var displayManager: DisplayManager
         lateinit var shadeController: Any
+        lateinit var collapsedStatusBarFragment: Any
 
         // Class references
         private var rStringClass: Class<*>? = null
@@ -74,6 +81,9 @@ class Statusbar {
         private var initialTouchX = 0
         private var initialTouchY = 0
         private var currentBrightness = 0f
+
+        //Clock position
+        private lateinit var mDefaultClockContainer: Any
 
         // Constants
         private const val BRIGHTNESS_CONTROL_PADDING = 0.15f
@@ -127,6 +137,45 @@ class Statusbar {
                 startHook
             )
 
+
+            //Clock position
+            findAndHookMethod(
+                COLLAPSED_STATUSBAR_FRAGMENT_CLASS,
+                classLoader,
+                "onViewCreated",
+                View::class.java,
+                Bundle::class.java,
+                onViewCreatedHook
+            )
+
+            //Clock position
+            findAndHookMethod(
+                COLLAPSED_STATUSBAR_FRAGMENT_CLASS,
+                classLoader,
+                "animateHiddenState",
+                View::class.java,
+                Int::class.javaPrimitiveType,
+                Boolean::class.javaPrimitiveType,
+                animateHiddenStateHook
+            )
+
+            val carrierTextManager =
+                findClass(
+                    "com.android.keyguard.CarrierTextManager\$\$ExternalSyntheticLambda1",
+                    classLoader
+                )
+
+            //Clock position
+            findAndHookMethod(
+                HEADS_UP_APPEARANCE_CONTROLLER_CLASS,
+                classLoader,
+                "hide",
+                View::class.java,
+                Int::class.javaPrimitiveType,
+                carrierTextManager,
+                hideHook
+            )
+
             rStringClass = findClass("com.android.systemui.R\$string", classLoader)
         }
 
@@ -171,6 +220,30 @@ class Statusbar {
                 phoneStatusBarView = view
             }
         }
+
+        //Register the receiver for clock position
+        private val onViewCreatedHook: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    collapsedStatusBarFragment = param.thisObject
+                    val mContext = (collapsedStatusBarFragment as Fragment).context
+                        as Context
+
+                    // Register broadcast receiver to receive values
+                    BroadcastUtils.registerBroadcastReceiver(
+                        mContext, Utils.statusBarClockPosition,
+                        param.thisObject.toString()
+                    )
+                }
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val mClockView =
+                        getObjectField(param.thisObject, "mClockView") as View
+
+                    mDefaultClockContainer = mClockView.parent
+
+                    setStatusbarClockPosition()
+                }
+            }
 
         // Perform the gestures on shade view
         private val onTouchHookNotificationPanelViewController: XC_MethodHook =
@@ -279,6 +352,39 @@ class Statusbar {
             }
         }
 
+        // Don't hide clock if it is in right position
+        private val animateHiddenStateHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val view:View = param.args[0]
+                    as View
+
+                val mClockView:View =
+                    getObjectField(collapsedStatusBarFragment, "mClockView")
+                        as View
+
+                if (view == mClockView && statusbarClockPosition != 0) {
+                    param.result = null
+                }
+
+            }
+        }
+
+        // Don't hide clock if it is in right position
+        private val hideHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val view:View = param.args[0]
+                        as View
+
+                val mClockView:View =
+                    getObjectField(collapsedStatusBarFragment, "mClockView")
+                            as View
+
+                if (view == mClockView && statusbarClockPosition != 0) {
+                    param.result = null
+                }
+            }
+        }
+
         // Additional functions
         private fun adjustBrightness(x: Int) {
             brightnessChanged = true
@@ -364,10 +470,15 @@ class Statusbar {
         fun onBrightnessChanged(upOrCancel: Boolean) {
             if (brightnessChanged && upOrCancel) {
                 brightnessChanged = false
-                val isExpandedVisible = getBooleanField(shadeController, "isExpandedVisible")
+                val isExpandedVisible =
+                    getBooleanField(shadeController, "isExpandedVisible")
                 if (justPeeked && isExpandedVisible) {
                     callMethod(
-                        notificationPanelViewController, "fling", 10, false, false
+                        notificationPanelViewController,
+                        "fling",
+                        10,
+                        false,
+                        false
                     )
                 }
                 callMethod(
@@ -376,10 +487,72 @@ class Statusbar {
             }
         }
 
+        @SuppressLint("DiscouragedApi")
+        fun setStatusbarClockPosition() {
+            val mContext = (collapsedStatusBarFragment as Fragment).context
+                    as Context
+
+            val mStatusBar = getObjectField(collapsedStatusBarFragment, "mStatusBar")
+                    as ViewGroup
+
+            //Get the clock containing view
+            val mSystemIconArea: LinearLayout =
+                mStatusBar.findViewById(
+                    mContext.resources.getIdentifier(
+                        "statusIcons",
+                        "id",
+                        "com.android.systemui"
+                    )
+                )
+            //Get the clock view
+            val mClockView = getObjectField(collapsedStatusBarFragment, "mClockView")
+                    as View
+
+            val rightParent = mSystemIconArea.parent as ViewGroup
+
+            //Remove clock
+            (mClockView.parent as ViewGroup?)?.removeView(mClockView)
+
+            //Parent view set by module
+            var setParent: ViewGroup? = null
+
+            //Set the paddings of the clock
+            val paddingStart: Int = mContext.resources.getDimensionPixelSize(
+                mContext.resources.getIdentifier(
+                    "status_bar_left_clock_starting_padding",
+                    "dimen",
+                    "com.android.systemui"
+                )
+            )
+            val paddingEnd: Int = mContext.resources.getDimensionPixelSize(
+                mContext.resources.getIdentifier(
+                    "status_bar_left_clock_end_padding",
+                    "dimen",
+                    "com.android.systemui"
+                )
+            )
+
+            when (statusbarClockPosition) {
+                //left side
+                0 -> {
+                    setParent = mDefaultClockContainer as ViewGroup
+                    setParent.addView(mClockView, 0)
+                    mClockView.setPadding(paddingStart, 0, paddingEnd, 0)
+                }
+                //right side
+                1 -> {
+                    setParent = rightParent
+                    setParent.addView(mClockView)
+                    mClockView.setPadding(paddingEnd * 2, 0, 0, 0)
+                }
+
+            }
+        }
+
     }
 
     class BrightnessControl(private val value: Float) {
-        suspend fun adjustBrightness() {
+        fun adjustBrightness() {
             val context = getObjectField(centralSurfacesImpl, "mContext")
                     as Context
             Settings.System.putFloat(

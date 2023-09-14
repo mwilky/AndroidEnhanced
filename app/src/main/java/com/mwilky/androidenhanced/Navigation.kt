@@ -12,6 +12,7 @@ import com.mwilky.androidenhanced.ui.HomeScreen
 import com.mwilky.androidenhanced.ui.OnboardingScreen
 import com.mwilky.androidenhanced.ui.SplashScreen
 import com.mwilky.androidenhanced.ui.Tweaks
+import com.mwilky.androidenhanced.ui.TweaksSelectionDialog
 
 @Composable
 fun Navigation(context: Context) {

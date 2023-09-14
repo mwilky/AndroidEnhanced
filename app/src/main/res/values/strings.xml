@@ -5,11 +5,13 @@
     <string name="powerButton">Power Button</string>
     <string name="volumeButton">Volume Button</string>
     <string name="gestures">Gestures</string>
+    <string name="clock">Clock</string>
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
     <string name="statusbarBrightnessControlTitle">Statusbar brightness control</string>
     <string name="statusbarBrightnessControlSummary">Control the brightness of the device via sliding or long pressing on the statusbar</string>
+    <string name="statusbarClockPositionTitle">Statusbar clock position</string>
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>

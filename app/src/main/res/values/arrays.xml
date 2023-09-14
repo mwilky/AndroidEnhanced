@@ -4,4 +4,9 @@
         <item>com.android.systemui</item>
         <item>android</item>
     </string-array>
+    <string-array name="statusbar_clock_position_entries">
+        <item>Default (left)</item>
+        <item>Right</item>
+        <item>Hidden</item>
+    </string-array>
 </resources>

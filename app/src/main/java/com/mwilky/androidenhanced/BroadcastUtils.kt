@@ -16,10 +16,10 @@ import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
+import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
-import com.mwilky.androidenhanced.xposed.Buttons
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
@@ -28,8 +28,9 @@ import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.doubleTapToSleepEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarBrightnessControlEnabled
-import de.robv.android.xposed.XposedBridge.log
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarClockPosition
 
 class BroadcastUtils: BroadcastReceiver() {
     companion object {
@@ -40,39 +41,48 @@ class BroadcastUtils: BroadcastReceiver() {
         fun registerBroadcastReceiver(mContext: Context, key: String, registeredClass: String) {
             val myReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
-                    val value = intent.getBooleanExtra(key, false)
+                    val value = when (intent.extras?.get(key)) {
+                        is Boolean -> intent.getBooleanExtra(key, false)
+                        is Int -> intent.getIntExtra(key, 0)
+                        else -> false // Default value if the type is not boolean or integer
+                    }
 
                     //Set behaviour for each tweak change here
                     when (key) {
                         //Torch on power key whilst screen
                         torchPowerScreenOff -> {
-                            mTorchPowerScreenOff = value
+                            mTorchPowerScreenOff = value as Boolean
                             updateSupportLongPressPowerWhenNonInteractive(value)
                         }
                         //Torch auto off when screen on
                         torchAutoOffScreenOn -> {
-                            mTorchAutoOff = value
+                            mTorchAutoOff = value as Boolean
                         }
                         //Vol key media control
                         volKeyMediaControl -> {
-                            mVolKeyMedia = value
+                            mVolKeyMedia = value as Boolean
                         }
                         //Allow all rotations
                         allowAllRotations -> {
-                            mAllowAllRotations = value
+                            mAllowAllRotations = value as Boolean
                             updateAllowAllRotations(value)
                         }
                         //Disable Secure Screenshots
                         disableSecureScreenshots -> {
-                            mDisableSecureScreenshots = value
+                            mDisableSecureScreenshots = value as Boolean
                         }
                         //Double tap to sleep
                         doubleTapToSleep -> {
-                            doubleTapToSleepEnabled = value
+                            doubleTapToSleepEnabled = value as Boolean
                         }
                         //Statusbar Brightness Control
                         statusBarBrightnessControl -> {
-                            statusbarBrightnessControlEnabled = value
+                            statusbarBrightnessControlEnabled = value as Boolean
+                        }
+                        //Statusbar Clock Position
+                        statusBarClockPosition -> {
+                            statusbarClockPosition = value as Int
+                            setStatusbarClockPosition()
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")
@@ -85,17 +95,21 @@ class BroadcastUtils: BroadcastReceiver() {
         }
 
         //This sends the broadcast containing the keys and values
-        fun sendBooleanBroadcast(
+        fun <T> sendBroadcast(
             context: Context,
             key: String,
-            value: Boolean
+            value: T
         ) {
             Intent().also { intent ->
                 intent.action = key
-                intent.putExtra(key, value)
+                when (value) {
+                    is Boolean -> intent.putExtra(key, value)
+                    is Int -> intent.putExtra(key, value)
+                    else -> throw IllegalArgumentException("Unsupported type for value")
+                }
                 context.sendBroadcast(intent)
             }
-            if (DEBUG) Log.d(TAG, "broadcast sent, $key = $value ")
+            if (DEBUG) Log.d(TAG, "broadcast sent, $key = $value")
         }
     }
 
@@ -124,7 +138,7 @@ class BroadcastUtils: BroadcastReceiver() {
             )
         val allPrefs = sharedPreferences.all
         for ((key, value) in allPrefs) {
-            sendBooleanBroadcast(deviceProtectedStorageContext, key, value as Boolean)
+            sendBroadcast(deviceProtectedStorageContext, key, value)
         }
     }
 }
