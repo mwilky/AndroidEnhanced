@@ -19,11 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -53,7 +48,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.sendBroadcast
@@ -71,10 +65,8 @@ import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import com.mwilky.androidenhanced.Utils
+import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
-import kotlinx.coroutines.flow.flow
 
 
 class Tweaks {
@@ -188,6 +180,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         val statusbar = "Statusbar"
         val buttons = "Buttons"
         val misc = "Miscellaneous"
+        val lockscreen = "Lockscreen"
 
         when (screen) {
             //Pages
@@ -329,6 +322,27 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.disableSecureScreenshotsSummary),
                         disableSecureScreenshots
+                    )
+                }
+            }
+            //Lockscreen Tweaks
+            lockscreen -> {
+                //Tweaks Items
+                item {
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.general
+                        )
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.hideLockscreenStatusbarTitle),
+                        stringResource(
+                            R.string.hideLockscreenStatusbarSummary),
+                        hideLockscreenStatusBar
                     )
                 }
             }

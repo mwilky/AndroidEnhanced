@@ -28,6 +28,7 @@ class Utils(context: Context, handler: Handler) {
         const val statusBarBrightnessControl = "bool_StatusbarBrightnessControl"
         const val statusBarClockPosition = "int_StatusbarClockPosition"
         const val statusBarClockSeconds = "bool_StatusbarClockSeconds"
+        const val hideLockscreenStatusBar = "bool_HideLockscreenStatusbar"
     }
 
     private val mContext: Context = context

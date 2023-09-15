@@ -20,6 +20,7 @@ class XposedInit : IXposedHookLoadPackage {
             }
             SYSTEMUI_PACKAGE -> {
                 Statusbar.init(lpparam.classLoader)
+                Lockscreen.init(lpparam.classLoader)
             }
         }
     }
