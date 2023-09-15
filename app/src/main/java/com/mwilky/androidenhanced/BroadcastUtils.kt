@@ -17,6 +17,7 @@ import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
+import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
@@ -27,10 +28,13 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPres
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.doubleTapToSleepEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarBrightnessControlEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarClockPosition
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarClockSecondsEnabled
+import de.robv.android.xposed.XposedHelpers.callMethod
 
 class BroadcastUtils: BroadcastReceiver() {
     companion object {
@@ -83,6 +87,11 @@ class BroadcastUtils: BroadcastReceiver() {
                         statusBarClockPosition -> {
                             statusbarClockPosition = value as Int
                             setStatusbarClockPosition()
+                        }
+                        //Statusbar Clock seconds
+                        statusBarClockSeconds -> {
+                            statusbarClockSecondsEnabled = value as Boolean
+                            callMethod(clock, "updateShowSeconds")
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")

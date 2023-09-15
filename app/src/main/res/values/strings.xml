@@ -12,6 +12,8 @@
     <string name="statusbarBrightnessControlTitle">Statusbar brightness control</string>
     <string name="statusbarBrightnessControlSummary">Control the brightness of the device via sliding or long pressing on the statusbar</string>
     <string name="statusbarClockPositionTitle">Statusbar clock position</string>
+    <string name="statusbarClockSecondsTitle">Statusbar clock seconds</string>
+    <string name="statusbarClockSecondsSummary">Display seconds in the statusbar clock</string>
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>

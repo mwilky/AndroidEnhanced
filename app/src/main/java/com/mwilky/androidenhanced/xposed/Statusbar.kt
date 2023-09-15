@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
 import android.app.Fragment
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Bundle
@@ -51,11 +52,14 @@ class Statusbar {
             "com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment"
         private const val HEADS_UP_APPEARANCE_CONTROLLER_CLASS =
             "com.android.systemui.statusbar.phone.HeadsUpAppearanceController"
+        private const val CLOCK_CLASS =
+            "com.android.systemui.statusbar.policy.Clock"
 
         // Tweak Variables
         var doubleTapToSleepEnabled: Boolean = false
         var statusbarBrightnessControlEnabled: Boolean = false
         var statusbarClockPosition: Int = 0
+        var statusbarClockSecondsEnabled: Boolean = false
 
         // Class Objects
         lateinit var notificationPanelViewController: Any
@@ -66,6 +70,7 @@ class Statusbar {
         lateinit var displayManager: DisplayManager
         lateinit var shadeController: Any
         lateinit var collapsedStatusBarFragment: Any
+        lateinit var clock: Any
 
         // Class references
         private var rStringClass: Class<*>? = null
@@ -174,6 +179,28 @@ class Statusbar {
                 Int::class.javaPrimitiveType,
                 carrierTextManager,
                 hideHook
+            )
+
+            //TODO: fix seconds in quickstatusbar header clock
+            //Clock seconds
+            findAndHookMethod(
+                CLOCK_CLASS,
+                classLoader,
+                "updateShowSeconds",
+                updateShowSecondsHook
+            )
+
+            //Clock seconds
+            findAndHookMethod(
+                CLOCK_CLASS,
+                classLoader,
+                "getSmallTime",
+                getSmallTimeHook
+            )
+
+            findAndHookMethod(
+                CLOCK_CLASS, classLoader, "onAttachedToWindow",
+                onAttachedToWindowHook
             )
 
             rStringClass = findClass("com.android.systemui.R\$string", classLoader)
@@ -385,6 +412,40 @@ class Statusbar {
             }
         }
 
+        private val getSmallTimeHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                XposedHelpers.setBooleanField(
+                    param.thisObject,
+                    "mShowSeconds",
+                    statusbarClockSecondsEnabled
+                )
+            }
+        }
+        private val updateShowSecondsHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                XposedHelpers.setBooleanField(
+                    param.thisObject,
+                    "mShowSeconds",
+                    statusbarClockSecondsEnabled
+                )
+            }
+        }
+
+        private val onAttachedToWindowHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                clock = param.thisObject
+                        as View
+
+                val mContext = (clock as View).context
+
+                // Register broadcast receiver to receive values
+                BroadcastUtils.registerBroadcastReceiver(
+                    mContext, Utils.statusBarClockSeconds,
+                    param.thisObject.toString()
+                )
+            }
+        }
+
         // Additional functions
         private fun adjustBrightness(x: Int) {
             brightnessChanged = true
@@ -514,7 +575,7 @@ class Statusbar {
             (mClockView.parent as ViewGroup?)?.removeView(mClockView)
 
             //Parent view set by module
-            var setParent: ViewGroup? = null
+            val setParent: ViewGroup?
 
             //Set the paddings of the clock
             val paddingStart: Int = mContext.resources.getDimensionPixelSize(

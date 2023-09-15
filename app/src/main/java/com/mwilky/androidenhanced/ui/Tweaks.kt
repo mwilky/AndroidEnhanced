@@ -73,6 +73,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.mwilky.androidenhanced.Utils
+import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 import kotlinx.coroutines.flow.flow
 
 
@@ -239,6 +240,18 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = statusBarClockPositionEntries[rememberStatusBarClockPosition],
                         key = statusBarClockPosition
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            id = R.string.statusbarClockSecondsTitle
+                        ),
+                        stringResource(
+                            id = R.string.statusbarClockSecondsSummary
+                        ),
+                        statusBarClockSeconds
                     )
                 }
             }
