@@ -15,6 +15,7 @@ import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
+import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
@@ -26,7 +27,8 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPressPowerWhenNonInteractive
-import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenStatusbar
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenShortcutsEnabled
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenStatusbarEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.keyguardStatusBarView
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
@@ -98,8 +100,12 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                         //Hide lockscreen statusbar
                         hideLockscreenStatusBar -> {
-                            hideLockscreenStatusbar = value as Boolean
+                            hideLockscreenStatusbarEnabled = value as Boolean
                             callMethod(keyguardStatusBarView, "updateVisibilities")
+                        }
+                        //Hide lockscreen shortcuts
+                        hideLockscreenShortcuts-> {
+                            hideLockscreenShortcutsEnabled = value as Boolean
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")

@@ -65,6 +65,7 @@ import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
+import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 
@@ -343,6 +344,16 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.hideLockscreenStatusbarSummary),
                         hideLockscreenStatusBar
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.hideLockscreenShortcutsTitle),
+                        stringResource(
+                            R.string.hideLockscreenShortcutsSummary),
+                        hideLockscreenShortcuts
                     )
                 }
             }
