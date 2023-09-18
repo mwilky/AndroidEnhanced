@@ -31,4 +31,6 @@
     <string name="hideLockscreenStatusbarSummary">Hide the statusbar when the lockscreen is visible</string>
     <string name="hideLockscreenShortcutsTitle">Hide lockscreen shortcuts</string>
     <string name="hideLockscreenShortcutsSummary">Hide the shortcuts at the bottom of the lockscreen</string>
+    <string name="randomKeypadTitle">Randomise keypad</string>
+    <string name="randomKeypadSummary">Rearrange the digits of the keypad to a random order</string>
 </resources>

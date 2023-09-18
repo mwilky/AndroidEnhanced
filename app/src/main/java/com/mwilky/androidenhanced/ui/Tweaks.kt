@@ -67,6 +67,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
+import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 
 
@@ -354,6 +355,16 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.hideLockscreenShortcutsSummary),
                         hideLockscreenShortcuts
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.randomKeypadTitle),
+                        stringResource(
+                            R.string.randomKeypadSummary),
+                        scrambleKeypad
                     )
                 }
             }

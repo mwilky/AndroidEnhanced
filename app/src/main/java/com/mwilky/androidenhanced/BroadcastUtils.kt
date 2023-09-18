@@ -17,6 +17,7 @@ import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
+import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
@@ -30,6 +31,7 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPres
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenShortcutsEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenStatusbarEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.keyguardStatusBarView
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnabled
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
@@ -106,6 +108,10 @@ class BroadcastUtils: BroadcastReceiver() {
                         //Hide lockscreen shortcuts
                         hideLockscreenShortcuts-> {
                             hideLockscreenShortcutsEnabled = value as Boolean
+                        }
+                        //Scramble Keypad
+                        scrambleKeypad-> {
+                            scrambleKeypadEnabled = value as Boolean
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")
