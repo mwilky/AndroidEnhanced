@@ -9,10 +9,10 @@
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
-    <string name="statusbarBrightnessControlTitle">Statusbar brightness control</string>
+    <string name="statusbarBrightnessControlTitle">Brightness control</string>
     <string name="statusbarBrightnessControlSummary">Control the brightness of the device via sliding or long pressing on the statusbar</string>
-    <string name="statusbarClockPositionTitle">Statusbar clock position</string>
-    <string name="statusbarClockSecondsTitle">Statusbar clock seconds</string>
+    <string name="statusbarClockPositionTitle">Clock position</string>
+    <string name="statusbarClockSecondsTitle">Clock seconds</string>
     <string name="statusbarClockSecondsSummary">Display seconds in the statusbar clock</string>
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
@@ -27,9 +27,9 @@
     <string name="disableSecureScreenshotsTitle">Disable secure screenshots</string>
     <string name="disableSecureScreenshotsSummary">Disable the security feature that restricts taking screenshots in secure apps</string>
 <!--    Lockscreen-->
-    <string name="hideLockscreenStatusbarTitle">Hide lockscreen statusbar</string>
+    <string name="hideLockscreenStatusbarTitle">Hide statusbar</string>
     <string name="hideLockscreenStatusbarSummary">Hide the statusbar when the lockscreen is visible</string>
-    <string name="hideLockscreenShortcutsTitle">Hide lockscreen shortcuts</string>
+    <string name="hideLockscreenShortcutsTitle">Hide shortcuts</string>
     <string name="hideLockscreenShortcutsSummary">Hide the shortcuts at the bottom of the lockscreen</string>
     <string name="randomKeypadTitle">Randomise keypad</string>
     <string name="randomKeypadSummary">Rearrange the digits of the keypad to a random order</string>
