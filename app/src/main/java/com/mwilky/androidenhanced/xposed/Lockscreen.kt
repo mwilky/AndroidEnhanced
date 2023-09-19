@@ -168,16 +168,6 @@ class Lockscreen {
                 setKeyguardShowingHook
             )
 
-            val footerActionsViewModel =
-                findClass(
-                    FOOTER_ACTIONS_VIEW_MODEL_CLASS,
-                    classLoader
-                )
-            hookAllConstructors(
-                footerActionsViewModel,
-                FooterActionsViewModelConstructorHook
-            )
-
             val iconButtonViewHolder =
                 findClass(
                     "com.android.systemui.qs.footer.ui.binder.IconButtonViewHolder",
@@ -350,12 +340,6 @@ class Lockscreen {
                         param.result = null
                     }
                 }
-            }
-        }
-
-        private val FooterActionsViewModelConstructorHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                log("$TAG: in here")
             }
         }
 
