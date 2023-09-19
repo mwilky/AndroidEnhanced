@@ -31,6 +31,7 @@ class Utils(context: Context, handler: Handler) {
         const val hideLockscreenStatusBar = "bool_HideLockscreenStatusbar"
         const val hideLockscreenShortcuts = "bool_HideLockscreenShortcuts"
         const val scrambleKeypad = "bool_ScrambleKeypad"
+        const val disableLockscreenPowerMenu = "bool_DisableLockscreenPowerMenu"
     }
 
     private val mContext: Context = context

@@ -13,6 +13,7 @@ import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
+import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
@@ -31,6 +32,7 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPres
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenShortcutsEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenStatusbarEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.keyguardStatusBarView
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenPowerMenuEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnabled
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
@@ -112,6 +114,10 @@ class BroadcastUtils: BroadcastReceiver() {
                         //Scramble Keypad
                         scrambleKeypad-> {
                             scrambleKeypadEnabled = value as Boolean
+                        }
+                        //Disable power menu on lockscreen
+                        disableLockscreenPowerMenu-> {
+                            mDisableLockscreenPowerMenuEnabled = value as Boolean
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")

@@ -6,7 +6,6 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Message
-import android.os.PowerManager
 import android.telecom.TelecomManager
 import android.util.Log
 import android.view.Display
@@ -15,6 +14,7 @@ import android.view.KeyEvent
 import android.view.ViewConfiguration
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastReceiver
 import com.mwilky.androidenhanced.Utils
+import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.isTorchEnabled
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
@@ -36,7 +36,7 @@ class Buttons {
 
     companion object {
         //Hook Classes
-        private const val PhoneWindowManagerClass =
+        private const val PHONE_WINDOW_MANAGER_CLASS =
             "com.android.server.policy.PhoneWindowManager"
         private const val PhoneWindowManagerPowerKeyRuleClass =
             "com.android.server.policy.PhoneWindowManager\$PowerKeyRule"
@@ -73,7 +73,7 @@ class Buttons {
 
             //Init hooks
             findAndHookMethod(
-                PhoneWindowManagerClass,
+                PHONE_WINDOW_MANAGER_CLASS,
                 classLoader,
                 "init",
                 Context::class.java,
@@ -110,7 +110,7 @@ class Buttons {
 
             //Torch on power function
             findAndHookMethod(
-                PhoneWindowManagerClass,
+                PHONE_WINDOW_MANAGER_CLASS,
                 classLoader,
                 "powerPress",
                 Long::class.javaPrimitiveType,
@@ -121,7 +121,7 @@ class Buttons {
 
             //Torch on power function
             findAndHookMethod(
-                PhoneWindowManagerClass,
+                PHONE_WINDOW_MANAGER_CLASS,
                 classLoader,
                 "interceptPowerKeyDown",
                 KeyEvent::class.java,
@@ -154,7 +154,7 @@ class Buttons {
 
             //Vol Key Media Control
             findAndHookMethod(
-                PhoneWindowManagerClass,
+                PHONE_WINDOW_MANAGER_CLASS,
                 classLoader,
                 "interceptKeyBeforeQueueing",
                 KeyEvent::class.java,
@@ -164,7 +164,7 @@ class Buttons {
 
             //Vol Key Media Control
             findAndHookMethod(
-                PhoneWindowManagerClass,
+                PHONE_WINDOW_MANAGER_CLASS,
                 classLoader,
                 "shouldDispatchInputWhenNonInteractive",
                 Int::class.javaPrimitiveType,
@@ -181,7 +181,7 @@ class Buttons {
             //PhoneWindowManager Class
             PhoneWindowManagerClassReference =
                 findClass(
-                    PhoneWindowManagerClass, classLoader
+                    PHONE_WINDOW_MANAGER_CLASS, classLoader
                 )
 
         }
@@ -205,6 +205,11 @@ class Buttons {
                 registerBroadcastReceiver(mContext, volKeyMediaControl,
                     param.thisObject.toString()
                 )
+                //Register this in this class so we don't need to rehook in Lockscreen.kt
+                registerBroadcastReceiver(mContext, disableLockscreenPowerMenu,
+                    param.thisObject.toString()
+                )
+
 
                 val mHandler =
                     getObjectField(param.thisObject, "mHandler")
@@ -489,7 +494,7 @@ class Buttons {
                             "mNavBarVirtualKeyHapticFeedbackEnabled"
                         )) && event.repeatCount == 0
 
-                    val MediaSessionLegacyHelperObject = callStaticMethod(
+                    val mediaSessionLegacyHelperObject = callStaticMethod(
                         MediaSessionLegacyHelper, "getHelper", mContext
                     )
 
@@ -664,7 +669,7 @@ class Buttons {
                                     // If we are in call but we decided not to pass the key to
                                     // the application, just pass it to the session service.
                                     callMethod(
-                                        MediaSessionLegacyHelperObject,
+                                        mediaSessionLegacyHelperObject,
                                         "sendVolumeKeyEvent", event,
                                         AudioManager.USE_DEFAULT_STREAM_TYPE, false
                                     )
@@ -721,7 +726,7 @@ class Buttons {
                                     // only change the volume on key down.
                                     val newEvent = KeyEvent(KeyEvent.ACTION_DOWN, keyCode)
                                     callMethod(
-                                        MediaSessionLegacyHelperObject,
+                                        mediaSessionLegacyHelperObject,
                                         "sendVolumeKeyEvent", newEvent,
                                         AudioManager.USE_DEFAULT_STREAM_TYPE, true
                                     )
@@ -775,7 +780,7 @@ class Buttons {
         private fun dispatchMediaKeyWithWakeLockToAudioService(keyEvent: KeyEvent) {
             val mContext: Context = getObjectField(PhoneWindowManagerObject, "mContext")
                 as Context
-            val MediaSessionLegacyHelperObject = callStaticMethod(
+            val mediaSessionLegacyHelperObject = callStaticMethod(
                 MediaSessionLegacyHelper,
                 "getHelper",
                 mContext
@@ -787,7 +792,7 @@ class Buttons {
                     ), "isSystemReady"
                 ) as Boolean
             ) {
-                callMethod(MediaSessionLegacyHelperObject, "sendMediaButtonEvent",
+                callMethod(mediaSessionLegacyHelperObject, "sendMediaButtonEvent",
                     keyEvent, true
                 )
             }
@@ -818,9 +823,9 @@ class Buttons {
                     }
                     var isDreaming = false
                     try {
-                        val DreamManagerisDreaming =
+                        val dreamManagerisDreaming =
                             callMethod(dreamManager, "isDreaming") as Boolean
-                        if (dreamManager != null && DreamManagerisDreaming) {
+                        if (dreamManager != null && dreamManagerisDreaming) {
                             isDreaming = true
                         }
                     } catch (e: java.lang.Exception) {

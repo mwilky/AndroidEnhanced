@@ -33,4 +33,6 @@
     <string name="hideLockscreenShortcutsSummary">Hide the shortcuts at the bottom of the lockscreen</string>
     <string name="randomKeypadTitle">Randomise keypad</string>
     <string name="randomKeypadSummary">Rearrange the digits of the keypad to a random order</string>
+    <string name="disableLockscreenPowerMenuTitle">Disable power menu</string>
+    <string name="disableLockscreenPowerMenuSummary">Disables access to the power menu whilst the lockscreen is visible</string>
 </resources>

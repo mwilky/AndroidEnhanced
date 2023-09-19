@@ -17,10 +17,11 @@ class XposedInit : IXposedHookLoadPackage {
             FRAMEWORK_PACKAGE -> {
                 Buttons.init(lpparam.classLoader)
                 Misc.init(lpparam.classLoader)
+                Lockscreen.initFramework(lpparam.classLoader)
             }
             SYSTEMUI_PACKAGE -> {
                 Statusbar.init(lpparam.classLoader)
-                Lockscreen.init(lpparam.classLoader)
+                Lockscreen.initSystemUI(lpparam.classLoader)
             }
         }
     }
