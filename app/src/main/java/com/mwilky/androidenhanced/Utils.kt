@@ -5,8 +5,11 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Handler
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Log
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
+import com.mwilky.androidenhanced.xposed.Quicksettings
 
 class Utils(context: Context, handler: Handler) {
 
@@ -32,6 +35,19 @@ class Utils(context: Context, handler: Handler) {
         const val hideLockscreenShortcuts = "bool_HideLockscreenShortcuts"
         const val scrambleKeypad = "bool_ScrambleKeypad"
         const val disableLockscreenPowerMenu = "bool_DisableLockscreenPowerMenu"
+        const val qsTileVibration = "bool_QsTileVibration"
+
+        lateinit var mVibrator: Vibrator
+
+        fun initVibrator(context: Context) {
+            if (!::mVibrator.isInitialized) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE)
+                        as VibratorManager
+                mVibrator = vibratorManager.defaultVibrator
+            }
+        }
+
+
     }
 
     private val mContext: Context = context
@@ -39,6 +55,8 @@ class Utils(context: Context, handler: Handler) {
     private val mCameraManager = mContext.getSystemService(Context.CAMERA_SERVICE)
                 as CameraManager
     private var mTorchCallback: TorchCallback = TorchCallback()
+
+
 
     fun registerTorchCallback() {
         mCameraManager.registerTorchCallback(mTorchCallback, mHandler)

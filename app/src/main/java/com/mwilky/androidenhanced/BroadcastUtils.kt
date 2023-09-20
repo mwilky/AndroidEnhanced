@@ -13,11 +13,11 @@ import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
-import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
+import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
@@ -32,17 +32,17 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPres
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenShortcutsEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenStatusbarEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.keyguardStatusBarView
-import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenPowerMenuEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnabled
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.doubleTapToSleepEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarBrightnessControlEnabled
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarClockPosition
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.statusbarClockSecondsEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnessControlEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosition
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
 import de.robv.android.xposed.XposedHelpers.callMethod
 
 class BroadcastUtils: BroadcastReceiver() {
@@ -86,20 +86,20 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                         //Double tap to sleep
                         doubleTapToSleep -> {
-                            doubleTapToSleepEnabled = value as Boolean
+                            mDoubleTapToSleepEnabled = value as Boolean
                         }
                         //Statusbar Brightness Control
                         statusBarBrightnessControl -> {
-                            statusbarBrightnessControlEnabled = value as Boolean
+                            mStatusbarBrightnessControlEnabled = value as Boolean
                         }
                         //Statusbar Clock Position
                         statusBarClockPosition -> {
-                            statusbarClockPosition = value as Int
+                            mStatusbarClockPosition = value as Int
                             setStatusbarClockPosition()
                         }
                         //Statusbar Clock seconds
                         statusBarClockSeconds -> {
-                            statusbarClockSecondsEnabled = value as Boolean
+                            mStatusbarClockSecondsEnabled = value as Boolean
                             callMethod(clock, "updateShowSeconds")
                         }
                         //Hide lockscreen statusbar
@@ -115,9 +115,9 @@ class BroadcastUtils: BroadcastReceiver() {
                         scrambleKeypad-> {
                             scrambleKeypadEnabled = value as Boolean
                         }
-                        //Disable power menu on lockscreen
-                        disableLockscreenPowerMenu-> {
-                            mDisableLockscreenPowerMenuEnabled = value as Boolean
+                        //Qs tile click vibration
+                        qsTileVibration-> {
+                            mClickVibrationEnabled = value as Boolean
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")

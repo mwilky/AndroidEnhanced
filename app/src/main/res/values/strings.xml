@@ -35,4 +35,7 @@
     <string name="randomKeypadSummary">Rearrange the digits of the keypad to a random order</string>
     <string name="disableLockscreenPowerMenuTitle">Disable power menu</string>
     <string name="disableLockscreenPowerMenuSummary">Disables access to the power menu whilst the lockscreen is visible</string>
+<!--    Quicksettings-->
+    <string name="qsTileClickVibrationTitle">Click vibration</string>
+    <string name="qsTileClickVibrationSummary">Enabled haptic feedback when clicking the tiles</string>
 </resources>

@@ -68,6 +68,7 @@ import androidx.compose.runtime.*
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
+import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 
@@ -184,6 +185,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         val buttons = "Buttons"
         val misc = "Miscellaneous"
         val lockscreen = "Lockscreen"
+        val quicksettings = "Quicksettings"
 
         when (screen) {
             //Pages
@@ -376,6 +378,27 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.disableLockscreenPowerMenuSummary),
                         disableLockscreenPowerMenu
+                    )
+                }
+            }
+            //Quicksettings Tweaks
+            quicksettings -> {
+                //Tweaks Items
+                item {
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.general
+                        )
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.qsTileClickVibrationTitle),
+                        stringResource(
+                            R.string.qsTileClickVibrationSummary),
+                        qsTileVibration
                     )
                 }
             }
