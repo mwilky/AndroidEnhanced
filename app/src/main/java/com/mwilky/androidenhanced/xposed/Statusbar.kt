@@ -2,7 +2,6 @@ package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
 import android.app.Fragment
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Bundle
@@ -20,6 +19,7 @@ import android.widget.LinearLayout
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
@@ -30,6 +30,7 @@ import de.robv.android.xposed.XposedHelpers.getFloatField
 import de.robv.android.xposed.XposedHelpers.getIntField
 import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
+import de.robv.android.xposed.XposedHelpers.setBooleanField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,10 +57,10 @@ class Statusbar {
             "com.android.systemui.statusbar.policy.Clock"
 
         // Tweak Variables
-        var doubleTapToSleepEnabled: Boolean = false
-        var statusbarBrightnessControlEnabled: Boolean = false
-        var statusbarClockPosition: Int = 0
-        var statusbarClockSecondsEnabled: Boolean = false
+        var mDoubleTapToSleepEnabled: Boolean = false
+        var mStatusbarBrightnessControlEnabled: Boolean = false
+        var mStatusbarClockPosition: Int = 0
+        var mStatusbarClockSecondsEnabled: Boolean = false
 
         // Class Objects
         lateinit var notificationPanelViewController: Any
@@ -74,6 +75,10 @@ class Statusbar {
 
         // Class references
         private var rStringClass: Class<*>? = null
+        private var viewClippingUtil: Class<*>? = null
+        private var `createUserActivity$$ExternalSyntheticLambda4`: Class<*>? = null
+        private var `headsUpAppearanceController$$ExternalSyntheticLambda1`: Class<*>? = null
+        private var `carrierTextManager$$ExternalSyntheticLambda1`: Class<*>? = null
 
         // Statusbar brightness control
         private var minimumBacklight: Float = 0f
@@ -142,6 +147,9 @@ class Statusbar {
                 startHook
             )
 
+            // Statusbar brightness control
+            rStringClass = findClass("com.android.systemui.R\$string", classLoader)
+
 
             //Clock position
             findAndHookMethod(
@@ -164,22 +172,39 @@ class Statusbar {
                 animateHiddenStateHook
             )
 
-            val carrierTextManager =
-                findClass(
-                    "com.android.keyguard.CarrierTextManager\$\$ExternalSyntheticLambda1",
-                    classLoader
-                )
-
             //Clock position
             findAndHookMethod(
                 HEADS_UP_APPEARANCE_CONTROLLER_CLASS,
                 classLoader,
-                "hide",
-                View::class.java,
-                Int::class.javaPrimitiveType,
-                carrierTextManager,
-                hideHook
+                "setShown",
+                Boolean::class.javaPrimitiveType,
+                setShownReplacement
             )
+
+            //Clock position
+            viewClippingUtil =
+                findClass("com.android.internal.widget.ViewClippingUtil", classLoader)
+
+            //Clock position
+            `createUserActivity$$ExternalSyntheticLambda4` =
+                findClass(
+                    "com.android.systemui.user.CreateUserActivity$\$ExternalSynthetic" +
+                            "Lambda4",
+                    classLoader
+                )
+
+            `headsUpAppearanceController$$ExternalSyntheticLambda1` =
+                findClass(
+                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda1",
+                    classLoader
+                )
+
+            //Clock position
+            `carrierTextManager$$ExternalSyntheticLambda1` =
+                findClass(
+                    "com.android.keyguard.CarrierTextManager$\$ExternalSyntheticLambda1",
+                    classLoader
+                )
 
             //TODO: fix seconds in quickstatusbar header clock
             //Clock seconds
@@ -198,12 +223,11 @@ class Statusbar {
                 getSmallTimeHook
             )
 
+            //Clock seconds
             findAndHookMethod(
                 CLOCK_CLASS, classLoader, "onAttachedToWindow",
                 onAttachedToWindowHook
             )
-
-            rStringClass = findClass("com.android.systemui.R\$string", classLoader)
         }
 
         // Hooked methods
@@ -285,7 +309,7 @@ class Statusbar {
                     callMethod(centralSurfaces, "getCommandQueuePanelsEnabled")
                             as Boolean
 
-                if (statusbarBrightnessControlEnabled) {
+                if (mStatusbarBrightnessControlEnabled) {
                     brightnessControl(event)
                     if (!commandQueuePanelsEnabled)
                         param.result = null
@@ -301,7 +325,7 @@ class Statusbar {
 
                 onBrightnessChanged(upOrCancel)
 
-                if (doubleTapToSleepEnabled) {
+                if (mDoubleTapToSleepEnabled) {
                     doubleTapGesture.onTouchEvent(event)
                 }
             }
@@ -318,7 +342,7 @@ class Statusbar {
                         callMethod(centralSurfaces, "getCommandQueuePanelsEnabled")
                             as Boolean
 
-                    if (statusbarBrightnessControlEnabled) {
+                    if (mStatusbarBrightnessControlEnabled) {
                         brightnessControl(event)
                         if (!commandQueuePanelsEnabled)
                             param.result = null
@@ -333,7 +357,7 @@ class Statusbar {
 
                     onBrightnessChanged(upOrCancel)
 
-                    if (doubleTapToSleepEnabled) {
+                    if (mDoubleTapToSleepEnabled) {
                         doubleTapGesture.onTouchEvent(event)
                     }
 
@@ -389,44 +413,117 @@ class Statusbar {
                     getObjectField(collapsedStatusBarFragment, "mClockView")
                         as View
 
-                if (view == mClockView && statusbarClockPosition != 0) {
+                if (view == mClockView && mStatusbarClockPosition != 0) {
                     param.result = null
                 }
 
             }
         }
 
-        // Don't hide clock if it is in right position
-        private val hideHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun beforeHookedMethod(param: MethodHookParam) {
-                val view:View = param.args[0]
+        private val setShownReplacement: XC_MethodHook = object : XC_MethodReplacement() {
+            override fun replaceHookedMethod(param: MethodHookParam): Any? {
+                val mShown = getBooleanField(param.thisObject, "mShown")
+
+                val isShown = param.args[0]
+                        as Boolean
+                val mView = getObjectField(param.thisObject, "mView")
                         as View
 
-                val mClockView:View =
-                    getObjectField(collapsedStatusBarFragment, "mClockView")
-                            as View
+                val mContext = mView.context
 
-                if (view == mClockView && statusbarClockPosition != 0) {
-                    param.result = null
+                val mClockView = getObjectField(param.thisObject, "mClockView")
+                        as View
+                val mParentClippingParams =
+                    getObjectField(param.thisObject, "mParentClippingParams")
+
+                val mOperatorNameViewOptional =
+                    getObjectField(param.thisObject, "mOperatorNameViewOptional")
+
+                val mStatusBarStateController =
+                    getObjectField(param.thisObject, "mStatusBarStateController")
+
+                val mCommandQueue =
+                    getObjectField(param.thisObject, "mCommandQueue")
+
+                if (mShown != isShown) {
+                    setBooleanField(param.thisObject, "mShown", isShown)
+                    if (isShown) {
+                        XposedHelpers.callStaticMethod(
+                            viewClippingUtil,
+                            "setClippingDeactivated",
+                            mView,
+                            true,
+                            mParentClippingParams
+                        )
+
+                        if (mView.javaClass.name ==
+                            "com.android.systemui.statusbar.HeadsUpStatusBarView"
+                            ) {
+                            mView.visibility = View.VISIBLE
+                        }
+
+                        callMethod(param.thisObject, "show", mView)
+
+                        if (mStatusbarClockPosition == 0) {
+                            callMethod(param.thisObject, "hide", mClockView, 4, null)
+                        }
+
+                        callMethod(
+                            mOperatorNameViewOptional, "ifPresent",
+                            XposedHelpers.newInstance(
+                                `createUserActivity$$ExternalSyntheticLambda4`,
+                                2,
+                                param.thisObject
+                            )
+                        )
+                    } else {
+                        callMethod(param.thisObject, "show", mClockView)
+
+                        callMethod(
+                            mOperatorNameViewOptional, "ifPresent",
+                            XposedHelpers.newInstance(
+                                `headsUpAppearanceController$$ExternalSyntheticLambda1`,
+                                0,
+                                param.thisObject
+                            )
+                        )
+                        callMethod(
+                            param.thisObject, "hide", mView, 8,
+                            XposedHelpers.newInstance(
+                                `carrierTextManager$$ExternalSyntheticLambda1`,
+                                3, param.thisObject
+                            )
+                        )
+                    }
+
+                    if (callMethod(mStatusBarStateController, "getState")
+                                as Int != 0
+                    ) {
+                        callMethod(
+                            mCommandQueue, "recomputeDisableFlags",
+                            callMethod(mContext, "getDisplayId"), false
+                        )
+                    }
                 }
+                return null
             }
         }
 
         private val getSmallTimeHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
-                XposedHelpers.setBooleanField(
+                setBooleanField(
                     param.thisObject,
                     "mShowSeconds",
-                    statusbarClockSecondsEnabled
+                    mStatusbarClockSecondsEnabled
                 )
             }
         }
         private val updateShowSecondsHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
-                XposedHelpers.setBooleanField(
+                setBooleanField(
                     param.thisObject,
                     "mShowSeconds",
-                    statusbarClockSecondsEnabled
+                    mStatusbarClockSecondsEnabled
                 )
             }
         }
@@ -593,7 +690,7 @@ class Statusbar {
                 )
             )
 
-            when (statusbarClockPosition) {
+            when (mStatusbarClockPosition) {
                 //left side
                 0 -> {
                     setParent = mDefaultClockContainer as ViewGroup
