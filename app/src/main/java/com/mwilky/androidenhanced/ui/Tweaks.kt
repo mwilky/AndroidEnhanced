@@ -69,6 +69,7 @@ import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
+import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
@@ -410,6 +411,16 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.qsTileClickVibrationSummary),
                         qsTileVibration
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.hideQsFooterBuildNumberTitle),
+                        stringResource(
+                            R.string.hideQsFooterBuildNumberSummary),
+                        hideQsFooterBuildNumber
                     )
                 }
             }

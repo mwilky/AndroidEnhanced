@@ -35,9 +35,11 @@
     <string name="randomKeypadSummary">Rearrange the digits of the keypad to a random order</string>
     <string name="disableLockscreenPowerMenuTitle">Disable power menu</string>
     <string name="disableLockscreenPowerMenuSummary">Disables access to the power menu whilst the lockscreen is visible</string>
+    <string name="disableQsLockscreenTitle">Disable quicksettings</string>
+    <string name="disableQsLockscreenSummary">Disable access to the quicksetting tiles whilst on the lockscreen</string>
 <!--    Quicksettings-->
     <string name="qsTileClickVibrationTitle">Click vibration</string>
     <string name="qsTileClickVibrationSummary">Enabled haptic feedback when clicking the tiles</string>
-    <string name="disableQsLockscreenTitle">Disable quicksettings</string>
-    <string name="disableQsLockscreenSummary">Disable access to the quicksetting tiles whilst on the lockscreen</string>
+    <string name="hideQsFooterBuildNumberTitle">Hide footer build number</string>
+    <string name="hideQsFooterBuildNumberSummary">Hides the build number in the quicksettings footer if dev options have been enabled</string>
 </resources>
