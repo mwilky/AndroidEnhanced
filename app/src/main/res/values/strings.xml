@@ -6,6 +6,7 @@
     <string name="volumeButton">Volume Button</string>
     <string name="gestures">Gestures</string>
     <string name="clock">Clock</string>
+    <string name="expansion">Expansion</string>
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
@@ -42,4 +43,6 @@
     <string name="qsTileClickVibrationSummary">Enabled haptic feedback when clicking the tiles</string>
     <string name="hideQsFooterBuildNumberTitle">Hide footer build number</string>
     <string name="hideQsFooterBuildNumberSummary">Hides the build number in the quicksettings footer if dev options have been enabled</string>
+    <string name="smartPulldownTitle">Smart pulldown</string>
+    <string name="quickPulldownTitle">Quick pulldown</string>
 </resources>

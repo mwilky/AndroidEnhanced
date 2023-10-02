@@ -71,7 +71,9 @@ import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
+import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
+import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 
 
@@ -151,11 +153,21 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
 
     val statusBarClockPositionEntries =
         context.resources.getStringArray(R.array.statusbar_clock_position_entries)
+    val smartPulldownEntries =
+        context.resources.getStringArray(R.array.smart_pulldown_entries)
+    val quickPulldownEntries =
+        context.resources.getStringArray(R.array.quick_pulldown_entries)
 
 
     // Create a Composable state variable that depends on the SharedPreferences value
     var rememberStatusBarClockPosition by remember {
-        mutableStateOf(sharedPreferences.getInt(statusBarClockPosition, 0))
+        mutableIntStateOf(sharedPreferences.getInt(statusBarClockPosition, 0))
+    }
+    var rememberSmartPulldown by remember {
+        mutableIntStateOf(sharedPreferences.getInt(smartPulldown, 0))
+    }
+    var rememberQuickPulldown by remember {
+        mutableIntStateOf(sharedPreferences.getInt(quickPulldown, 0))
     }
 
     // Set the listener and update the remembered value on change to force a recomposition
@@ -164,6 +176,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             if (key == statusBarClockPosition) {
                 rememberStatusBarClockPosition =
                     sharedPreferences.getInt(statusBarClockPosition, 0)
+            }
+            if (key == smartPulldown) {
+                rememberSmartPulldown =
+                    sharedPreferences.getInt(smartPulldown, 0)
+            }
+            if (key == quickPulldown) {
+                rememberQuickPulldown =
+                    sharedPreferences.getInt(quickPulldown, 0)
             }
         }
 
@@ -239,7 +259,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                             id = R.string.statusbarClockPositionTitle
                         ),
                         description = statusBarClockPositionEntries[rememberStatusBarClockPosition],
-                        key = statusBarClockPosition
+                        key = statusBarClockPosition,
+                        entries = context.resources.getStringArray(R.array.statusbar_clock_position_entries)
                     )
                 }
                 item {
@@ -423,6 +444,26 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         hideQsFooterBuildNumber
                     )
                 }
+                item {
+                    TweaksSelectionRow(
+                        label = stringResource(
+                            id = R.string.smartPulldownTitle
+                        ),
+                        description = smartPulldownEntries[rememberSmartPulldown],
+                        key = smartPulldown,
+                        entries = context.resources.getStringArray(R.array.smart_pulldown_entries)
+                    )
+                }
+                item {
+                    TweaksSelectionRow(
+                        label = stringResource(
+                            id = R.string.quickPulldownTitle
+                        ),
+                        description = quickPulldownEntries[rememberQuickPulldown],
+                        key = quickPulldown,
+                        entries = context.resources.getStringArray(R.array.quick_pulldown_entries)
+                    )
+                }
             }
         }
 
@@ -511,6 +552,7 @@ fun TweaksSelectionDialog(
     onConfirmation: () -> Unit,
     label: String,
     key: String,
+    entries: Array<String>
 ) {
 
     val context = LocalContext.current
@@ -518,12 +560,11 @@ fun TweaksSelectionDialog(
     val coroutineScope = rememberCoroutineScope()
 
     // Create a state variable to track the selected radio button
-    var selectedOption by remember { mutableStateOf(0) }
+    var selectedOption by remember { mutableIntStateOf(0) }
 
     // Options for the radio buttons
     val options = remember {
-        val resources = context.resources
-        resources.getStringArray(R.array.statusbar_clock_position_entries).toList()
+        entries.toList()
     }
 
     // Function to update the selected radio button
@@ -617,7 +658,8 @@ fun TweaksSelectionDialog(
                                 text = option,
                                 modifier = Modifier
                                     .padding(
-                                        start = 16.dp
+                                        start = 16.dp,
+                                        end = 24.dp
                                     ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -683,6 +725,7 @@ fun TweaksSelectionRow(
     label: String,
     description: String,
     key: String,
+    entries: Array<String>
 ) {
     // Create a state variable to track whether the dialog should be shown
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -694,7 +737,8 @@ fun TweaksSelectionRow(
             onDismissRequest = { isDialogVisible = false },
             onConfirmation = { isDialogVisible = false },
             label = label,
-            key = key
+            key = key,
+            entries = entries
         )
     }
 

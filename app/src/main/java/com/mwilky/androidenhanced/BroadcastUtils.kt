@@ -20,7 +20,9 @@ import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
+import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
+import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
@@ -42,6 +44,8 @@ import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQuickPulldownConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownConfig
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
@@ -132,6 +136,14 @@ class BroadcastUtils: BroadcastReceiver() {
                         hideQsFooterBuildNumber-> {
                             mHideQSFooterBuildNumberEnabled = value as Boolean
                             callMethod(QSFooterView, "setBuildText")
+                        }
+                        //QS smart pulldown
+                        smartPulldown -> {
+                            mSmartPulldownConfig = value as Int
+                        }
+                        //QS quick pulldown
+                        quickPulldown -> {
+                            mQuickPulldownConfig = value as Int
                         }
                     }
                     if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")

@@ -38,6 +38,8 @@ class Utils(context: Context, handler: Handler) {
         const val qsTileVibration = "bool_QsTileVibration"
         const val disableQsLockscreen = "bool_DisableQsLockscreen"
         const val hideQsFooterBuildNumber = "bool_HideQsFooterBuildNumber"
+        const val smartPulldown = "int_SmartPulldown"
+        const val quickPulldown = "int_QuickPulldown"
 
         lateinit var mVibrator: Vibrator
 
