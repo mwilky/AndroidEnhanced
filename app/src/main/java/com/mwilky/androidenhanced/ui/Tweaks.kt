@@ -66,6 +66,7 @@ import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
+import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
@@ -380,6 +381,16 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         disableLockscreenPowerMenu
                     )
                 }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.disableQsLockscreenTitle),
+                        stringResource(
+                            R.string.disableQsLockscreenSummary),
+                        disableQsLockscreen
+                    )
+                }
             }
             //Quicksettings Tweaks
             quicksettings -> {
@@ -483,7 +494,6 @@ fun TweaksSectionHeader(label: String) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TweaksSelectionDialog(
     onDismissRequest: () -> Unit,

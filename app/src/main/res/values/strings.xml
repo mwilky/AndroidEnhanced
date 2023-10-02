@@ -38,4 +38,6 @@
 <!--    Quicksettings-->
     <string name="qsTileClickVibrationTitle">Click vibration</string>
     <string name="qsTileClickVibrationSummary">Enabled haptic feedback when clicking the tiles</string>
+    <string name="disableQsLockscreenTitle">Disable quicksettings</string>
+    <string name="disableQsLockscreenSummary">Disable access to the quicksetting tiles whilst on the lockscreen</string>
 </resources>

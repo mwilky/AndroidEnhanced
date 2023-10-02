@@ -36,6 +36,7 @@ class Utils(context: Context, handler: Handler) {
         const val scrambleKeypad = "bool_ScrambleKeypad"
         const val disableLockscreenPowerMenu = "bool_DisableLockscreenPowerMenu"
         const val qsTileVibration = "bool_QsTileVibration"
+        const val disableQsLockscreen = "bool_DisableQsLockscreen"
 
         lateinit var mVibrator: Vibrator
 
