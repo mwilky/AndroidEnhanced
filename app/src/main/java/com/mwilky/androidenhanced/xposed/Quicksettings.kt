@@ -12,14 +12,12 @@ import com.mwilky.androidenhanced.Utils.Companion.initVibrator
 import com.mwilky.androidenhanced.Utils.Companion.mVibrator
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
 import de.robv.android.xposed.XposedHelpers.getBooleanField
 import de.robv.android.xposed.XposedHelpers.getIntField
 import de.robv.android.xposed.XposedHelpers.getObjectField
-import de.robv.android.xposed.XposedHelpers.getSurroundingThis
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 
 
@@ -30,8 +28,6 @@ class Quicksettings {
         private const val QS_TILE_IMPL_CLASS = "com.android.systemui.qs.tileimpl.QSTileImpl"
         private const val QS_FOOTER_VIEW_CLASS = "com.android.systemui.qs.QSFooterView"
         private const val QUICK_SETTINGS_CONTROLLER_CLASS = "com.android.systemui.shade.QuickSettingsController"
-        private const val PHONE_STATUS_BAR_VIEW_CONTROLLER_TOUCH_HANDLER_CLASS =
-            "com.android.systemui.statusbar.phone.PhoneStatusBarViewController\$PhoneStatusBarViewTouchHandler"
 
         //Class Objects
         lateinit var QSFooterView: Any
