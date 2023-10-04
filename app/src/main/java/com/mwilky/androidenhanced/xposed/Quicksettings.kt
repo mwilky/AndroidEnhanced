@@ -13,9 +13,14 @@ import com.mwilky.androidenhanced.Utils.Companion.mVibrator
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
 import de.robv.android.xposed.XposedHelpers
+import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
+import de.robv.android.xposed.XposedHelpers.getBooleanField
+import de.robv.android.xposed.XposedHelpers.getIntField
 import de.robv.android.xposed.XposedHelpers.getObjectField
+import de.robv.android.xposed.XposedHelpers.getSurroundingThis
+import de.robv.android.xposed.XposedHelpers.setBooleanField
 
 
 class Quicksettings {
@@ -24,6 +29,7 @@ class Quicksettings {
         //Hook Classes
         private const val QS_TILE_IMPL_CLASS = "com.android.systemui.qs.tileimpl.QSTileImpl"
         private const val QS_FOOTER_VIEW_CLASS = "com.android.systemui.qs.QSFooterView"
+        private const val QUICK_SETTINGS_CONTROLLER_CLASS = "com.android.systemui.shade.QuickSettingsController"
         private const val PHONE_STATUS_BAR_VIEW_CONTROLLER_TOUCH_HANDLER_CLASS =
             "com.android.systemui.statusbar.phone.PhoneStatusBarViewController\$PhoneStatusBarViewTouchHandler"
 
@@ -68,12 +74,20 @@ class Quicksettings {
             )
 
             // Quick and smart pulldown
+//            findAndHookMethod(
+//                PHONE_STATUS_BAR_VIEW_CONTROLLER_TOUCH_HANDLER_CLASS,
+//                classLoader,
+//                "onTouchEvent",
+//                MotionEvent::class.java,
+//                onTouchEventHook
+//            )
+
             findAndHookMethod(
-                PHONE_STATUS_BAR_VIEW_CONTROLLER_TOUCH_HANDLER_CLASS,
+                QUICK_SETTINGS_CONTROLLER_CLASS,
                 classLoader,
-                "onTouchEvent",
+                "isOpenQsEvent",
                 MotionEvent::class.java,
-                onTouchEventHookPhoneStatusBarViewController
+                isOpenQsEventHook
             )
 
         }
@@ -142,17 +156,17 @@ class Quicksettings {
                 if (mHideQSFooterBuildNumberEnabled) {
                     val mBuildText = getObjectField(param.thisObject, "mBuildText")
                             as TextView
-                    XposedHelpers.callMethod(
+                    callMethod(
                         mBuildText,
                         "setText",
                         null as CharSequence?
                     )
-                    XposedHelpers.setBooleanField(
+                    setBooleanField(
                         param.thisObject,
                         "mShouldShowBuildText",
                         false
                     )
-                    XposedHelpers.callMethod(
+                    callMethod(
                         mBuildText,
                         "setSelected",
                         false
@@ -162,98 +176,74 @@ class Quicksettings {
             }
         }
 
-        private val onTouchEventHookPhoneStatusBarViewController: XC_MethodHook =
-            object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    //TODO: check for new unread notifications for smart pulldown (notifications with the bell)
-                    val motionEvent = param.args[0] as MotionEvent
-                    val phoneStatusBarViewController =
-                        XposedHelpers.getSurroundingThis(param.thisObject)
-                    val centralSurface =
-                        getObjectField(phoneStatusBarViewController, "centralSurfaces")
-                    val notificationPanelViewController =
-                        XposedHelpers.callMethod(
-                            centralSurface,
-                            "getNotificationPanelViewController"
-                        )
+        private val isOpenQsEventHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val quickSettingsController = param.thisObject
+                val event = param.args[0] as MotionEvent
 
-
-                    //QUICK
-                    val measuredWidth = XposedHelpers.callMethod(
-                        getObjectField(
-                            notificationPanelViewController, "mView"
-                        ), "getMeasuredWidth"
-                    ) as Int
-
-                    val x = motionEvent.x
-                    val f = 0.25f * measuredWidth
-                    val showQSQuick =
-                        (if (mQuickPulldownConfig != 1) !(if (mQuickPulldownConfig != 2) mQuickPulldownConfig != 3 else if (XposedHelpers.callMethod(
-                                getObjectField(
-                                    notificationPanelViewController, "mView"
-                                ), "isLayoutRtl"
-                            ) as Boolean
-                        ) measuredWidth - f >= x else x >= f) else !if (XposedHelpers.callMethod(
-                                getObjectField(
-                                    notificationPanelViewController, "mView"
-                                ), "isLayoutRtl"
-                            ) as Boolean
-                        ) x >= f else measuredWidth - f >= x) and (XposedHelpers.getIntField(
-                            notificationPanelViewController, "mBarState"
-                        ) == 0)
-
-                    //SMART
-                    val notificationStackScrollLayoutController = getObjectField(
-                        notificationPanelViewController,
-                        "mNotificationStackScrollLayoutController"
-                    )
-
-                    val numActiveNotifs = XposedHelpers.getIntField(
-                        getObjectField(
-                            notificationStackScrollLayoutController,
-                            "mNotifStats"
-                        ), "numActiveNotifs"
-                    )
-                    val hasNonClearableAlertingNotifs = XposedHelpers.getBooleanField(
-                        getObjectField(
-                            notificationStackScrollLayoutController,
-                            "mNotifStats"
-                        ), "hasNonClearableAlertingNotifs"
-                    )
-                    val hasClearableAlertingNotifs = XposedHelpers.getBooleanField(
-                        getObjectField(
-                            notificationStackScrollLayoutController,
-                            "mNotifStats"
-                        ), "hasClearableAlertingNotifs"
-                    )
-
-                    var showQSSmart = false
-
-                    //NO HIGH PRIORITY NOTIFICATIONS
-                    if (mSmartPulldownConfig == 1) {
-                        if (!hasNonClearableAlertingNotifs && !hasClearableAlertingNotifs) {
-                            showQSSmart = true
-                        }
-                        //NO NOTIFICATIONS
-                    } else if (mSmartPulldownConfig == 2) {
-                        if (numActiveNotifs == 0) {
-                            showQSSmart = true
-                        }
-                    }
-
-                    //OPEN WITH QS IF VALUES ARE TRUE
-                    if (showQSQuick || showQSSmart) {
-                        XposedHelpers.callMethod(
-                            getObjectField(notificationPanelViewController, "mMetricsLogger"),
-                            "count",
-                            "panel_open_qs", 1
-                        )
-                        XposedHelpers.callMethod(notificationPanelViewController, "expandWithQs")
-                    }
+                if (shouldFullyExpandDueQuickPulldown(quickSettingsController, event) ||
+                    shouldFullyExpandDueSmartPulldown(quickSettingsController)
+                    ) {
+                    param.result = true
                 }
             }
-
+        }
 
         //Additional functions
+        //Evaluate quick pulldown
+        private fun shouldFullyExpandDueQuickPulldown(
+            quickSettingsController: Any,
+            event: MotionEvent
+        ): Boolean {
+            val mQs = getObjectField(quickSettingsController, "mQs")
+            val mView = callMethod(mQs, "getView") as View
+            val isLayoutRtl = callMethod(mView, "isLayoutRtl") as Boolean
+            val measuredWidth = mView.measuredWidth
+            val x = event.x
+            val region = 0.25f * measuredWidth
+            val mBarState = getIntField(quickSettingsController, "mBarState")
+
+            return when (mQuickPulldownConfig) {
+                0 -> false
+                1 -> if (isLayoutRtl) x < region else measuredWidth - region < x
+                2 -> if (isLayoutRtl) measuredWidth - region < x else x < region
+                3 -> true
+                else -> false
+            } && mBarState == 0
+        }
+
+        //Evaluate smart pulldown
+        private fun shouldFullyExpandDueSmartPulldown(quickSettingsController: Any) : Boolean {
+
+            val notificationStackScrollLayoutController = getObjectField(
+                quickSettingsController,
+                "mNotificationStackScrollLayoutController"
+            )
+
+            val numActiveNotifs = getIntField(
+                getObjectField(
+                    notificationStackScrollLayoutController,
+                    "mNotifStats"
+                ), "numActiveNotifs"
+            )
+            val hasNonClearableAlertingNotifs = getBooleanField(
+                getObjectField(
+                    notificationStackScrollLayoutController,
+                    "mNotifStats"
+                ), "hasNonClearableAlertingNotifs"
+            )
+            val hasClearableAlertingNotifs = getBooleanField(
+                getObjectField(
+                    notificationStackScrollLayoutController,
+                    "mNotifStats"
+                ), "hasClearableAlertingNotifs"
+            )
+
+            return when (mSmartPulldownConfig) {
+                1 -> !hasNonClearableAlertingNotifs && !hasClearableAlertingNotifs
+                2 -> numActiveNotifs == 0
+                else -> false
+            }
+        }
     }
 }
