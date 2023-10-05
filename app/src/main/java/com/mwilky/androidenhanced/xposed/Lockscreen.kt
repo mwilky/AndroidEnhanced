@@ -5,17 +5,20 @@ import android.content.Context
 import android.view.View
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils
+import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
 import de.robv.android.xposed.XposedHelpers.getBooleanField
 import de.robv.android.xposed.XposedHelpers.getIntField
 import de.robv.android.xposed.XposedHelpers.getObjectField
+import de.robv.android.xposed.XposedHelpers.getSurroundingThis
+import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
+import de.robv.android.xposed.XposedHelpers.setIntField
 import de.robv.android.xposed.XposedHelpers.setObjectField
 
 
@@ -25,36 +28,30 @@ class Lockscreen {
         //Hook Classes
         private const val KEYGUARD_STATUSBAR_VIEW_CLASS =
             "com.android.systemui.statusbar.phone.KeyguardStatusBarView"
-        private const val KEYGUARD_QUICK_AFFORDANCE_VIEW_MODEL_CLASS =
-            "com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel"
-        private const val KEYGUARD_BOTTOM_AREA_VIEW_BINDER_CLASS =
-            "com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder"
         private const val KEYGUARD_ABS_KEY_INPUT_VIEW_CLASS =
             "com.android.keyguard.KeyguardAbsKeyInputView"
         private const val NUM_PAD_KEY_CLASS =
             "com.android.keyguard.NumPadKey"
-        private const val QS_FOOTER_VIEW_CONTROLLER =
-            "com.android.systemui.qs.QSFooterViewController"
         private const val PHONE_WINDOW_MANAGER_9_CLASS =
             "com.android.server.policy.PhoneWindowManager\$9"
         private const val PHONE_WINDOW_MANAGER_CLASS =
             "com.android.server.policy.PhoneWindowManager"
-        private const val FOOTER_ACTIONS_VIEW_MODEL_CLASS =
-            "com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel"
         private const val FOOTER_ACTIONS_VIEW_BINDER_CLASS =
             "com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder"
         private const val QS_FRAGMENT_CLASS =
             "com.android.systemui.qs.QSFragment"
         private const val CENTRAL_SURFACES_COMMAND_QUEUE_CALLBACKS_CLASS =
             "com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks"
+        private const val CENTRAL_SURFACES_IMPL_CLASS =
+            "com.android.systemui.statusbar.phone.CentralSurfacesImpl"
 
         //Class Objects
         lateinit var keyguardStatusBarView: Any
         var powerMenuButton: Any? = null
+        lateinit var `QSFooterView$$ExternalSyntheticLambda0`: Class<*>
 
         //Tweak Variables
         var hideLockscreenStatusbarEnabled: Boolean = false
-        var hideLockscreenShortcutsEnabled: Boolean = false
         var scrambleKeypadEnabled: Boolean = false
         var mDisableLockscreenPowerMenuEnabled = false
         var mDisableLockscreenQuicksettingsEnabled = false
@@ -107,50 +104,6 @@ class Lockscreen {
                 onFinishInflateHook
             )
 
-            //Hide lockscreen shortcuts
-            val keyguardQuickAffordanceViewModelClass =
-                findClass(
-                    KEYGUARD_QUICK_AFFORDANCE_VIEW_MODEL_CLASS,
-                    classLoader
-                )
-
-            //Hide lockscreen shortcuts
-            hookAllConstructors(
-                keyguardQuickAffordanceViewModelClass,
-                keyguardQuickAffordanceViewModelConstructorHook
-            )
-
-            /*val falsingManager =
-                findClass(
-                    "com.android.systemui.plugins.FalsingManager",
-                    classLoader
-                )
-
-            val function1 =
-                findClass(
-                    "kotlin.jvm.functions.Function1",
-                    classLoader
-                )
-
-            val vibrationHelper =
-                findClass(
-                    "com.android.systemui.statusbar.VibratorHelper",
-                    classLoader
-                )
-
-            //TODO: we may be able to go into further control from this function. Check it at a later date
-            findAndHookMethod(
-                KEYGUARD_BOTTOM_AREA_VIEW_BINDER_CLASS,
-                classLoader,
-                "access\$updateButton",
-                ImageView::class.java,
-                keyguardQuickAffordanceViewModelClass,
-                falsingManager,
-                function1,
-                vibrationHelper,
-                updateButtonHook
-            )*/
-
             //Scramble Keypad
             findAndHookMethod(
                 KEYGUARD_ABS_KEY_INPUT_VIEW_CLASS,
@@ -173,23 +126,35 @@ class Lockscreen {
 
             //Disable power menu lockscreen
             findAndHookMethod(
-                QS_FOOTER_VIEW_CONTROLLER,
+                CENTRAL_SURFACES_IMPL_CLASS,
                 classLoader,
-                "setKeyguardShowing",
+                "updateIsKeyguard",
                 Boolean::class.javaPrimitiveType,
-                setKeyguardShowingHook
+                updateIsKeyguardHook
             )
 
+            //Disable power menu lockscreen
+            `QSFooterView$$ExternalSyntheticLambda0` =
+                findClass(
+                    "com.android.systemui.qs.footer.ui.binder.IconButtonViewHolder",
+                    classLoader
+                )
+
+            //Disable power menu lockscreen
             val iconButtonViewHolder =
                 findClass(
                     "com.android.systemui.qs.footer.ui.binder.IconButtonViewHolder",
                     classLoader
                 )
+
+            //Disable power menu lockscreen
             val footerActionsButtonViewModel =
                 findClass(
                     "com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel",
                     classLoader
                 )
+
+            //Disable power menu lockscreen
             findAndHookMethod(
                 FOOTER_ACTIONS_VIEW_BINDER_CLASS,
                 classLoader,
@@ -199,6 +164,7 @@ class Lockscreen {
                 bindButtonHook
             )
 
+            //Disable QS on lockscreen
             findAndHookMethod(
                 QS_FRAGMENT_CLASS,
                 classLoader,
@@ -210,6 +176,7 @@ class Lockscreen {
                 disableHookQSFragment
             )
 
+            //Disable QS on lockscreen
             findAndHookMethod(
                 CENTRAL_SURFACES_COMMAND_QUEUE_CALLBACKS_CLASS,
                 classLoader,
@@ -235,11 +202,6 @@ class Lockscreen {
                 // Register broadcast receiver to receive values
                 BroadcastUtils.registerBroadcastReceiver(
                     mContext, Utils.hideLockscreenStatusBar,
-                    param.thisObject.toString()
-                )
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.hideLockscreenShortcuts,
                     param.thisObject.toString()
                 )
 
@@ -270,16 +232,6 @@ class Lockscreen {
             }
         }
 
-        //Hide Lockscreen Shortcuts
-        private val keyguardQuickAffordanceViewModelConstructorHook:
-                XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-
-                if (hideLockscreenShortcutsEnabled)
-                    setBooleanField(param.thisObject, "isVisible", false)
-            }
-        }
-
         //Scramble Keypad
         private val onViewAttachedHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
@@ -302,14 +254,15 @@ class Lockscreen {
 
         //Block power menu
         //Toggle the visibility of the power menu button when we go/leave lockscreen
-        private val setKeyguardShowingHook: XC_MethodHook = object : XC_MethodHook() {
+        private val updateIsKeyguardHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
 
-                val keyguard = param.args[0] as Boolean
-
+                val mKeyguardShowing =
+                    callMethod(param.thisObject, "isKeyguardShowing")
+                            as Boolean
                 //If on lockscreen and tweak is enabled, hide the button
                 if (powerMenuButton != null) {
-                    if (!keyguard || !mDisableLockscreenPowerMenuEnabled) {
+                    if (!mKeyguardShowing || !mDisableLockscreenPowerMenuEnabled) {
                         (powerMenuButton as View).visibility = View.VISIBLE
                     } else {
                         (powerMenuButton as View).visibility = View.GONE
@@ -330,6 +283,7 @@ class Lockscreen {
                 val resolvedLongPressOnPowerBehavior =
                     callMethod(param.thisObject, "getResolvedLongPressOnPowerBehavior")
                             as Int
+
                 if (resolvedLongPressOnPowerBehavior == 1) {
                     if (mDisableLockscreenPowerMenuEnabled && isScreenOn && keyguardOn) {
                         setBooleanField(param.thisObject, "mPowerKeyHandled", true)
@@ -347,31 +301,31 @@ class Lockscreen {
         }
 
         //Block power menu
-        // Blocks power menu on a regular power button press
+        // Blocks power menu on power + volume button press
         private val executeHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
 
                 val isScreenOn =
                     callMethod(
-                        XposedHelpers.getSurroundingThis(param.thisObject),
+                        getSurroundingThis(param.thisObject),
                         "isScreenOn"
                     ) as Boolean
 
                 val keyguardOn =
                     callMethod(
-                        XposedHelpers.getSurroundingThis(param.thisObject),
+                        getSurroundingThis(param.thisObject),
                         "keyguardOn"
                     ) as Boolean
 
                 val mPowerVolUpBehavior =
                     getIntField(
-                        XposedHelpers.getSurroundingThis(param.thisObject),
+                        getSurroundingThis(param.thisObject),
                         "mPowerVolUpBehavior"
                     )
                 if (mPowerVolUpBehavior == 2) {
                     if (mDisableLockscreenPowerMenuEnabled && isScreenOn && keyguardOn) {
                         callMethod(
-                            XposedHelpers.getSurroundingThis(param.thisObject),
+                            getSurroundingThis(param.thisObject),
                             "performHapticFeedback",
                             10003,
                             false,
@@ -383,7 +337,7 @@ class Lockscreen {
             }
         }
 
-        //Hide lockscreen shortcuts
+        //Hide lockscreen pwoer menu
         private val bindButtonHook: XC_MethodHook = object : XC_MethodHook() {
             @SuppressLint("DiscouragedApi")
             override fun afterHookedMethod(param: MethodHookParam) {
@@ -422,6 +376,9 @@ class Lockscreen {
                     getObjectField(param.thisObject, "mHeader")
                 val mFooter =
                     getObjectField(param.thisObject, "mFooter")
+                val mFooterView =
+                    getObjectField(mFooter, "mView")
+                            as View
                 val mQuickQSPanel =
                     getObjectField(mHeader, "mHeaderQsPanel")
                             as View
@@ -451,7 +408,12 @@ class Lockscreen {
                 }
                 callMethod(mHeader, "updateResources")
 
-                callMethod(mFooter, "disable", state2)
+                setBooleanField(mFooterView, "mQsDisabled", disabled)
+
+                mFooterView.post(newInstance(`QSFooterView$$ExternalSyntheticLambda0`, mFooterView)
+                        as Runnable?
+                )
+
                 callMethod(param.thisObject, "updateQsState")
 
                 return null
@@ -479,37 +441,32 @@ class Lockscreen {
                     getObjectField(param.thisObject, "mShadeController")
                 val mHeadsUpManager =
                     getObjectField(param.thisObject, "mHeadsUpManager")
-                val mNotificationPanelViewController =
-                    getObjectField(param.thisObject, "mNotificationPanelViewController")
+                val mShadeViewController =
+                    getObjectField(param.thisObject, "mShadeViewController")
                 val mShadeHeaderController =
-                    getObjectField(mNotificationPanelViewController, "mShadeHeaderController")
+                    getObjectField(mShadeViewController, "mShadeHeaderController")
                 val mKeyguardStateController =
                     getObjectField(param.thisObject, "mKeyguardStateController")
 
                 state2 = adjustDisableFlags(mRemoteInputQuickSettingsDisabler, state2)
                 state2 = adjustQsDisableFlags(mKeyguardStateController, state2)
 
-                val old1: Int = callMethod(mCentralSurfaces, "getDisabled1")
-                        as Int
+                val old1 = getIntField(mCentralSurfaces, "mDisabled1")
                 val diff1: Int = state1 xor old1
-                callMethod(mCentralSurfaces, "setDisabled1", state1)
+                setIntField(mCentralSurfaces, "mDisabled1", state1)
 
-                val old2: Int = callMethod(mCentralSurfaces, "getDisabled2")
-                        as Int
+                val old2 = getIntField(mCentralSurfaces, "mDisabled2")
                 val diff2: Int = state2 xor old2
-                callMethod(mCentralSurfaces, "setDisabled2", state2)
+                setIntField(mCentralSurfaces, "mDisabled2", state2)
 
                 if (diff1 and DISABLE_EXPAND != 0) {
                     if (state1 and DISABLE_EXPAND != 0) {
-                        callMethod(mShadeController, "animateCollapseShade")
+                        callMethod(mShadeController, "animateCollapseShade", 0)
                     }
                 }
 
-                val areNotificationAlertsDisabled =
-                    callMethod(mCentralSurfaces, "areNotificationAlertsDisabled")
-                            as Boolean
                 if (diff1 and DISABLE_NOTIFICATION_ALERTS != 0) {
-                    if (areNotificationAlertsDisabled) {
+                    if (state1 and DISABLE_NOTIFICATION_ALERTS != 0) {
                         callMethod(mHeadsUpManager, "releaseAllImmediately")
                     }
                 }
@@ -521,7 +478,7 @@ class Lockscreen {
                 if (diff2 and DISABLE2_NOTIFICATION_SHADE != 0) {
                     callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
                     if (state2 and DISABLE2_NOTIFICATION_SHADE != 0) {
-                        callMethod(mShadeController, "animateCollapseShade")
+                        callMethod(mShadeController, "animateCollapseShade", 0)
                     }
                 }
 
@@ -570,19 +527,6 @@ class Lockscreen {
             } else {
                 state2
             }
-        }
-
-        //disable qs on lockscreen
-        //Checks whether device is on lockscreen
-        private fun isUnlocked(mKeyguardStateController: Any): Boolean {
-            val isShowing =
-                callMethod(mKeyguardStateController, "isShowing")
-                    as Boolean
-            val canDismissLockScreen =
-                callMethod(mKeyguardStateController, "canDismissLockScreen")
-                    as Boolean
-
-            return !(isShowing && !canDismissLockScreen)
         }
     }
 }

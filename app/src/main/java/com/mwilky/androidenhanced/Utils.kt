@@ -9,7 +9,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
-import com.mwilky.androidenhanced.xposed.Quicksettings
+import de.robv.android.xposed.XposedHelpers
 
 class Utils(context: Context, handler: Handler) {
 
@@ -32,7 +32,6 @@ class Utils(context: Context, handler: Handler) {
         const val statusBarClockPosition = "int_StatusbarClockPosition"
         const val statusBarClockSeconds = "bool_StatusbarClockSeconds"
         const val hideLockscreenStatusBar = "bool_HideLockscreenStatusbar"
-        const val hideLockscreenShortcuts = "bool_HideLockscreenShortcuts"
         const val scrambleKeypad = "bool_ScrambleKeypad"
         const val disableLockscreenPowerMenu = "bool_DisableLockscreenPowerMenu"
         const val qsTileVibration = "bool_QsTileVibration"
@@ -49,6 +48,16 @@ class Utils(context: Context, handler: Handler) {
                         as VibratorManager
                 mVibrator = vibratorManager.defaultVibrator
             }
+        }
+
+        // Function to check if phone is unlocked
+        fun isUnlocked(mKeyguardStateController: Any): Boolean {
+            val isShowing =
+                XposedHelpers.getBooleanField(mKeyguardStateController, "mShowing")
+            val canDismissLockScreen =
+                XposedHelpers.getBooleanField(mKeyguardStateController, "mCanDismissLockScreen")
+
+            return !(isShowing && !canDismissLockScreen)
         }
 
 

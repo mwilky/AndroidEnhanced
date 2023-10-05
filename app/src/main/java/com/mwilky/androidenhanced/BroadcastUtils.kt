@@ -1,9 +1,9 @@
 package com.mwilky.androidenhanced
 
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
@@ -13,10 +13,10 @@ import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
+import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
-import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
@@ -33,9 +33,9 @@ import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPressPowerWhenNonInteractive
-import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenShortcutsEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenStatusbarEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.keyguardStatusBarView
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenPowerMenuEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenQuicksettingsEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnabled
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
@@ -59,7 +59,6 @@ class BroadcastUtils: BroadcastReceiver() {
 
         const val PREFS = "prefs"
 
-        @SuppressLint("UnspecifiedRegisterReceiverFlag")
         fun registerBroadcastReceiver(mContext: Context, key: String, registeredClass: String) {
             val myReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
@@ -116,13 +115,13 @@ class BroadcastUtils: BroadcastReceiver() {
                             hideLockscreenStatusbarEnabled = value as Boolean
                             callMethod(keyguardStatusBarView, "updateVisibilities")
                         }
-                        //Hide lockscreen shortcuts
-                        hideLockscreenShortcuts-> {
-                            hideLockscreenShortcutsEnabled = value as Boolean
-                        }
                         //Scramble Keypad
                         scrambleKeypad-> {
                             scrambleKeypadEnabled = value as Boolean
+                        }
+                        //Disable power menu on lockscreen
+                        disableLockscreenPowerMenu-> {
+                            mDisableLockscreenPowerMenuEnabled = value as Boolean
                         }
                         //Qs tile click vibration
                         qsTileVibration-> {
@@ -151,7 +150,7 @@ class BroadcastUtils: BroadcastReceiver() {
             }
 
             val intentFilter = IntentFilter(key)
-            mContext.registerReceiver(myReceiver, intentFilter)
+            mContext.registerReceiver(myReceiver, intentFilter, RECEIVER_EXPORTED)
             if (DEBUG) Log.d(TAG, "Registered new receiver in $registeredClass")
         }
 

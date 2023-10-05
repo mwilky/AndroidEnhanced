@@ -1,6 +1,4 @@
 package com.mwilky.androidenhanced.xposed
-
-import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.media.AudioManager
@@ -189,7 +187,6 @@ class Buttons {
         //Hooked functions
         //Init hooks
         private val PhoneWindowManager_init_hook: XC_MethodHook = object : XC_MethodHook() {
-            @SuppressLint("UnspecifiedRegisterReceiverFlag")
             override fun afterHookedMethod(param: MethodHookParam) {
 
                 PhoneWindowManagerObject = param.thisObject

@@ -7,11 +7,14 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import com.mwilky.androidenhanced.BroadcastUtils
+import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.initVibrator
+import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
 import com.mwilky.androidenhanced.Utils.Companion.mVibrator
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
@@ -68,15 +71,6 @@ class Quicksettings {
                 "setBuildText",
                 setBuildTextHook
             )
-
-            // Quick and smart pulldown
-//            findAndHookMethod(
-//                PHONE_STATUS_BAR_VIEW_CONTROLLER_TOUCH_HANDLER_CLASS,
-//                classLoader,
-//                "onTouchEvent",
-//                MotionEvent::class.java,
-//                onTouchEventHook
-//            )
 
             findAndHookMethod(
                 QUICK_SETTINGS_CONTROLLER_CLASS,

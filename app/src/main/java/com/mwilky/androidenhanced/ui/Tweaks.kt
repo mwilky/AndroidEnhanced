@@ -67,7 +67,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
-import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenShortcuts
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
@@ -371,16 +370,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.hideLockscreenStatusbarSummary),
                         hideLockscreenStatusBar
-                    )
-                }
-                item {
-                    TweakSwitch(
-                        context,
-                        stringResource(
-                            R.string.hideLockscreenShortcutsTitle),
-                        stringResource(
-                            R.string.hideLockscreenShortcutsSummary),
-                        hideLockscreenShortcuts
                     )
                 }
                 item {

@@ -74,9 +74,9 @@ class Statusbar {
         lateinit var clock: Any
 
         // Class references
-        private var rStringClass: Class<*>? = null
+        private var brightnessUtilsClass: Class<*>? = null
         private var viewClippingUtil: Class<*>? = null
-        private var `createUserActivity$$ExternalSyntheticLambda4`: Class<*>? = null
+        private var `headsUpAppearanceController$$ExternalSyntheticLambda0`: Class<*>? = null
         private var `headsUpAppearanceController$$ExternalSyntheticLambda1`: Class<*>? = null
         private var `carrierTextManager$$ExternalSyntheticLambda1`: Class<*>? = null
 
@@ -148,7 +148,7 @@ class Statusbar {
             )
 
             // Statusbar brightness control
-            rStringClass = findClass("com.android.systemui.R\$string", classLoader)
+            brightnessUtilsClass = findClass("com.android.settingslib.display.BrightnessUtils", classLoader)
 
 
             //Clock position
@@ -166,8 +166,8 @@ class Statusbar {
                 COLLAPSED_STATUSBAR_FRAGMENT_CLASS,
                 classLoader,
                 "animateHiddenState",
-                View::class.java,
                 Int::class.javaPrimitiveType,
+                View::class.java,
                 Boolean::class.javaPrimitiveType,
                 animateHiddenStateHook
             )
@@ -186,23 +186,15 @@ class Statusbar {
                 findClass("com.android.internal.widget.ViewClippingUtil", classLoader)
 
             //Clock position
-            `createUserActivity$$ExternalSyntheticLambda4` =
+            `headsUpAppearanceController$$ExternalSyntheticLambda0` =
                 findClass(
-                    "com.android.systemui.user.CreateUserActivity$\$ExternalSynthetic" +
-                            "Lambda4",
+                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda0",
                     classLoader
                 )
 
             `headsUpAppearanceController$$ExternalSyntheticLambda1` =
                 findClass(
                     "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda1",
-                    classLoader
-                )
-
-            //Clock position
-            `carrierTextManager$$ExternalSyntheticLambda1` =
-                findClass(
-                    "com.android.keyguard.CarrierTextManager$\$ExternalSyntheticLambda1",
                     classLoader
                 )
 
@@ -301,12 +293,12 @@ class Statusbar {
             object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val event = param.args[1] as MotionEvent
-                val centralSurfaces =
+                val mCommandQueue =
                     getObjectField(
-                        getSurroundingThis(param.thisObject), "mCentralSurfaces"
+                        getSurroundingThis(param.thisObject), "mCommandQueue"
                     )
                 val commandQueuePanelsEnabled =
-                    callMethod(centralSurfaces, "getCommandQueuePanelsEnabled")
+                    callMethod(mCommandQueue, "panelsEnabled")
                             as Boolean
 
                 if (mStatusbarBrightnessControlEnabled) {
@@ -336,10 +328,11 @@ class Statusbar {
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     val event = param.args[0] as MotionEvent
-                    val centralSurfaces =
-                        getObjectField(param.thisObject, "centralSurfaces")
+                    val centralSurfaces = getObjectField(param.thisObject, "centralSurfaces")
+                    val mCommandQueue =
+                        getObjectField(centralSurfaces, "mCommandQueue")
                     val commandQueuePanelsEnabled =
-                        callMethod(centralSurfaces, "getCommandQueuePanelsEnabled")
+                        callMethod(mCommandQueue, "panelsEnabled")
                             as Boolean
 
                     if (mStatusbarBrightnessControlEnabled) {
@@ -406,7 +399,7 @@ class Statusbar {
         // Don't hide clock if it is in right position
         private val animateHiddenStateHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
-                val view:View = param.args[0]
+                val view:View = param.args[1]
                     as View
 
                 val mClockView:View =
@@ -471,9 +464,9 @@ class Statusbar {
                         callMethod(
                             mOperatorNameViewOptional, "ifPresent",
                             XposedHelpers.newInstance(
-                                `createUserActivity$$ExternalSyntheticLambda4`,
-                                2,
-                                param.thisObject
+                                `headsUpAppearanceController$$ExternalSyntheticLambda1`,
+                                param.thisObject,
+                                1
                             )
                         )
                     } else {
@@ -483,15 +476,16 @@ class Statusbar {
                             mOperatorNameViewOptional, "ifPresent",
                             XposedHelpers.newInstance(
                                 `headsUpAppearanceController$$ExternalSyntheticLambda1`,
-                                0,
-                                param.thisObject
+                                param.thisObject,
+                                2
                             )
                         )
                         callMethod(
                             param.thisObject, "hide", mView, 8,
                             XposedHelpers.newInstance(
-                                `carrierTextManager$$ExternalSyntheticLambda1`,
-                                3, param.thisObject
+                                `headsUpAppearanceController$$ExternalSyntheticLambda0`,
+                                param.thisObject,
+                                1
                             )
                         )
                     }
@@ -555,7 +549,7 @@ class Statusbar {
             val padded = 0.85f.coerceAtMost(BRIGHTNESS_CONTROL_PADDING.coerceAtLeast(raw))
             val value = (padded - BRIGHTNESS_CONTROL_PADDING) / 0.7f
             val linearFloat = XposedHelpers.callStaticMethod(
-                rStringClass, "convertGammaToLinearFloat",
+                brightnessUtilsClass, "convertGammaToLinearFloat",
                 (65535.0f * value).roundToInt(),
                 minimumBacklight,
                 maximumBacklight
@@ -629,7 +623,7 @@ class Statusbar {
             if (brightnessChanged && upOrCancel) {
                 brightnessChanged = false
                 val isExpandedVisible =
-                    getBooleanField(shadeController, "isExpandedVisible")
+                    getBooleanField(shadeController, "mExpandedVisible")
                 if (justPeeked && isExpandedVisible) {
                     callMethod(
                         notificationPanelViewController,
