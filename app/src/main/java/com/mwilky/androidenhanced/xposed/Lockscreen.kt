@@ -3,6 +3,7 @@ package com.mwilky.androidenhanced.xposed
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
+import android.widget.FrameLayout
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
@@ -136,7 +137,7 @@ class Lockscreen {
             //Disable power menu lockscreen
             `QSFooterView$$ExternalSyntheticLambda0` =
                 findClass(
-                    "com.android.systemui.qs.footer.ui.binder.IconButtonViewHolder",
+                    "com.android.systemui.qs.QSFooterView$\$ExternalSyntheticLambda0",
                     classLoader
                 )
 
@@ -378,7 +379,7 @@ class Lockscreen {
                     getObjectField(param.thisObject, "mFooter")
                 val mFooterView =
                     getObjectField(mFooter, "mView")
-                            as View
+                            as FrameLayout
                 val mQuickQSPanel =
                     getObjectField(mHeader, "mHeaderQsPanel")
                             as View
@@ -409,7 +410,6 @@ class Lockscreen {
                 callMethod(mHeader, "updateResources")
 
                 setBooleanField(mFooterView, "mQsDisabled", disabled)
-
                 mFooterView.post(newInstance(`QSFooterView$$ExternalSyntheticLambda0`, mFooterView)
                         as Runnable?
                 )
