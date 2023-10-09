@@ -606,7 +606,7 @@ class Buttons {
                             if (down) {
                                 callMethod(
                                     param.thisObject,
-                                    "sendSystemKeyToStatusBarAsync", event.keyCode
+                                    "sendSystemKeyToStatusBarAsync", event
                                 )
                                 val nm = callMethod(
                                     param.thisObject,
