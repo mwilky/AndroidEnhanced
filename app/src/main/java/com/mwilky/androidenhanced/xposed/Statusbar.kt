@@ -261,8 +261,11 @@ class Statusbar {
         //Register the receiver for clock position
         private val onViewCreatedHook: XC_MethodHook =
             object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
+                override fun beforeHookedMethod(param: MethodHookParam) {
                     collapsedStatusBarFragment = param.thisObject
+
+                }
+                override fun afterHookedMethod(param: MethodHookParam) {
 
                     val mClockView =
                         getObjectField(param.thisObject, "mClockView") as View

@@ -69,6 +69,7 @@ import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
+import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
@@ -218,6 +219,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         val misc = "Miscellaneous"
         val lockscreen = "Lockscreen"
         val quicksettings = "Quicksettings"
+        val notifications = "Notifications"
 
         when (screen) {
             //Pages
@@ -503,6 +505,26 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
 //                        0
 //                    )
 //                }
+            }
+            //Notification tweaks
+            notifications -> {
+                item {
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.general
+                        )
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.muteScreenOnNotificationsTitle),
+                        stringResource(
+                            R.string.muteScreenOnNotificationsSummary),
+                        muteScreenOnNotifications
+                    )
+                }
             }
         }
 

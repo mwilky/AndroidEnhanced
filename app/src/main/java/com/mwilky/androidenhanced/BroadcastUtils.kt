@@ -19,6 +19,7 @@ import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
+import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
@@ -41,6 +42,7 @@ import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnab
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNotificationsEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
@@ -144,6 +146,10 @@ class BroadcastUtils: BroadcastReceiver() {
                         //QS quick pulldown
                         quickPulldown -> {
                             mQuickPulldownConfig = value as Int
+                        }
+                        //Mute Screen on notifications
+                        muteScreenOnNotifications -> {
+                            mMuteScreenOnNotificationsEnabled = value as Boolean
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")

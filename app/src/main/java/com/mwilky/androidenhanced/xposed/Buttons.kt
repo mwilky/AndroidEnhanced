@@ -14,6 +14,7 @@ import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastRece
 import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.isTorchEnabled
+import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
@@ -209,7 +210,11 @@ class Buttons {
                     param.thisObject.toString(),
                     false
                 )
-
+                //Register this in this class
+                registerBroadcastReceiver(mContext, muteScreenOnNotifications,
+                    param.thisObject.toString(),
+                    false
+                )
 
                 val mHandler =
                     getObjectField(param.thisObject, "mHandler")

@@ -18,6 +18,7 @@ class XposedInit : IXposedHookLoadPackage {
                 Buttons.init(lpparam.classLoader)
                 Misc.init(lpparam.classLoader)
                 Lockscreen.initFramework(lpparam.classLoader)
+                Notifications.initFramework(lpparam.classLoader)
             }
             SYSTEMUI_PACKAGE -> {
                 SystemUIApplication.init(lpparam.classLoader)
