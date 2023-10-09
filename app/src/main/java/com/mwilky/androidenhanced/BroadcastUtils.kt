@@ -17,6 +17,7 @@ import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
+import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
@@ -42,7 +43,11 @@ import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnab
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mExpandedNotifications
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNotificationsEnabled
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mNotifCollection
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mRowAppearanceCoordinator
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationExpansion
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
@@ -55,7 +60,10 @@ import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosi
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
 import de.robv.android.xposed.XposedBridge.log
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
+import de.robv.android.xposed.XposedHelpers.getObjectField
+import de.robv.android.xposed.XposedHelpers.setBooleanField
 
 class BroadcastUtils: BroadcastReceiver() {
     companion object {
@@ -151,6 +159,12 @@ class BroadcastUtils: BroadcastReceiver() {
                         muteScreenOnNotifications -> {
                             mMuteScreenOnNotificationsEnabled = value as Boolean
                         }
+                        //Expand all notifications
+                        expandAllNotifications -> {
+                            mExpandedNotifications = value as Boolean
+                            updateNotificationExpansion()
+                        }
+
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
                 }

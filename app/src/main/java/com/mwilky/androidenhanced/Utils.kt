@@ -40,6 +40,7 @@ class Utils(context: Context, handler: Handler) {
         const val smartPulldown = "int_SmartPulldown"
         const val quickPulldown = "int_QuickPulldown"
         const val muteScreenOnNotifications = "bool_MuteScreenOnNotifications"
+        const val expandAllNotifications = "bool_ExpandAllNotifications"
 
         lateinit var mVibrator: Vibrator
 

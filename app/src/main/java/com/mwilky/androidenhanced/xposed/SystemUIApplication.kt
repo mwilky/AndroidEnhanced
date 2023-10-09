@@ -103,6 +103,11 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 false
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.expandAllNotifications,
+                                param.thisObject.toString(),
+                                false
+                            )
                         }
                     }
                 }
