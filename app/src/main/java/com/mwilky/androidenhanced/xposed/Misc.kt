@@ -80,7 +80,8 @@ class Misc {
                 //Register broadcast receiver to receive values
                 registerBroadcastReceiver(
                     mContext, allowAllRotations,
-                    param.thisObject.toString()
+                    param.thisObject.toString(),
+                    false
                 )
             }
         }
@@ -97,7 +98,8 @@ class Misc {
                 //Register broadcast receiver to receive values
                 registerBroadcastReceiver(
                     mContext, disableSecureScreenshots,
-                    param.thisObject.toString()
+                    param.thisObject.toString(),
+                    false
                 )
             }
         }

@@ -48,10 +48,11 @@ import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQuickPulldownC
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownConfig
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnessControlEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 
 class BroadcastUtils: BroadcastReceiver() {
@@ -59,12 +60,12 @@ class BroadcastUtils: BroadcastReceiver() {
 
         const val PREFS = "prefs"
 
-        fun registerBroadcastReceiver(mContext: Context, key: String, registeredClass: String) {
+        fun registerBroadcastReceiver(mContext: Context, key: String, registeredClass: String, defaultValue: Any) {
             val myReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     val value = when (intent.extras?.get(key)) {
-                        is Boolean -> intent.getBooleanExtra(key, false)
-                        is Int -> intent.getIntExtra(key, 0)
+                        is Boolean -> intent.getBooleanExtra(key, defaultValue as Boolean)
+                        is Int -> intent.getIntExtra(key, defaultValue as Int)
                         else -> false // Default value if the type is not boolean or integer
                     }
 
@@ -145,13 +146,13 @@ class BroadcastUtils: BroadcastReceiver() {
                             mQuickPulldownConfig = value as Int
                         }
                     }
-                    if (DEBUG) Log.d(TAG, "broadcast received, $key = $value ")
+                    if (DEBUG) log("$TAG: broadcast received, $key = $value")
                 }
             }
 
             val intentFilter = IntentFilter(key)
             mContext.registerReceiver(myReceiver, intentFilter, RECEIVER_EXPORTED)
-            if (DEBUG) Log.d(TAG, "Registered new receiver in $registeredClass")
+            if (DEBUG) log("TAG: Registered new receiver in $registeredClass")
         }
 
         //This sends the broadcast containing the keys and values

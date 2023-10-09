@@ -197,14 +197,17 @@ class Buttons {
 
                 //Register broadcast receiver to receive values
                 registerBroadcastReceiver(mContext, torchPowerScreenOff,
-                    param.thisObject.toString()
+                    param.thisObject.toString(),
+                    false
                 )
                 registerBroadcastReceiver(mContext, volKeyMediaControl,
-                    param.thisObject.toString()
+                    param.thisObject.toString(),
+                    false
                 )
                 //Register this in this class so we don't need to rehook in Lockscreen.kt
                 registerBroadcastReceiver(mContext, disableLockscreenPowerMenu,
-                    param.thisObject.toString()
+                    param.thisObject.toString(),
+                    false
                 )
 
 
@@ -395,7 +398,12 @@ class Buttons {
                             as Handler
 
                 //Register broadcast receiver to receive values
-                registerBroadcastReceiver(mContext, torchAutoOffScreenOn,  param.thisObject.toString())
+                registerBroadcastReceiver(
+                    mContext,
+                    torchAutoOffScreenOn,
+                    param.thisObject.toString(),
+                    false
+                )
 
                 //Initialise Utils + torch callbacks
                 utils = Utils(mContext, mHandler)

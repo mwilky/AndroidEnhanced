@@ -235,12 +235,6 @@ class Statusbar {
 
                 val context = view.context as Context
 
-                // Register broadcast receiver to receive values
-                BroadcastUtils.registerBroadcastReceiver(
-                    context, Utils.doubleTapToSleep,
-                    param.thisObject.toString()
-                )
-
                 doubleTapGesture = GestureDetector(context, object : SimpleOnGestureListener() {
                     override fun onDoubleTap(event: MotionEvent): Boolean {
                         val powerManager = context.getSystemService(Context.POWER_SERVICE)
@@ -267,18 +261,9 @@ class Statusbar {
         //Register the receiver for clock position
         private val onViewCreatedHook: XC_MethodHook =
             object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    collapsedStatusBarFragment = param.thisObject
-                    val mContext = (collapsedStatusBarFragment as Fragment).context
-                        as Context
-
-                    // Register broadcast receiver to receive values
-                    BroadcastUtils.registerBroadcastReceiver(
-                        mContext, Utils.statusBarClockPosition,
-                        param.thisObject.toString()
-                    )
-                }
                 override fun afterHookedMethod(param: MethodHookParam) {
+                    collapsedStatusBarFragment = param.thisObject
+
                     val mClockView =
                         getObjectField(param.thisObject, "mClockView") as View
 
@@ -373,12 +358,6 @@ class Statusbar {
 
                 val powerManager = getObjectField(param.thisObject, "mPowerManager")
                         as PowerManager
-
-                // Register broadcast receiver to receive values
-                BroadcastUtils.registerBroadcastReceiver(
-                    context, Utils.statusBarBrightnessControl,
-                    param.thisObject.toString()
-                )
 
                 // Set statusbar brightness control variables
                 displayId = getIntField(param.thisObject, "mDisplayId")
@@ -526,14 +505,6 @@ class Statusbar {
             override fun afterHookedMethod(param: MethodHookParam) {
                 clock = param.thisObject
                         as View
-
-                val mContext = (clock as View).context
-
-                // Register broadcast receiver to receive values
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.statusBarClockSeconds,
-                    param.thisObject.toString()
-                )
             }
         }
 

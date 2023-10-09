@@ -6,18 +6,11 @@ import android.os.VibrationEffect.EFFECT_CLICK
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
-import com.mwilky.androidenhanced.BroadcastUtils
-import com.mwilky.androidenhanced.MainActivity.Companion.TAG
-import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.initVibrator
-import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
 import com.mwilky.androidenhanced.Utils.Companion.mVibrator
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge.hookAllConstructors
-import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
-import de.robv.android.xposed.XposedHelpers.findClass
 import de.robv.android.xposed.XposedHelpers.getBooleanField
 import de.robv.android.xposed.XposedHelpers.getIntField
 import de.robv.android.xposed.XposedHelpers.getObjectField
@@ -44,12 +37,11 @@ class Quicksettings {
         fun init(classLoader: ClassLoader?) {
 
             //Hook Constructors
-            val qsTileImpl = findClass(QS_TILE_IMPL_CLASS, classLoader)
-            hookAllConstructors(qsTileImpl, QSTileImplConstructorHook)
 
             //QS tile click vibration
             findAndHookMethod(
-                QS_TILE_IMPL_CLASS, classLoader, "click",
+                QS_TILE_IMPL_CLASS, classLoader,
+                "click",
                 View::class.java,
                 clickHook
             )
@@ -72,6 +64,7 @@ class Quicksettings {
                 setBuildTextHook
             )
 
+            //Quick/Smart pulldown
             findAndHookMethod(
                 QUICK_SETTINGS_CONTROLLER_CLASS,
                 classLoader,
@@ -83,36 +76,6 @@ class Quicksettings {
         }
 
         // Hooked functions
-        // register the receiver
-        private val QSTileImplConstructorHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-
-                val mContext = getObjectField(param.thisObject, "mContext")
-                        as Context
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.qsTileVibration,
-                    param.thisObject.toString()
-                )
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.hideQsFooterBuildNumber,
-                    param.thisObject.toString()
-                )
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.smartPulldown,
-                    param.thisObject.toString()
-                )
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.quickPulldown,
-                    param.thisObject.toString()
-                )
-
-            }
-        }
-
         //vibrate on short press
         private val clickHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
@@ -141,31 +104,24 @@ class Quicksettings {
 
         // HIDE THE VIEW
         private val setBuildTextHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun beforeHookedMethod(param: MethodHookParam) {
+            override fun afterHookedMethod(param: MethodHookParam) {
                 QSFooterView = param.thisObject
                 if (mHideQSFooterBuildNumberEnabled) {
                     val mBuildText = getObjectField(param.thisObject, "mBuildText")
                             as TextView
-                    callMethod(
-                        mBuildText,
-                        "setText",
-                        null as CharSequence?
-                    )
+
+                    mBuildText.text = null
                     setBooleanField(
                         param.thisObject,
                         "mShouldShowBuildText",
                         false
                     )
-                    callMethod(
-                        mBuildText,
-                        "setSelected",
-                        false
-                    )
-                    param.result = null
+                    mBuildText.isSelected = false
                 }
             }
         }
 
+        //Smart/Quick pulldown
         private val isOpenQsEventHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val quickSettingsController = param.thisObject
@@ -180,6 +136,7 @@ class Quicksettings {
         }
 
         //Additional functions
+        //Smart/Quick pulldown
         //Evaluate quick pulldown
         private fun shouldFullyExpandDueQuickPulldown(
             quickSettingsController: Any,
@@ -202,6 +159,7 @@ class Quicksettings {
             } && mBarState == 0
         }
 
+        //Smart/Quick pulldown
         //Evaluate smart pulldown
         private fun shouldFullyExpandDueSmartPulldown(quickSettingsController: Any) : Boolean {
 

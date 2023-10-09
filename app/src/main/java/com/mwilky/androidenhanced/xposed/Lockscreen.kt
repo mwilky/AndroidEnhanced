@@ -195,32 +195,6 @@ class Lockscreen {
         private val onFinishInflateHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 keyguardStatusBarView = param.thisObject
-
-                val mContext = getObjectField(param.thisObject, "mContext")
-                        as Context
-
-                //TODO: move all these to onCreate in SystemUIApplication
-                // Register broadcast receiver to receive values
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.hideLockscreenStatusBar,
-                    param.thisObject.toString()
-                )
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.scrambleKeypad,
-                    param.thisObject.toString()
-                )
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.disableLockscreenPowerMenu,
-                    param.thisObject.toString()
-                )
-
-                BroadcastUtils.registerBroadcastReceiver(
-                    mContext, Utils.disableQsLockscreen,
-                    param.thisObject.toString()
-                )
-
             }
         }
 

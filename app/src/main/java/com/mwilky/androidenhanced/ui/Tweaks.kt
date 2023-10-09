@@ -156,6 +156,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         context.resources.getStringArray(R.array.smart_pulldown_entries)
     val quickPulldownEntries =
         context.resources.getStringArray(R.array.quick_pulldown_entries)
+//    val qqsRowsEntries =
+//        context.resources.getStringArray(R.array.qqs_rows_entries)
+//    val qsColumnsEntries =
+//        context.resources.getStringArray(R.array.qs_columns)
 
 
     // Create a Composable state variable that depends on the SharedPreferences value
@@ -168,21 +172,28 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     var rememberQuickPulldown by remember {
         mutableIntStateOf(sharedPreferences.getInt(quickPulldown, 0))
     }
+//    var rememberQqsRows by remember {
+//        mutableIntStateOf(sharedPreferences.getInt(qqsRows, 2) -1)
+//    }
+//    var rememberQsColumns by remember {
+//        mutableIntStateOf(sharedPreferences.getInt(qsColumns, 2) -2)
+//    }
 
     // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == statusBarClockPosition) {
-                rememberStatusBarClockPosition =
+            //For certain keys we need to offset the index
+            when (key) {
+                statusBarClockPosition -> rememberStatusBarClockPosition =
                     sharedPreferences.getInt(statusBarClockPosition, 0)
-            }
-            if (key == smartPulldown) {
-                rememberSmartPulldown =
+                smartPulldown -> rememberSmartPulldown =
                     sharedPreferences.getInt(smartPulldown, 0)
-            }
-            if (key == quickPulldown) {
-                rememberQuickPulldown =
+                quickPulldown -> rememberQuickPulldown =
                     sharedPreferences.getInt(quickPulldown, 0)
+//                qqsRows -> rememberQqsRows =
+//                    sharedPreferences.getInt(qqsRows, 2) - 1
+//                qsColumns -> rememberQsColumns =
+//                    sharedPreferences.getInt(qsColumns, 2) - 2
             }
         }
 
@@ -259,7 +270,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = statusBarClockPositionEntries[rememberStatusBarClockPosition],
                         key = statusBarClockPosition,
-                        entries = context.resources.getStringArray(R.array.statusbar_clock_position_entries)
+                        entries = context.resources.getStringArray(R.array.statusbar_clock_position_entries),
+                        0
                     )
                 }
                 item {
@@ -434,13 +446,21 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.expansion
+                        )
+                    )
+                }
+                item {
                     TweaksSelectionRow(
                         label = stringResource(
                             id = R.string.smartPulldownTitle
                         ),
                         description = smartPulldownEntries[rememberSmartPulldown],
                         key = smartPulldown,
-                        entries = context.resources.getStringArray(R.array.smart_pulldown_entries)
+                        entries = context.resources.getStringArray(R.array.smart_pulldown_entries),
+                        0
                     )
                 }
                 item {
@@ -450,9 +470,39 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = quickPulldownEntries[rememberQuickPulldown],
                         key = quickPulldown,
-                        entries = context.resources.getStringArray(R.array.quick_pulldown_entries)
+                        entries = context.resources.getStringArray(R.array.quick_pulldown_entries),
+                        0
                     )
                 }
+//                item {
+//                    TweaksSectionHeader(
+//                        label = stringResource(
+//                            id = R.string.tileLayout
+//                        )
+//                    )
+//                }
+//                item {
+//                    TweaksSelectionRow(
+//                        label = stringResource(
+//                            id = R.string.qqsRowsTitle
+//                        ),
+//                        description = qqsRowsEntries[rememberQqsRows],
+//                        key = qqsRows,
+//                        entries = context.resources.getStringArray(R.array.qqs_rows_entries),
+//                        1
+//                    )
+//                }
+//                item {
+//                    TweaksSelectionRow(
+//                        label = stringResource(
+//                            id = R.string.qsColumnsTitle
+//                        ),
+//                        description = qsColumnsEntries[rememberQsColumns],
+//                        key = qsColumns,
+//                        entries = context.resources.getStringArray(R.array.qs_columns),
+//                        0
+//                    )
+//                }
             }
         }
 
@@ -541,7 +591,8 @@ fun TweaksSelectionDialog(
     onConfirmation: () -> Unit,
     label: String,
     key: String,
-    entries: Array<String>
+    entries: Array<String>,
+    defaultIndex: Int
 ) {
 
     val context = LocalContext.current
@@ -549,7 +600,7 @@ fun TweaksSelectionDialog(
     val coroutineScope = rememberCoroutineScope()
 
     // Create a state variable to track the selected radio button
-    var selectedOption by remember { mutableIntStateOf(0) }
+    var selectedOption by remember { mutableIntStateOf(defaultIndex) }
 
     // Options for the radio buttons
     val options = remember {
@@ -575,7 +626,25 @@ fun TweaksSelectionDialog(
     val readFromSharedPreferences: () -> Unit = {
         val sharedPreferences =
             deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
-        selectedOption = sharedPreferences.getInt(key, 0)
+        selectedOption = sharedPreferences.getInt(key, defaultIndex)
+        //For certain keys we need to offset the index
+//        selectedOption = when (key) {
+//            qqsRows -> {
+//                if (sharedPreferences.contains(qqsRows)) {
+//                    selectedOption - 1
+//                } else {
+//                    selectedOption
+//                }
+//            }
+//            qsColumns -> {
+//                if (sharedPreferences.contains(qsColumns)) {
+//                    selectedOption - 2
+//                } else {
+//                    selectedOption
+//                }
+//            }
+//            else -> selectedOption
+//        }
     }
 
     Dialog(
@@ -684,6 +753,12 @@ fun TweaksSelectionDialog(
                     }
                     TextButton(
                         onClick = {
+                            //For certain keys we need to offset the index
+//                            selectedOption += when (key) {
+//                                qqsRows -> 1
+//                                qsColumns -> 2
+//                                else -> 0
+//                            }
                             saveToSharedPreferences()
                             sendBroadcast(context, key, selectedOption)
                                   },
@@ -714,7 +789,8 @@ fun TweaksSelectionRow(
     label: String,
     description: String,
     key: String,
-    entries: Array<String>
+    entries: Array<String>,
+    defaultIndex: Int
 ) {
     // Create a state variable to track whether the dialog should be shown
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -727,7 +803,8 @@ fun TweaksSelectionRow(
             onConfirmation = { isDialogVisible = false },
             label = label,
             key = key,
-            entries = entries
+            entries = entries,
+            defaultIndex = defaultIndex
         )
     }
 
