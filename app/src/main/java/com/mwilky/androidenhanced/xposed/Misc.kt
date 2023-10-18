@@ -107,11 +107,11 @@ class Misc {
         //Sets the value to the field and also sets the functions return value
         private val getAllowAllRotations_hook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
-                param.result = mAllowAllRotations
-
                 val intResult: Int = if (mAllowAllRotations) 1 else 0
 
                 setIntField(param.thisObject, "mAllowAllRotations", intResult)
+
+                param.result = intResult
             }
         }
 
