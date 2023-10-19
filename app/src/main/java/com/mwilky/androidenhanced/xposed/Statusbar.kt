@@ -603,6 +603,7 @@ class Statusbar {
                         notificationPanelViewController,
                         "fling",
                         10,
+                        1.0f,
                         false,
                         false
                     )

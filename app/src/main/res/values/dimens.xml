@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="qs_quick_tile_size">55.0dp</dimen>
+    <dimen name="qs_label_container_margin">6.0dp</dimen>
+    <dimen name="qs_tile_padding">18.0dp</dimen>
+    <dimen name="qs_tile_text_size">12.0sp</dimen>
+    <dimen name="qs_tile_text_line_height">16.0sp</dimen>
+    <dimen name="qs_tile_height">130.0dp</dimen>
+    <dimen name="qs_tile_margin_horizontal">22.0dp</dimen>
+    <dimen name="qs_tile_margin_vertical">22.0dp</dimen>
+    <dimen name="qs_corner_radius">28dp</dimen>
+</resources>

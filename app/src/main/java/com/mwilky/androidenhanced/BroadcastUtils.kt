@@ -7,6 +7,7 @@ import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.util.Log
 import androidx.core.os.BuildCompat
 import androidx.core.os.UserManagerCompat
@@ -21,8 +22,13 @@ import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
+import com.mwilky.androidenhanced.Utils.Companion.qqsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsColumns
+import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
+import com.mwilky.androidenhanced.Utils.Companion.reloadTiles
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
@@ -48,11 +54,20 @@ import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNo
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mNotifCollection
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mRowAppearanceCoordinator
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationExpansion
+import com.mwilky.androidenhanced.xposed.Quicksettings
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanel
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanelController
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanelControllerBase
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QuickQSPanelController
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsRowsConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsColumnsConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsRowsConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQuickPulldownConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownConfig
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnessControlEnabled
@@ -164,6 +179,43 @@ class BroadcastUtils: BroadcastReceiver() {
                             mExpandedNotifications = value as Boolean
                             updateNotificationExpansion()
                         }
+                        //QS Style
+                        qsStyle -> {
+                            QuicksettingsPremium.mQsStyleConfig = value as Int
+                            callMethod(QuicksettingsPremium.QSPanel, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(QuicksettingsPremium.QSPanelController, "onConfigurationChanged")
+                            callMethod(QuicksettingsPremium.QuickQSPanelController, "onConfigurationChanged")
+                            callMethod(QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(QuicksettingsPremium.QSPanelControllerBase, "onConfigurationChanged")
+                            reloadTiles()
+                        }
+                        qsColumns -> {
+                            mQsColumnsConfig= value as Int
+                            callMethod(Quicksettings.QSPanel, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(Quicksettings.QSPanelController, "onConfigurationChanged")
+                            callMethod(Quicksettings.QuickQSPanelController, "onConfigurationChanged")
+                            callMethod(Quicksettings.QuickQSPanelQQSSideLabelTileLayout, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(Quicksettings.QSPanelControllerBase, "onConfigurationChanged")
+                            reloadTiles()
+                        }
+                        qsRows -> {
+                            mQsRowsConfig= value as Int
+                            callMethod(Quicksettings.QSPanel, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(Quicksettings.QSPanelController, "onConfigurationChanged")
+                            callMethod(Quicksettings.QuickQSPanelController, "onConfigurationChanged")
+                            callMethod(Quicksettings.QuickQSPanelQQSSideLabelTileLayout, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(QSPanelControllerBase, "onConfigurationChanged")
+                            reloadTiles()
+                        }
+                        qqsRows -> {
+                            mQQsRowsConfig= value as Int
+                            callMethod(Quicksettings.QSPanel, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(Quicksettings.QSPanelController, "onConfigurationChanged")
+                            callMethod(Quicksettings.QuickQSPanelController, "onConfigurationChanged")
+                            callMethod(Quicksettings.QuickQSPanelQQSSideLabelTileLayout, "onConfigurationChanged", mContext.resources.configuration)
+                            callMethod(Quicksettings.QSPanelControllerBase, "onConfigurationChanged")
+                            reloadTiles()
+                        }
 
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
@@ -172,7 +224,7 @@ class BroadcastUtils: BroadcastReceiver() {
 
             val intentFilter = IntentFilter(key)
             mContext.registerReceiver(myReceiver, intentFilter, RECEIVER_EXPORTED)
-            if (DEBUG) log("TAG: Registered new receiver in $registeredClass")
+            if (DEBUG) log("$TAG: Registered '$key' receiver  in $registeredClass")
         }
 
         //This sends the broadcast containing the keys and values
@@ -210,6 +262,9 @@ class BroadcastUtils: BroadcastReceiver() {
         if (!bootCompleted) {
             return
         }
+
+        //Pause for 2 seconds before sending the boot broadcasts to allow things to init
+        Thread.sleep(2000)
 
         //Send the preferences and their values via broadcast
         val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()

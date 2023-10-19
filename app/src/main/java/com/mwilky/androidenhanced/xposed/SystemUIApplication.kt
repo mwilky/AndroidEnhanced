@@ -108,6 +108,26 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 false
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsStyle,
+                                param.thisObject.toString(),
+                                0
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsColumns,
+                                param.thisObject.toString(),
+                                2
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qqsRows,
+                                param.thisObject.toString(),
+                                2
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsRows,
+                                param.thisObject.toString(),
+                                4
+                            )
                         }
                     }
                 }

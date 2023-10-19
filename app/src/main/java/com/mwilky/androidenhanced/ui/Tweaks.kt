@@ -71,6 +71,10 @@ import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
+import com.mwilky.androidenhanced.Utils.Companion.qqsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsColumns
+import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
@@ -158,10 +162,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         context.resources.getStringArray(R.array.smart_pulldown_entries)
     val quickPulldownEntries =
         context.resources.getStringArray(R.array.quick_pulldown_entries)
-//    val qqsRowsEntries =
-//        context.resources.getStringArray(R.array.qqs_rows_entries)
-//    val qsColumnsEntries =
-//        context.resources.getStringArray(R.array.qs_columns)
+    val qqsRowsEntries =
+        context.resources.getStringArray(R.array.qqs_rows_entries)
+    val qsRowsEntries =
+        context.resources.getStringArray(R.array.qs_rows_entries)
+    val qsColumnsEntries =
+        context.resources.getStringArray(R.array.qs_columns)
+    val qsStyleEntries =
+        context.resources.getStringArray(R.array.quicksettingsStyle)
 
 
     // Create a Composable state variable that depends on the SharedPreferences value
@@ -174,12 +182,18 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     var rememberQuickPulldown by remember {
         mutableIntStateOf(sharedPreferences.getInt(quickPulldown, 0))
     }
-//    var rememberQqsRows by remember {
-//        mutableIntStateOf(sharedPreferences.getInt(qqsRows, 2) -1)
-//    }
-//    var rememberQsColumns by remember {
-//        mutableIntStateOf(sharedPreferences.getInt(qsColumns, 2) -2)
-//    }
+    var rememberQsStyle by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsStyle, 0))
+    }
+    var rememberQqsRows by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qqsRows, 2) -1)
+    }
+    var rememberQsRows by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsRows, 4) -2)
+    }
+    var rememberQsColumns by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsColumns, 2) -2)
+    }
 
     // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener =
@@ -192,10 +206,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getInt(smartPulldown, 0)
                 quickPulldown -> rememberQuickPulldown =
                     sharedPreferences.getInt(quickPulldown, 0)
-//                qqsRows -> rememberQqsRows =
-//                    sharedPreferences.getInt(qqsRows, 2) - 1
-//                qsColumns -> rememberQsColumns =
-//                    sharedPreferences.getInt(qsColumns, 2) - 2
+                qsStyle -> rememberQsStyle =
+                    sharedPreferences.getInt(qsStyle, 0)
+                qqsRows -> rememberQqsRows =
+                    sharedPreferences.getInt(qqsRows, 2) - 1
+                qsColumns -> rememberQsColumns =
+                    sharedPreferences.getInt(qsColumns, 2) - 2
+                qsRows -> rememberQsRows =
+                    sharedPreferences.getInt(qsRows, 4) - 2
             }
         }
 
@@ -477,35 +495,57 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         0
                     )
                 }
-//                item {
-//                    TweaksSectionHeader(
-//                        label = stringResource(
-//                            id = R.string.tileLayout
-//                        )
-//                    )
-//                }
-//                item {
-//                    TweaksSelectionRow(
-//                        label = stringResource(
-//                            id = R.string.qqsRowsTitle
-//                        ),
-//                        description = qqsRowsEntries[rememberQqsRows],
-//                        key = qqsRows,
-//                        entries = context.resources.getStringArray(R.array.qqs_rows_entries),
-//                        1
-//                    )
-//                }
-//                item {
-//                    TweaksSelectionRow(
-//                        label = stringResource(
-//                            id = R.string.qsColumnsTitle
-//                        ),
-//                        description = qsColumnsEntries[rememberQsColumns],
-//                        key = qsColumns,
-//                        entries = context.resources.getStringArray(R.array.qs_columns),
-//                        0
-//                    )
-//                }
+                item {
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.tileLayout
+                        )
+                    )
+                }
+                item {
+                    TweaksSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsStyleTitle
+                        ),
+                        description = qsStyleEntries[rememberQsStyle],
+                        key = qsStyle,
+                        entries = context.resources.getStringArray(R.array.quicksettingsStyle),
+                        0
+                    )
+                }
+                item {
+                    TweaksSelectionRow(
+                        label = stringResource(
+                            id = R.string.qqsRowsTitle
+                        ),
+                        description = qqsRowsEntries[rememberQqsRows],
+                        key = qqsRows,
+                        entries = context.resources.getStringArray(R.array.qqs_rows_entries),
+                        1
+                    )
+                }
+                item {
+                    TweaksSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsRowsTitle
+                        ),
+                        description = qsRowsEntries[rememberQsRows],
+                        key = qsRows,
+                        entries = context.resources.getStringArray(R.array.qs_rows_entries),
+                        2
+                    )
+                }
+                item {
+                    TweaksSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsColumnsTitle
+                        ),
+                        description = qsColumnsEntries[rememberQsColumns],
+                        key = qsColumns,
+                        entries = context.resources.getStringArray(R.array.qs_columns),
+                        0
+                    )
+                }
             }
             //Notification tweaks
             notifications -> {
@@ -661,23 +701,30 @@ fun TweaksSelectionDialog(
             deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
         selectedOption = sharedPreferences.getInt(key, defaultIndex)
         //For certain keys we need to offset the index
-//        selectedOption = when (key) {
-//            qqsRows -> {
-//                if (sharedPreferences.contains(qqsRows)) {
-//                    selectedOption - 1
-//                } else {
-//                    selectedOption
-//                }
-//            }
-//            qsColumns -> {
-//                if (sharedPreferences.contains(qsColumns)) {
-//                    selectedOption - 2
-//                } else {
-//                    selectedOption
-//                }
-//            }
-//            else -> selectedOption
-//        }
+        selectedOption = when (key) {
+            qqsRows -> {
+                if (sharedPreferences.contains(qqsRows)) {
+                    selectedOption - 1
+                } else {
+                    selectedOption
+                }
+            }
+            qsColumns -> {
+                if (sharedPreferences.contains(qsColumns)) {
+                    selectedOption - 2
+                } else {
+                    selectedOption
+                }
+            }
+            qsRows -> {
+                if (sharedPreferences.contains(qsRows)) {
+                    selectedOption - 2
+                } else {
+                    selectedOption
+                }
+            }
+            else -> selectedOption
+        }
     }
 
     Dialog(
@@ -787,11 +834,12 @@ fun TweaksSelectionDialog(
                     TextButton(
                         onClick = {
                             //For certain keys we need to offset the index
-//                            selectedOption += when (key) {
-//                                qqsRows -> 1
-//                                qsColumns -> 2
-//                                else -> 0
-//                            }
+                            selectedOption += when (key) {
+                                qqsRows -> 1
+                                qsColumns -> 2
+                                qsRows -> 2
+                                else -> 0
+                            }
                             saveToSharedPreferences()
                             sendBroadcast(context, key, selectedOption)
                                   },

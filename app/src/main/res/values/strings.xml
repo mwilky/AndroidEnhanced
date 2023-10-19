@@ -7,6 +7,7 @@
     <string name="gestures">Gestures</string>
     <string name="clock">Clock</string>
     <string name="expansion">Expansion</string>
+    <string name="tileLayout">Tile Layout</string>
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
@@ -43,6 +44,10 @@
     <string name="hideQsFooterBuildNumberSummary">Hides the build number in the quicksettings footer if dev options have been enabled</string>
     <string name="smartPulldownTitle">Smart pulldown</string>
     <string name="quickPulldownTitle">Quick pulldown</string>
+    <string name="qsStyleTitle">Style</string>
+    <string name="qqsRowsTitle">Quick quicksettings row count</string>
+    <string name="qsRowsTitle">Quicksettings row count</string>
+    <string name="qsColumnsTitle">Quicksettings column count</string>
 <!--    Notifications-->
     <string name="muteScreenOnNotificationsTitle">Silent screen on notifications</string>
     <string name="muteScreenOnNotificationsSummary">Mute notification sounds whilst the screen is turned on</string>

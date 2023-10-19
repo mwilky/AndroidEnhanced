@@ -14,12 +14,13 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "DEBUG: Android Enhanced"
-        const val DEBUG = true
+        var DEBUG = BuildConfig.DEBUG
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        UtilsPremium.TAG = TAG
         setContent {
             AndroidEnhancedTheme {
                 // A surface container using the 'background' color from the theme
