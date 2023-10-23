@@ -7,9 +7,7 @@ import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.util.Log
-import androidx.core.os.BuildCompat
 import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
@@ -51,15 +49,10 @@ import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshot
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mExpandedNotifications
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNotificationsEnabled
-import com.mwilky.androidenhanced.xposed.Notifications.Companion.mNotifCollection
-import com.mwilky.androidenhanced.xposed.Notifications.Companion.mRowAppearanceCoordinator
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationExpansion
 import com.mwilky.androidenhanced.xposed.Quicksettings
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanel
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanelController
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanelControllerBase
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QuickQSPanelController
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsRowsConfig
@@ -75,10 +68,7 @@ import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosi
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
 import de.robv.android.xposed.XposedBridge.log
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
-import de.robv.android.xposed.XposedHelpers.getObjectField
-import de.robv.android.xposed.XposedHelpers.setBooleanField
 
 class BroadcastUtils: BroadcastReceiver() {
     companion object {
@@ -254,12 +244,9 @@ class BroadcastUtils: BroadcastReceiver() {
             TAG, "Received action: $action, user unlocked: " + UserManagerCompat
                 .isUserUnlocked(context)
         )
-        bootCompleted = if (BuildCompat.isAtLeastN()) {
+        bootCompleted =
             Intent.ACTION_LOCKED_BOOT_COMPLETED == action
-        } else {
-            Intent.ACTION_BOOT_COMPLETED == action
-        }
-        if (!bootCompleted) {
+    if (!bootCompleted) {
             return
         }
 

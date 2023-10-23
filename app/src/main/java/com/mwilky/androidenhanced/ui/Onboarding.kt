@@ -88,7 +88,11 @@ fun OnboardingScreen(navController: NavController, context: Context) {
                 //Set onboarding complete
                 sharedPreferences.edit().putBoolean(ISONBOARDINGCOMPLETEDKEY, true).apply()
                 //Go to Home-screen
-                navController.navigate(Screen.Home.route)
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Onboarding.route) {
+                        inclusive = true
+                    }
+                }
             },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
