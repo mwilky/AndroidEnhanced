@@ -49,6 +49,8 @@ class Utils(context: Context, handler: Handler) {
         const val qqsRows = "int_QQsRows"
         const val qsRows = "int_QsRows"
         const val qsColumns = "int_QSColumns"
+        const val qsBrightnessSliderPosition = "int_QSBrightnessSliderPosition"
+        const val qqsBrightnessSlider = "boolean_QQSBrightnesSlider"
 
         var mReloadTiles: Boolean = false
 

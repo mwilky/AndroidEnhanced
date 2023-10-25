@@ -8,6 +8,7 @@
     <string name="clock">Clock</string>
     <string name="expansion">Expansion</string>
     <string name="tileLayout">Tile Layout</string>
+    <string name="brightnessSlider">Brightness Slider</string>
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
@@ -48,6 +49,9 @@
     <string name="qqsRowsTitle">Quick quicksettings row count</string>
     <string name="qsRowsTitle">Quicksettings row count</string>
     <string name="qsColumnsTitle">Quicksettings column count</string>
+    <string name="qsBrightnessSliderPositionTitle">Brightness slider position</string>
+    <string name="qqsBrightnessSliderTitle">Quick quicksetting brightness slider</string>
+    <string name="qqsBrightnessSliderSummary">Show the brightness slider in the quick quicksettings panel</string>
 <!--    Notifications-->
     <string name="muteScreenOnNotificationsTitle">Silent screen on notifications</string>
     <string name="muteScreenOnNotificationsSummary">Mute notification sounds whilst the screen is turned on</string>

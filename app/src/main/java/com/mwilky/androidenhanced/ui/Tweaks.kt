@@ -71,7 +71,9 @@ import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
+import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
@@ -170,6 +172,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         context.resources.getStringArray(R.array.qs_columns)
     val qsStyleEntries =
         context.resources.getStringArray(R.array.quicksettingsStyle)
+    val qsBrightnessSliderPositionEntries =
+        context.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition)
 
 
     // Create a Composable state variable that depends on the SharedPreferences value
@@ -194,6 +198,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     var rememberQsColumns by remember {
         mutableIntStateOf(sharedPreferences.getInt(qsColumns, 2) -2)
     }
+    var rememberQsBrightnessSliderPosition by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsBrightnessSliderPosition, 0))
+    }
 
     // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener =
@@ -214,6 +221,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getInt(qsColumns, 2) - 2
                 qsRows -> rememberQsRows =
                     sharedPreferences.getInt(qsRows, 4) - 2
+                qsBrightnessSliderPosition -> rememberQsBrightnessSliderPosition =
+                    sharedPreferences.getInt(qsBrightnessSliderPosition, 0)
             }
         }
 
@@ -544,6 +553,34 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         key = qsColumns,
                         entries = context.resources.getStringArray(R.array.qs_columns),
                         0
+                    )
+                }
+                item {
+                    TweaksSectionHeader(
+                        label = stringResource(
+                            id = R.string.brightnessSlider
+                        )
+                    )
+                }
+                item {
+                    TweaksSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsBrightnessSliderPositionTitle
+                        ),
+                        description = qsBrightnessSliderPositionEntries[rememberQsBrightnessSliderPosition],
+                        key = qsBrightnessSliderPosition,
+                        entries = context.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition),
+                        0
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            R.string.qqsBrightnessSliderTitle),
+                        stringResource(
+                            R.string.qqsBrightnessSliderSummary),
+                        qqsBrightnessSlider
                     )
                 }
             }

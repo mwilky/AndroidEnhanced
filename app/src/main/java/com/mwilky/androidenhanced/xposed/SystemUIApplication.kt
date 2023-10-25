@@ -128,6 +128,16 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 4
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsBrightnessSliderPosition,
+                                param.thisObject.toString(),
+                                0
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qqsBrightnessSlider,
+                                param.thisObject.toString(),
+                                false
+                            )
                         }
                     }
                 }
