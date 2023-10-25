@@ -43,4 +43,9 @@
         <item>Icon with background</item>
         <item>Icon with no background</item>
     </string-array>
+    <string-array name="quicksettingsBrightnessSliderPosition">
+        <item>Default (above tiles)</item>
+        <item>Below tiles</item>
+        <item>Hidden</item>
+    </string-array>
 </resources>
