@@ -1,5 +1,6 @@
 package com.mwilky.androidenhanced.xposed
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.VibrationEffect
@@ -100,6 +101,7 @@ class Quicksettings {
         var mQsRowsConfig: Int = 4
         var mQsBrightnessSliderPositionConfig: Int = 0
         var mQQsBrightnessSliderEnabled: Boolean = false
+        var mQsStyleConfig: Int = 0
 
         //Qqs Brightness
         lateinit var mQQsBrightnessController: Any
@@ -800,6 +802,7 @@ class Quicksettings {
             }
         }
 
+        @SuppressLint("DiscouragedApi")
         fun setBrighnessSliderMargins(parentView: View) {
             val mContext = getObjectField(parentView, "mContext") as Context
             val mBrightnessView = getObjectField(parentView, "mBrightnessView")
@@ -824,8 +827,21 @@ class Quicksettings {
 
                 when (mQsBrightnessSliderPositionConfig) {
                     0 -> {
-                        lp.topMargin = top
-                        lp.bottomMargin = bottom
+                        //Slightly alter the padding for when using modified QS style so it sits more central
+                        when (mQsStyleConfig) {
+                            0 -> {
+                                lp.topMargin =  top
+                                lp.bottomMargin = bottom
+                            }
+                            else -> {
+                                lp.topMargin =
+                                    if (parentView.javaClass.name == "com.android.systemui.qs.QuickQSPanel")
+                                        top * 3 else top
+                                lp.bottomMargin =
+                                    if (parentView.javaClass.name == "com.android.systemui.qs.QuickQSPanel")
+                                        0 else bottom
+                            }
+                        }
                     }
                     1 -> {
                         lp.topMargin = bottom

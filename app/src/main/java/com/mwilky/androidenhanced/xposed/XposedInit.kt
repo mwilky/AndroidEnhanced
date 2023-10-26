@@ -27,7 +27,6 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
         var QSCellMarginHorizontal = 0
         var QSCellMarginVertical = 0
         var QSTileTextLineHeight = 0
-        var QSTileBackgroundSize = 0
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {

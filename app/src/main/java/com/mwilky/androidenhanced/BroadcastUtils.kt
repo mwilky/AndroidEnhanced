@@ -56,11 +56,12 @@ import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNo
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationExpansion
 import com.mwilky.androidenhanced.xposed.Quicksettings
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanelControllerBase
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanel
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsBrightnessSliderEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsRowsConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsAnimator
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsBrightnessSliderPositionConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsColumnsConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsRowsConfig
@@ -68,6 +69,7 @@ import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQuickPulldownC
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.setBrightnessView
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.animateBrightnessSlider
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnessControlEnabled
@@ -180,202 +182,31 @@ class BroadcastUtils: BroadcastReceiver() {
                         //QS Style
                         qsStyle -> {
                             QuicksettingsPremium.mQsStyleConfig = value as Int
-                            callMethod(
-                                QuicksettingsPremium.QSPanel,
-                                "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
-                                        "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelControllerBase,
-                                "onConfigurationChanged"
-                            )
-                            reloadTiles()
+                            Quicksettings.mQsStyleConfig = value as Int
+                            updateQuicksettings(mContext)
                         }
                         qsColumns -> {
                             mQsColumnsConfig= value as Int
-                            callMethod(
-                                QuicksettingsPremium.QSPanel,
-                                "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
-                                        "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelControllerBase,
-                                "onConfigurationChanged"
-                            )
-                            reloadTiles()
+                            updateQuicksettings(mContext)
                         }
                         qsRows -> {
                             mQsRowsConfig= value as Int
-                            callMethod(
-                                QuicksettingsPremium.QSPanel,
-                                "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
-                                        "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelControllerBase,
-                                "onConfigurationChanged"
-                            )
-                            reloadTiles()
+                            updateQuicksettings(mContext)
                         }
                         qqsRows -> {
                             mQQsRowsConfig= value as Int
-                            callMethod(
-                                QuicksettingsPremium.QSPanel,
-                                "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelController,
-                                "onConfigurationChanged"
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
-                                        "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-                            callMethod(
-                                QuicksettingsPremium.QSPanelControllerBase,
-                                "onConfigurationChanged"
-                            )
-                            reloadTiles()
+                            updateQuicksettings(mContext)
                         }
                         qsBrightnessSliderPosition -> {
                             mQsBrightnessSliderPositionConfig = value as Int
                             QuicksettingsPremium.mQsBrightnessSliderPositionConfig = value as Int
-                            callMethod(
-                                QuicksettingsPremium.QSPanel,
-                                "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
+                            updateQuicksettings(mContext)
 
-                            callMethod(
-                                QuicksettingsPremium.QSPanelController,
-                                "onConfigurationChanged"
-                            )
-
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelController,
-                                "onConfigurationChanged"
-                            )
-
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
-                                        "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-
-                            callMethod(
-                                QuicksettingsPremium.QSPanelControllerBase,
-                                "onConfigurationChanged"
-                            )
-
-                            reloadTiles()
-
-                            val mView =
-                                getObjectField(Quicksettings.QSPanelController, "mView")
-                                        as ViewGroup
-                            val mBrightnessView = getObjectField(mView, "mBrightnessView")
-                                    as View
-
-                            setBrightnessView(mView, mBrightnessView)
-
-                            val mQQsView =
-                                getObjectField(Quicksettings.QuickQSPanelController, "mView")
-                                        as ViewGroup
-                            val mQQsBrightnessView = getObjectField(mQQsView, "mBrightnessView")
-                                    as View
-
-                            setBrightnessView(mQQsView, mQQsBrightnessView)
                         }
                         qqsBrightnessSlider -> {
                             mQQsBrightnessSliderEnabled= value as Boolean
-                            callMethod(
-                                QuicksettingsPremium.QSPanel,
-                                "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-
-                            callMethod(
-                                QuicksettingsPremium.QSPanelController,
-                                "onConfigurationChanged"
-                            )
-
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelController,
-                                "onConfigurationChanged"
-                            )
-
-                            callMethod(
-                                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
-                                        "onConfigurationChanged",
-                                mContext.resources.configuration
-                            )
-
-                            callMethod(
-                                QuicksettingsPremium.QSPanelControllerBase,
-                                "onConfigurationChanged"
-                            )
-
-                            reloadTiles()
-
-                            val mView =
-                                getObjectField(Quicksettings.QSPanelController, "mView")
-                                        as ViewGroup
-                            val mBrightnessView = getObjectField(mView, "mBrightnessView")
-                                    as View
-
-                            setBrightnessView(mView, mBrightnessView)
-
-                            val mQQsView =
-                                getObjectField(Quicksettings.QuickQSPanelController, "mView")
-                                        as ViewGroup
-                            val mQQsBrightnessView = getObjectField(mQQsView, "mBrightnessView")
-                                    as View
-
-                            setBrightnessView(mQQsView, mQQsBrightnessView)
+                            QuicksettingsPremium.mQQsBrightnessSliderEnabled= value as Boolean
+                            updateQuicksettings(mContext)
                         }
 
                     }
@@ -405,6 +236,56 @@ class BroadcastUtils: BroadcastReceiver() {
             }
             if (DEBUG) Log.d(TAG, "broadcast sent, $key = $value")
         }
+
+        fun updateQuicksettings(mContext: Context) {
+            callMethod(
+                QuicksettingsPremium.QSPanel,
+                "onConfigurationChanged",
+                mContext.resources.configuration
+            )
+
+            callMethod(
+                QuicksettingsPremium.QSPanelController,
+                "onConfigurationChanged"
+            )
+
+            callMethod(
+                QuicksettingsPremium.QuickQSPanelController,
+                "onConfigurationChanged"
+            )
+
+            callMethod(
+                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
+                        "onConfigurationChanged",
+                mContext.resources.configuration
+            )
+
+            callMethod(
+                QuicksettingsPremium.QSPanelControllerBase,
+                "onConfigurationChanged"
+            )
+
+            reloadTiles()
+
+            val mView =
+                getObjectField(Quicksettings.QSPanelController, "mView")
+                        as ViewGroup
+            val mBrightnessView = getObjectField(mView, "mBrightnessView")
+                    as View
+
+            setBrightnessView(mView, mBrightnessView)
+
+            val mQQsView =
+                getObjectField(Quicksettings.QuickQSPanelController, "mView")
+                        as ViewGroup
+            val mQQsBrightnessView = getObjectField(mQQsView, "mBrightnessView")
+                    as View
+
+            setBrightnessView(mQQsView, mQQsBrightnessView)
+
+            animateBrightnessSlider(mQsAnimator)
+        }
+
     }
 
 // Sends keys and values when the device has booted
