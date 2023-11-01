@@ -91,6 +91,7 @@ class BroadcastUtils: BroadcastReceiver() {
                     val value = when (intent.extras?.get(key)) {
                         is Boolean -> intent.getBooleanExtra(key, defaultValue as Boolean)
                         is Int -> intent.getIntExtra(key, defaultValue as Int)
+                        is String -> intent.getStringExtra(key)
                         else -> false // Default value if the type is not boolean or integer
                     }
 
@@ -170,7 +171,7 @@ class BroadcastUtils: BroadcastReceiver() {
                         quickPulldown -> {
                             mQuickPulldownConfig = value as Int
                         }
-                        //Mute Screen on notifications
+                        //Mute Screens on notifications
                         muteScreenOnNotifications -> {
                             mMuteScreenOnNotificationsEnabled = value as Boolean
                         }
@@ -230,6 +231,7 @@ class BroadcastUtils: BroadcastReceiver() {
                 when (value) {
                     is Boolean -> intent.putExtra(key, value)
                     is Int -> intent.putExtra(key, value)
+                    is String -> intent.putExtra(key, value)
                     else -> throw IllegalArgumentException("Unsupported type for value")
                 }
                 context.sendBroadcast(intent)

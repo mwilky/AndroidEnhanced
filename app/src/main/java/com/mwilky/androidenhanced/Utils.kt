@@ -23,6 +23,7 @@ class Utils(context: Context, handler: Handler) {
         //App Settings
         const val ISDEVICESUPPORTEDKEY = "isDeviceSupported"
         const val ISONBOARDINGCOMPLETEDKEY = "isOnboardingComplete"
+        const val LASTBACKUP = "lastBackupDate"
         //Tweak Values
         //Framework
         const val torchPowerScreenOff = "bool_LongPressPowerTorchScreenOff"

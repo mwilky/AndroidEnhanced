@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.VibrationEffect.EFFECT_CLICK
@@ -557,7 +558,10 @@ class Quicksettings {
                     QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout =
                         QuickQSPanelQQSSideLabelTileLayout
                 }
-                setIntField(param.thisObject, "mMaxAllowedRows", mQQsRowsConfig)
+                val mContext = getObjectField(param.thisObject, "mContext") as Context
+                if (mContext.resources.configuration.orientation == ORIENTATION_PORTRAIT) {
+                    setIntField(param.thisObject, "mMaxAllowedRows", mQQsRowsConfig)
+                }
             }
         }
 

@@ -12,10 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +35,7 @@ fun OnboardingScreen(navController: NavController, context: Context) {
         deviceProtectedStorageContext.getSharedPreferences(
             BroadcastUtils.PREFS, Context.MODE_PRIVATE
         )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,6 +65,7 @@ fun OnboardingScreen(navController: NavController, context: Context) {
                     append("Enhanced")
                 }
             },
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .padding(16.dp)
         )
@@ -73,12 +73,9 @@ fun OnboardingScreen(navController: NavController, context: Context) {
         Text(
             text = "Welcome to Android Enhanced! This app heavily relies on Xposed framework. " +
                     "Functionality will be limited without it...",
-            style = TextStyle(
-                fontSize = 16.sp,
-                color = Color.Gray,
-                fontStyle = FontStyle.Italic,
-                textAlign = TextAlign.Center
-            ),
+            style = MaterialTheme.typography.bodyMedium,
+            fontStyle = FontStyle.Italic,
+            textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(16.dp)
         )
@@ -88,8 +85,8 @@ fun OnboardingScreen(navController: NavController, context: Context) {
                 //Set onboarding complete
                 sharedPreferences.edit().putBoolean(ISONBOARDINGCOMPLETEDKEY, true).apply()
                 //Go to Home-screen
-                navController.navigate(Screen.Home.route) {
-                    popUpTo(Screen.Onboarding.route) {
+                navController.navigate(Screens.Home.route) {
+                    popUpTo(Screens.Onboarding.route) {
                         inclusive = true
                     }
                 }
@@ -110,7 +107,7 @@ fun OnboardingScreenPreview() {
     AndroidEnhancedTheme {
         val navController = rememberNavController()
         val context = LocalContext.current
-        OnboardingScreen(navController, context)
+        //OnboardingScreen(navController, context, pa)
     }
 }
 

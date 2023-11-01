@@ -6,15 +6,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -23,18 +23,32 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Create
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
@@ -58,7 +73,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.mwilky.androidenhanced.dataclasses.BottomNavigationItem
 import com.mwilky.androidenhanced.dataclasses.EnvironmentProp
 import com.mwilky.androidenhanced.dataclasses.TweaksCard
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
@@ -71,66 +89,39 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, context: Context) {
+
     //Top App Bar
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                ),
-                scrollBehavior = scrollBehavior,
-                title = {
-                    Text(
-                        buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = (-1).sp
-                                )
-                            ) {
-                                append("Android ")
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Light,
-                                    fontStyle = FontStyle.Italic,
-                                    letterSpacing = (-1).sp
-                                )
-                            ) {
-                                append("Enhanced")
-                            }
-                        }, lineHeight = 64.sp,
-                        modifier = Modifier
-                            .padding(16.dp)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* doSomething() */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                }
-            )
+            ScaffoldHomeCenteredAppBar()
+        },
+        bottomBar = {
+            ScaffoldNavigationBar(navController = navController)
         },
         content = {
-            HomeScreenScrollableContent(topPadding = it, navController)
+            HomeScreenScrollableContent(topPadding = it, bottomPadding = it, navController)
         }
     )
 }
 
 @Composable
-fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavController ) {
+fun HomeScreenScrollableContent(
+    topPadding: PaddingValues,
+    bottomPadding: PaddingValues,
+    navController: NavController
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
+        contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = topPadding.calculateTopPadding())
+            .padding(
+                top = topPadding.calculateTopPadding(),
+                bottom = bottomPadding.calculateBottomPadding()
+            )
     ) {
         // Header Logo
         item(
@@ -187,8 +178,11 @@ fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavCon
                 )
             )
         }
-
-        item {
+        item(
+            span = {
+                GridItemSpan(2)
+            }
+        ) {
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
@@ -197,8 +191,11 @@ fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavCon
                 navController = navController
             )
         }
-
-        item {
+        item(
+            span = {
+                GridItemSpan(2)
+            }
+        )  {
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
@@ -207,8 +204,11 @@ fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavCon
                 navController = navController
             )
         }
-
-        item {
+        item(
+            span = {
+                GridItemSpan(2)
+            }
+        ) {
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
@@ -217,8 +217,11 @@ fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavCon
                 navController = navController
             )
         }
-
-        item {
+        item(
+            span = {
+                GridItemSpan(2)
+            }
+        ) {
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
@@ -227,8 +230,11 @@ fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavCon
                 navController = navController
             )
         }
-
-        item {
+        item(
+            span = {
+                GridItemSpan(2)
+            }
+        ) {
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
@@ -237,14 +243,27 @@ fun HomeScreenScrollableContent(topPadding: PaddingValues, navController: NavCon
                 navController = navController
             )
         }
-
-        item {
+        item(
+            span = {
+                GridItemSpan(2)
+            }
+        ) {
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
                     label = "Miscellaneous",
                 ),
                 navController = navController
+            )
+        }
+        item(
+            span = {
+                GridItemSpan(2)
+            }
+        ) {
+            Spacer(
+                modifier = Modifier
+                    .height(32.dp)
             )
         }
     }
@@ -282,14 +301,16 @@ fun EnvironmentRow(
         horizontalArrangement = Arrangement.Center
     ) {
         props.forEach { environmentProp ->
-            EnvironmentItem(environmentProp)
+            CircularImageButton(
+                prop = environmentProp,
+            )
         }
     }
 }
 @Composable
-fun EnvironmentItem(
+fun CircularImageButton(
     prop: EnvironmentProp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -332,59 +353,50 @@ fun EnvironmentItem(
 fun TweaksItem(
     card: TweaksCard, navController: NavController
 ) {
-    BoxWithConstraints(
+    ElevatedCard(
         modifier = Modifier
-            .aspectRatio(1f)
             .padding(8.dp)
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    enabled = true,
-                    onClick = {
-                        navController.navigate(Screen.Tweaks.withArgs(card.label))
-                    }
-                ),
-            shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(),
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = card.icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Text(
-                        text = card.label,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Text(
-                        text = "View",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(top = 32.dp)
-                    )
+            .fillMaxSize()
+            .clickable(
+                enabled = true,
+                onClick = {
+                    navController.navigate(Screens.Tweaks.withArgs(card.label))
                 }
+            ),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.elevatedCardColors()
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(start =  16.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)
+            //verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = card.label,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .padding(start = 4.dp, top = 8.dp)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                //OutlinedButton(onClick = { /*TODO*/ }) { Text(text = "Reset to defaults") }
+                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+                //OutlinedButton(onClick = { /*TODO*/ }) { Text(text = "Enter") }
+                Icon(
+                    imageVector = Icons.Filled.ArrowForward,
+                    contentDescription = "back",
+                    tint =  MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
 }
 @Composable
-private fun currentTimeFlow(): Flow<String> = flow {
+fun currentTimeFlow(): Flow<String> = flow {
     val calendar = Calendar.getInstance()
     var currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
@@ -401,17 +413,7 @@ private fun currentTimeFlow(): Flow<String> = flow {
     }
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun HomeScreenPreview() {
-    AndroidEnhancedTheme {
-        val navController = rememberNavController()
-        val context = LocalContext.current
-        HomeScreen(navController, context)
-    }
-}
-
-private fun getGreetingMessage(): String {
+fun getGreetingMessage(): String {
     return when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
         in 0..11 -> "Good morning!"
         in 12..16 -> "Good afternoon!"
@@ -581,5 +583,155 @@ fun headerImage(
             fill = SolidColor(onSurfaceColor)
         )
         build()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScaffoldHomeCenteredAppBar(
+) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    CenterAlignedTopAppBar(
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        ),
+        scrollBehavior = scrollBehavior,
+        title = {
+            Text(
+                buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-1).sp
+                        )
+                    ) {
+                        append("Android ")
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Light,
+                            fontStyle = FontStyle.Italic,
+                            letterSpacing = (-1).sp
+                        )
+                    ) {
+                        append("Enhanced")
+                    }
+                }, lineHeight = 64.sp,
+                modifier = Modifier
+                    .padding(16.dp)
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScaffoldTweaksAppBar(
+    navController: NavController,
+    screen: String,
+    showBackIcon: Boolean
+) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+        ),
+        scrollBehavior = scrollBehavior,
+        title = {
+            Text(
+                text = screen,
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        navigationIcon = {
+            if (showBackIcon) {
+                IconButton(
+                    onClick = { navController.popBackStack() }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "back"
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun ScaffoldNavigationBar(
+    navController: NavController
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val navBarItemsList = listOf(
+        BottomNavigationItem(
+            title = "Logs",
+            selectedIcon = Icons.Filled.Info,
+            unselectedIcon = Icons.Outlined.Info,
+            route = "logs"
+        ),
+        BottomNavigationItem(
+            title = "Home",
+            selectedIcon = Icons.Filled.Home,
+            unselectedIcon = Icons.Outlined.Home,
+            route = "home"
+        ),
+        BottomNavigationItem(
+            title = "Settings",
+            selectedIcon = Icons.Filled.Settings,
+            unselectedIcon = Icons.Outlined.Settings,
+            route = "settings"
+        )
+    )
+    NavigationBar {
+        navBarItemsList.forEach { bottomNavigationItem ->
+            NavigationBarItem(
+                selected =
+                currentDestination?.hierarchy?.any { it.route == bottomNavigationItem.route }
+                        == true,
+                onClick = {
+                    navController.navigate(bottomNavigationItem.route) {
+                        // Pop up to the home screen of the app to
+                        // avoid building up a large stack of destinations
+                        // on the back stack as users select items
+                        popUpTo(Screens.Home.route) {
+                            saveState = true
+                        }
+                        // Avoid multiple copies of the same destination when
+                        // reselecting the same item
+                        launchSingleTop = true
+                        // Restore state when reselecting a previously selected item
+                        restoreState = true
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector =
+                        if (currentDestination?.hierarchy?.any
+                            { it.route == bottomNavigationItem.route } == true
+                        )
+                            bottomNavigationItem.selectedIcon else
+                            bottomNavigationItem.unselectedIcon,
+                        contentDescription = bottomNavigationItem.title
+                    )
+                },
+                label = {
+                    Text(text = bottomNavigationItem.title)
+                },
+                colors = NavigationBarItemDefaults.colors(),
+                alwaysShowLabel = false
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(showBackground = true, showSystemUi = true)
+fun HomeScreenPreview() {
+    AndroidEnhancedTheme {
+        val navController = rememberNavController()
+        val context = LocalContext.current
+        HomeScreen(navController, context)
     }
 }

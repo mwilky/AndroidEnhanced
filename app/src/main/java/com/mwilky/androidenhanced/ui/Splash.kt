@@ -37,16 +37,16 @@ fun SplashScreen(navController: NavController, context: Context) {
             .apply()
     }
 
-    // Go to Home Screen if onboarding is complete
+    // Go to Home Screens if onboarding is complete
     if (sharedPreferences.getBoolean(ISONBOARDINGCOMPLETEDKEY, false)) {
-        navController.navigate(Screen.Home.route) {
-            popUpTo(Screen.Splash.route) {
+        navController.navigate(Screens.Home.route) {
+            popUpTo(Screens.Splash.route) {
                 inclusive = true
             }
         }
     } else {
-        navController.navigate(Screen.Onboarding.route) {
-            popUpTo(Screen.Splash.route) {
+        navController.navigate(Screens.Onboarding.route) {
+            popUpTo(Screens.Splash.route) {
                 inclusive = true
             }
         }

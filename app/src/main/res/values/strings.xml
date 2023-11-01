@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">Android Enhanced</string>
+    <string name="settings">Settings</string>
+    <string name="logs">logs</string>
+    <string name="home">Home</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
+    <string name="backupSuccess">Backup successful!</string>
+    <string name="backupFailed">Backup failed!</string>
+    <string name="restoreSuccess">Restore successful!</string>
+    <string name="restoreFailed">Restore failed!</string>
+    <string name="never">Never</string>
 <!--    Tweaks Categories-->
     <string name="general">General</string>
     <string name="powerButton">Power Button</string>
@@ -9,6 +19,7 @@
     <string name="expansion">Expansion</string>
     <string name="tileLayout">Tile Layout</string>
     <string name="brightnessSlider">Brightness Slider</string>
+    <string name="backup_restore">Backup and restore</string>
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>

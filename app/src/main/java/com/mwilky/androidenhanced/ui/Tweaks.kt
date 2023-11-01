@@ -9,16 +9,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,6 +34,8 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -118,28 +125,8 @@ fun Tweaks(navController: NavController, context: Context, screen : String) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        //Background color of everything below
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                ),
-                scrollBehavior = scrollBehavior,
-                title = {
-                    Text(
-                        text = screen
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navController.popBackStack() }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "back"
-                        )
-                    }
-                }
-            )
+            ScaffoldTweaksAppBar(navController = navController, screen = screen, showBackIcon = true)
         },
         content = {
             TweaksScrollableContent(topPadding = it, screen = screen, navController = navController)
@@ -285,6 +272,12 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         statusBarBrightnessControl
                     )
                 }
+                item {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                }
                 //Clock section
                 item {
                     TweaksSectionHeader(
@@ -344,6 +337,12 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.torchAutoOffScreenOnSummary),
                         torchAutoOffScreenOn
+                    )
+                }
+                item {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                 }
                 item {
@@ -476,6 +475,12 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                }
+                item {
                     TweaksSectionHeader(
                         label = stringResource(
                             id = R.string.expansion
@@ -502,6 +507,12 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         key = quickPulldown,
                         entries = context.resources.getStringArray(R.array.quick_pulldown_entries),
                         0
+                    )
+                }
+                item {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                 }
                 item {
@@ -556,6 +567,12 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                }
+                item {
                     TweaksSectionHeader(
                         label = stringResource(
                             id = R.string.brightnessSlider
@@ -581,6 +598,12 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.qqsBrightnessSliderSummary),
                         qqsBrightnessSlider
+                    )
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .height(64.dp)
                     )
                 }
             }
@@ -673,8 +696,9 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
             modifier = Modifier
                 .padding(
                     start = 16.dp,
-                    end = 16.dp
-                )
+                    end = 16.dp,
+                ),
+            colors = SwitchDefaults.colors()
         )
     }
 }

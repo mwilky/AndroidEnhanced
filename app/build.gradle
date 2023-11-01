@@ -11,8 +11,8 @@ android {
         applicationId "com.mwilky.androidenhanced"
         minSdk 34
         targetSdk 34
-        versionCode 116
-        versionName "1.1.6"
+        versionCode 118
+        versionName "1.1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
