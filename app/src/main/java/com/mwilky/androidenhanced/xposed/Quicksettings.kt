@@ -154,15 +154,6 @@ class Quicksettings {
                 brightnessMirrorHandler, ConstructorHookBrightnessMirrorHandler
             )
 
-            // QuickQSPanelController CLASS
-            val quickQSPanelController = findClass(
-                QUICK_QS_PANEL_CONTROLLER_CLASS, classLoader
-            )
-
-            hookAllConstructors(
-                quickQSPanelController, ConstructorHookQuickQSPanelController
-            )
-
             BrightnessControllerClass = findClass(BRIGHTNESS_CONTROLLER_CLASS, classLoader)
 
             findAndHookMethod(
@@ -349,41 +340,6 @@ class Quicksettings {
                 val mBrightnessView = getObjectField(mView, "mBrightnessView") as View
                 mBrightnessMirrorHandler = getObjectField(param.thisObject, "mBrightnessMirrorHandler")
                 setBrightnessView(mView, mBrightnessView)
-            }
-        }
-
-        private val ConstructorHookQuickQSPanelController: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val mContext = callMethod(param.thisObject, "getContext") as Context
-                val mView = getObjectField(param.thisObject, "mView") as ViewGroup
-
-                mQQsBrightnessSliderController =
-                    callMethod(
-                        BrightnessSliderControllerFactory,
-                        "create",
-                        mContext,
-                        mView
-                    )
-
-                val mBrightnessView =
-                    getObjectField(mQQsBrightnessSliderController, "mView") as View
-
-                mQQsBrightnessController =
-                    newInstance(
-                        BrightnessControllerClass,
-                        getObjectField(BrightnessControllerFactory, "mContext"),
-                        mQQsBrightnessSliderController,
-                        getObjectField(BrightnessControllerFactory, "mUserTracker"),
-                        getObjectField(BrightnessControllerFactory, "mDisplayTracker"),
-                        getObjectField(BrightnessControllerFactory, "mMainExecutor"),
-                        getObjectField(BrightnessControllerFactory, "mBackgroundHandler")
-                    )
-
-                mQQsBrightnessMirrorHandler =
-                    newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
-
-                setBrightnessView(mView, mBrightnessView)
-
             }
         }
 
@@ -679,6 +635,36 @@ class Quicksettings {
 
         private val onInitHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
+                val mContext = callMethod(param.thisObject, "getContext") as Context
+                val mView = getObjectField(param.thisObject, "mView") as ViewGroup
+
+                mQQsBrightnessSliderController =
+                    callMethod(
+                        BrightnessSliderControllerFactory,
+                        "create",
+                        mContext,
+                        mView
+                    )
+
+                val mBrightnessView =
+                    getObjectField(mQQsBrightnessSliderController, "mView") as View
+
+                mQQsBrightnessController =
+                    newInstance(
+                        BrightnessControllerClass,
+                        getObjectField(BrightnessControllerFactory, "mContext"),
+                        mQQsBrightnessSliderController,
+                        getObjectField(BrightnessControllerFactory, "mUserTracker"),
+                        getObjectField(BrightnessControllerFactory, "mDisplayTracker"),
+                        getObjectField(BrightnessControllerFactory, "mMainExecutor"),
+                        getObjectField(BrightnessControllerFactory, "mBackgroundHandler")
+                    )
+
+                mQQsBrightnessMirrorHandler =
+                    newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
+
+                setBrightnessView(mView, mBrightnessView)
+
                 callMethod(mQQsBrightnessSliderController, "init")
             }
         }
