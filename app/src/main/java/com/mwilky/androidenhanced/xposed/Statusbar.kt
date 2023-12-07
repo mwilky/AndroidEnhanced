@@ -17,6 +17,7 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.mwilky.androidenhanced.BroadcastUtils
+import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.Utils
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -34,6 +35,7 @@ import de.robv.android.xposed.XposedHelpers.setBooleanField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -78,6 +80,7 @@ class Statusbar {
         private var viewClippingUtil: Class<*>? = null
         private var `headsUpAppearanceController$$ExternalSyntheticLambda0`: Class<*>? = null
         private var `headsUpAppearanceController$$ExternalSyntheticLambda1`: Class<*>? = null
+        private var `headsUpAppearanceController$$ExternalSyntheticLambda2`: Class<*>? = null
         private var `carrierTextManager$$ExternalSyntheticLambda1`: Class<*>? = null
 
         // Statusbar brightness control
@@ -195,6 +198,12 @@ class Statusbar {
             `headsUpAppearanceController$$ExternalSyntheticLambda1` =
                 findClass(
                     "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda1",
+                    classLoader
+                )
+
+            `headsUpAppearanceController$$ExternalSyntheticLambda2` =
+                findClass(
+                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda2",
                     classLoader
                 )
 
@@ -443,33 +452,55 @@ class Statusbar {
                             callMethod(param.thisObject, "hide", mClockView, 4, null)
                         }
 
-                        callMethod(
-                            mOperatorNameViewOptional, "ifPresent",
-                            XposedHelpers.newInstance(
-                                `headsUpAppearanceController$$ExternalSyntheticLambda1`,
-                                param.thisObject,
-                                1
+                        if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                            callMethod(
+                                mOperatorNameViewOptional, "ifPresent",
+                                XposedHelpers.newInstance(
+                                    `headsUpAppearanceController$$ExternalSyntheticLambda1`,
+                                    param.thisObject,
+                                    1
+                                )
                             )
-                        )
+                        } else {
+                            callMethod(
+                                mOperatorNameViewOptional, "ifPresent",
+                                XposedHelpers.newInstance(
+                                    `headsUpAppearanceController$$ExternalSyntheticLambda0`,
+                                    param.thisObject,
+                                    1
+                                )
+                            )
+                        }
                     } else {
                         callMethod(param.thisObject, "show", mClockView)
 
                         callMethod(
                             mOperatorNameViewOptional, "ifPresent",
                             XposedHelpers.newInstance(
-                                `headsUpAppearanceController$$ExternalSyntheticLambda1`,
+                                `headsUpAppearanceController$$ExternalSyntheticLambda0`,
                                 param.thisObject,
                                 2
                             )
                         )
-                        callMethod(
-                            param.thisObject, "hide", mView, 8,
-                            XposedHelpers.newInstance(
-                                `headsUpAppearanceController$$ExternalSyntheticLambda0`,
-                                param.thisObject,
-                                1
+                        if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                            callMethod(
+                                param.thisObject, "hide", mView, 8,
+                                XposedHelpers.newInstance(
+                                    `headsUpAppearanceController$$ExternalSyntheticLambda0`,
+                                    param.thisObject,
+                                    1
+                                )
                             )
-                        )
+                        } else {
+                            callMethod(
+                                param.thisObject, "hide", mView, 8,
+                                XposedHelpers.newInstance(
+                                    `headsUpAppearanceController$$ExternalSyntheticLambda2`,
+                                    param.thisObject,
+                                    1
+                                )
+                            )
+                        }
                     }
 
                     if (callMethod(mStatusBarStateController, "getState")

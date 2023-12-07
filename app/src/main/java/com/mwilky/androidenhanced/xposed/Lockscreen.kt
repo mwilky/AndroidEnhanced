@@ -4,8 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
-import com.mwilky.androidenhanced.BroadcastUtils
-import com.mwilky.androidenhanced.Utils
+import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -21,6 +20,7 @@ import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 import de.robv.android.xposed.XposedHelpers.setIntField
 import de.robv.android.xposed.XposedHelpers.setObjectField
+import java.time.LocalDate
 
 
 class Lockscreen {
@@ -425,13 +425,34 @@ class Lockscreen {
                 state2 = adjustDisableFlags(mRemoteInputQuickSettingsDisabler, state2)
                 state2 = adjustQsDisableFlags(mKeyguardStateController, state2)
 
-                val old1 = getIntField(mCentralSurfaces, "mDisabled1")
-                val diff1: Int = state1 xor old1
-                setIntField(mCentralSurfaces, "mDisabled1", state1)
+                val old1 = if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                    getIntField(mCentralSurfaces, "mDisabled1")
+                } else {
+                    getIntField(param.thisObject, "mDisabled1")
+                }
 
-                val old2 = getIntField(mCentralSurfaces, "mDisabled2")
+                val diff1: Int = state1 xor old1
+
+                if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                    setIntField(mCentralSurfaces, "mDisabled1", state1)
+                } else {
+                    setIntField(param.thisObject, "mDisabled1", state1)
+                }
+
+
+                val old2 = if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                    getIntField(mCentralSurfaces, "mDisabled2")
+                } else {
+                    getIntField(param.thisObject, "mDisabled2")
+                }
+
                 val diff2: Int = state2 xor old2
-                setIntField(mCentralSurfaces, "mDisabled2", state2)
+
+                if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                    setIntField(mCentralSurfaces, "mDisabled2", state2)
+                } else {
+                    setIntField(param.thisObject, "mDisabled2", state2)
+                }
 
                 if (diff1 and DISABLE_EXPAND != 0) {
                     if (state1 and DISABLE_EXPAND != 0) {
@@ -445,12 +466,16 @@ class Lockscreen {
                     }
                 }
 
-                if (diff2 and DISABLE2_QUICK_SETTINGS != 0) {
-                    callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
+                if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                    if (diff2 and DISABLE2_QUICK_SETTINGS != 0) {
+                        callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
+                    }
                 }
 
                 if (diff2 and DISABLE2_NOTIFICATION_SHADE != 0) {
-                    callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
+                    if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                        callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
+                    }
                     if (state2 and DISABLE2_NOTIFICATION_SHADE != 0) {
                         callMethod(mShadeController, "animateCollapseShade", 0)
                     }

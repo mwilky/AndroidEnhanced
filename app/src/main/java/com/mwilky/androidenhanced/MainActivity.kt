@@ -1,10 +1,9 @@
 package com.mwilky.androidenhanced
 
-import android.app.ActivityOptions
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -25,6 +24,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val TAG = "DEBUG: Android Enhanced"
         var DEBUG = BuildConfig.DEBUG
+        val SECURTY_PATCH: LocalDate = LocalDate.parse(Build.VERSION.SECURITY_PATCH);
     }
 
     private val restoreBackupLauncher: ActivityResultLauncher<String> = registerForActivityResult(

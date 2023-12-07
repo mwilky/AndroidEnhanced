@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
+import com.mwilky.androidenhanced.MainActivity.Companion.SECURTY_PATCH
 import com.mwilky.androidenhanced.Utils.Companion.initVibrator
 import com.mwilky.androidenhanced.Utils.Companion.mReloadTiles
 import com.mwilky.androidenhanced.Utils.Companion.mVibrator
@@ -33,6 +34,7 @@ import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 import de.robv.android.xposed.XposedHelpers.setIntField
 import de.robv.android.xposed.XposedHelpers.setObjectField
+import java.time.LocalDate
 
 
 class Quicksettings {
@@ -649,16 +651,26 @@ class Quicksettings {
                 val mBrightnessView =
                     getObjectField(mQQsBrightnessSliderController, "mView") as View
 
-                mQQsBrightnessController =
-                    newInstance(
-                        BrightnessControllerClass,
-                        getObjectField(BrightnessControllerFactory, "mContext"),
-                        mQQsBrightnessSliderController,
-                        getObjectField(BrightnessControllerFactory, "mUserTracker"),
-                        getObjectField(BrightnessControllerFactory, "mDisplayTracker"),
-                        getObjectField(BrightnessControllerFactory, "mMainExecutor"),
-                        getObjectField(BrightnessControllerFactory, "mBackgroundHandler")
-                    )
+                if (SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                    mQQsBrightnessController =
+                        newInstance(
+                            BrightnessControllerClass,
+                            getObjectField(BrightnessControllerFactory, "mContext"),
+                            mQQsBrightnessSliderController,
+                            getObjectField(BrightnessControllerFactory, "mUserTracker"),
+                            getObjectField(BrightnessControllerFactory, "mDisplayTracker"),
+                            getObjectField(BrightnessControllerFactory, "mMainExecutor"),
+                            getObjectField(BrightnessControllerFactory, "mBackgroundHandler")
+                        )
+                } else {
+                    mQQsBrightnessController =
+                        callMethod(
+                            BrightnessControllerFactory,
+                            "create",
+                            mQQsBrightnessSliderController
+                        )
+                }
+
 
                 mQQsBrightnessMirrorHandler =
                     newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
