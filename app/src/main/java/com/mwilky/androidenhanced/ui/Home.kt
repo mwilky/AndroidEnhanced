@@ -50,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -91,12 +92,13 @@ import java.util.Calendar
 fun HomeScreen(navController: NavController, context: Context) {
 
     //Top App Bar
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+        .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            ScaffoldHomeCenteredAppBar()
+            ScaffoldHomeCenteredAppBar(scrollBehavior = scrollBehavior)
         },
         bottomBar = {
             ScaffoldNavigationBar(navController = navController)
@@ -588,13 +590,12 @@ fun headerImage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldHomeCenteredAppBar(
+fun ScaffoldHomeCenteredAppBar(scrollBehavior: TopAppBarScrollBehavior
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     CenterAlignedTopAppBar(
+        scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
         ),
-        scrollBehavior = scrollBehavior,
         title = {
             Text(
                 buildAnnotatedString {

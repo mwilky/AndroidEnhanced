@@ -12,6 +12,7 @@
     <string name="never">Never</string>
 <!--    Tweaks Categories-->
     <string name="general">General</string>
+    <string name="iconColors">Icon colors</string>
     <string name="powerButton">Power Button</string>
     <string name="volumeButton">Volume Button</string>
     <string name="gestures">Gestures</string>
@@ -28,6 +29,22 @@
     <string name="statusbarClockPositionTitle">Clock position</string>
     <string name="statusbarClockSecondsTitle">Clock seconds</string>
     <string name="statusbarClockSecondsSummary">Display seconds in the statusbar clock</string>
+    <string name="customStatusbarColorsTitle">Custom icon colors</string>
+    <string name="customStatusbarColorsSummary">Set the colors of the statusbar icons</string>
+    <string name="customStatusbarClockColorTitle">Clock</string>
+    <string name="customStatusbarBatteryIconColorTitle">Battery icon</string>
+    <string name="customStatusbarBatteryPercentColorTitle">Battery percent</string>
+    <string name="customStatusbarWifiIconColorTitle">WiFi</string>
+    <string name="customStatusbarMobileIconColorTitle">Mobile signal</string>
+    <string name="customStatusbarNotificationIconColorTitle">Notifications</string>
+    <string name="customStatusbarOtherIconColorTitle">Other</string>
+    <string name="customStatusbarDndIconColorTitle">Do not disturb</string>
+    <string name="customStatusbarAirplaneIconColorTitle">Airplane mode</string>
+    <string name="customStatusbarBluetoothIconColorTitle">Bluetooth</string>
+    <string name="customStatusbarHotspotIconColorTitle">Hotspot</string>
+    <string name="customStatusbarGlobalIconColorTitle">Global icon color</string>
+    <string name="customStatusbarIndividualIconColorSummary">Set colors individually for each icon</string>
+    <string name="customStatusbarIndividualIconColorSummaryDisabled">Reset the global icon color to enable individual control</string>
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>

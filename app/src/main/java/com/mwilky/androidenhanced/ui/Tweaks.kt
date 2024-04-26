@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,27 +20,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -72,6 +71,25 @@ import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import com.github.skydoves.colorpicker.compose.ColorEnvelope
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarAirplaneIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryPercentColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBluetoothIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarClockColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarDndIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarGlobalIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarHotspotIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarMobileIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarNotificationIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarOtherIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
@@ -138,8 +156,7 @@ fun Tweaks(navController: NavController, context: Context, screen : String) {
 fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navController: NavController) {
     val context = LocalContext.current
 
-
-    //The below code is for updating the description of TweaksSelectionRow based off the user's section.
+    //The below code is for updating the description of TweakSelectionRow based off the user's section.
     // It forces a recomposition each time the value is changed
     val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
     val sharedPreferences =
@@ -188,6 +205,42 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     var rememberQsBrightnessSliderPosition by remember {
         mutableIntStateOf(sharedPreferences.getInt(qsBrightnessSliderPosition, 0))
     }
+    var rememberStatusbarIconClockColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarClockColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconBatteryIconColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarBatteryIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconBatteryPercentColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarBatteryPercentColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconWifiColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarWifiIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconMobileColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarMobileIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconNotificationColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarNotificationIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconOtherColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarOtherIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconDndColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarDndIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconAirplaneColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarAirplaneIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconHotspotColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarHotspotIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconBluetoothColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarBluetoothIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconGlobalColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customStatusbarGlobalIconColor, android.graphics.Color.WHITE))
+    }
 
     // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener =
@@ -213,6 +266,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             }
         }
 
+    val individualColorsDisabled = rememberStatusbarIconGlobalColor != -1
+
     // Add the listener when this Composable is first composed
     DisposableEffect(Unit) {
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
@@ -235,6 +290,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         val lockscreen = "Lockscreen"
         val quicksettings = "Quicksettings"
         val notifications = "Notifications"
+        val statusbarColors = "Individual icon colors"
 
         when (screen) {
             //Pages
@@ -242,7 +298,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 //Tweaks Items
                 //Gestures section
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.gestures
                         )
@@ -280,14 +336,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 //Clock section
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.clock
                         )
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.statusbarClockPositionTitle
                         ),
@@ -309,11 +365,186 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         statusBarClockSeconds
                     )
                 }
+                item {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                }
+                //Icon section
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.iconColors
+                        )
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarGlobalIconColorTitle
+                        ),
+                        customStatusbarGlobalIconColor,
+                        rememberStatusbarIconGlobalColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakRow(
+                        context = context,
+                        label = statusbarColors,
+                        description = stringResource(
+                            id = if (!individualColorsDisabled)
+                                    R.string.customStatusbarIndividualIconColorSummary
+                                else
+                                    R.string.customStatusbarIndividualIconColorSummaryDisabled
+                        ),
+                        navController = navController,
+                        sharedPreferences = sharedPreferences,
+                        individualColorsDisabled
+                    )
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .height(64.dp)
+                    )
+                }
+            }
+            statusbarColors -> {
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarClockColorTitle
+                        ),
+                        customStatusbarClockColor,
+                        rememberStatusbarIconClockColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarBatteryIconColorTitle
+                        ),
+                        customStatusbarBatteryIconColor,
+                        rememberStatusbarIconBatteryIconColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarBatteryPercentColorTitle
+                        ),
+                        customStatusbarBatteryPercentColor,
+                        rememberStatusbarIconBatteryPercentColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarWifiIconColorTitle
+                        ),
+                        customStatusbarWifiIconColor,
+                        rememberStatusbarIconWifiColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarMobileIconColorTitle
+                        ),
+                        customStatusbarMobileIconColor,
+                        rememberStatusbarIconMobileColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarNotificationIconColorTitle
+                        ),
+                        customStatusbarNotificationIconColor,
+                        rememberStatusbarIconNotificationColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarDndIconColorTitle
+                        ),
+                        customStatusbarDndIconColor,
+                        rememberStatusbarIconDndColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarAirplaneIconColorTitle
+                        ),
+                        customStatusbarAirplaneIconColor,
+                        rememberStatusbarIconAirplaneColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarBluetoothIconColorTitle
+                        ),
+                        customStatusbarBluetoothIconColor,
+                        rememberStatusbarIconBluetoothColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarHotspotIconColorTitle
+                        ),
+                        customStatusbarHotspotIconColor,
+                        rememberStatusbarIconHotspotColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        context,
+                        stringResource(
+                            id = R.string.customStatusbarOtherIconColorTitle
+                        ),
+                        customStatusbarOtherIconColor,
+                        rememberStatusbarIconOtherColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .height(64.dp)
+                    )
+                }
             }
             buttons -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.powerButton
                         )
@@ -346,7 +577,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.volumeButton
                         )
@@ -366,7 +597,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             misc -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.general
                         )
@@ -397,7 +628,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             lockscreen -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.general
                         )
@@ -448,7 +679,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             quicksettings -> {
                 //Tweaks Items
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.general
                         )
@@ -481,14 +712,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.expansion
                         )
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.smartPulldownTitle
                         ),
@@ -499,7 +730,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.quickPulldownTitle
                         ),
@@ -516,14 +747,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.tileLayout
                         )
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.qsStyleTitle
                         ),
@@ -534,7 +765,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.qqsRowsTitle
                         ),
@@ -545,7 +776,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.qsRowsTitle
                         ),
@@ -556,7 +787,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.qsColumnsTitle
                         ),
@@ -573,14 +804,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.brightnessSlider
                         )
                     )
                 }
                 item {
-                    TweaksSelectionRow(
+                    TweakSelectionRow(
                         label = stringResource(
                             id = R.string.qsBrightnessSliderPositionTitle
                         ),
@@ -610,7 +841,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             //Notification tweaks
             notifications -> {
                 item {
-                    TweaksSectionHeader(
+                    TweakSectionHeader(
                         label = stringResource(
                             id = R.string.general
                         )
@@ -704,7 +935,171 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
 }
 
 @Composable
-fun TweaksSectionHeader(label: String) {
+fun TweakRow(
+    context: Context,
+    label: String,
+    description: String,
+    navController: NavController,
+    sharedPreferences: SharedPreferences,
+    individualColorsDisabled: Boolean
+) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp
+            )
+            .clickable(
+                enabled = !individualColorsDisabled,
+                onClick = {
+                    navController.navigate(Screens.Tweaks.withArgs(label))
+                }
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f), // Take available horizontal space
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge,
+                color = if (individualColorsDisabled)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else
+                            MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .padding(
+                        start = 16.dp,
+                        top = 8.dp,
+                        end = 4.dp
+                    )
+            )
+            if (description != "") {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (individualColorsDisabled)
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(
+                            start = 16.dp,
+                            bottom = 8.dp,
+                            end = 16.dp
+                        )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TweakColor(
+    context: Context,
+    label: String,
+    key: String,
+    previewColor: Int,
+    sharedPreferences: SharedPreferences,
+) {
+
+    var isColorPickerVisible by remember { mutableStateOf(false) }
+
+
+    // Conditionally render the dialog if isDialogVisible is true
+    if (isColorPickerVisible) {
+        // Call the TweakSelectionDialog Composable
+        TweakColorDialog(
+            onDismissRequest = { isColorPickerVisible = false },
+            onConfirmation = { isColorPickerVisible = false },
+            key = key,
+            context = context,
+            sharedPreferences = sharedPreferences,
+            label = label
+        )
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f), // Take available horizontal space
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .padding(
+                        start = 16.dp,
+                        top = 8.dp,
+                        end = 4.dp,
+                        bottom = 8.dp,
+                    )
+            )
+        }
+        Box(
+            modifier = Modifier
+                .padding(
+                    horizontal = 16.dp
+                )
+                .size(32.dp) // Adjust the size as needed
+                .background(
+                    color = intToColor(previewColor),
+                    shape = CircleShape
+                )
+                .clickable {
+                    isColorPickerVisible = true
+                    //sharedPreferences.edit().putInt(key, android.graphics.Color.RED).apply()
+                    //sendBroadcast(context, key, android.graphics.Color.RED)
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            // You can add content inside the clickable box if needed
+//            Box(
+//                modifier = Modifier
+//                    .size(32.dp) // Adjust the size as needed
+//                    .background(
+//                        color = intToColor(previewColor),
+//                        shape = CircleShape
+//                    )
+//                    .clickable {
+//                        sharedPreferences.edit().putInt(key, android.graphics.Color.RED).apply()
+//                        sendBroadcast(context, key, android.graphics.Color.RED)
+//                    },
+//            )
+        }
+    }
+}
+
+@Composable
+fun intToColor(intValue: Int): Color {
+    // Extract the red, green, and blue components from the intValue
+    val red = (intValue shr 16) and 0xFF
+    val green = (intValue shr 8) and 0xFF
+    val blue = intValue and 0xFF
+
+    // Create a Color object using the extracted components
+    return Color(red = red / 255f, green = green / 255f, blue = blue / 255f, alpha = 1f)
+}
+
+
+@Composable
+fun TweakSectionHeader(label: String) {
     val label = label
     Text(
         text = label,
@@ -720,7 +1115,7 @@ fun TweaksSectionHeader(label: String) {
 }
 
 @Composable
-fun TweaksSelectionDialog(
+fun TweakSelectionDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     label: String,
@@ -926,8 +1321,205 @@ fun TweaksSelectionDialog(
         onDispose { }
     }
 }
+
 @Composable
-fun TweaksSelectionRow(
+fun TweakColorDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    key: String,
+    context: Context,
+    sharedPreferences: SharedPreferences,
+    label: String
+) {
+    val colorPickerController = rememberColorPickerController()
+    var selectedColorInt by remember { mutableIntStateOf(sharedPreferences.getInt(key, android.graphics.Color.WHITE)) }
+    var hexCode by remember { mutableStateOf("") }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest() }
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            tonalElevation = 6.dp,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
+            Column(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .wrapContentHeight(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        style = MaterialTheme.typography.labelLarge,
+                        text = label,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .padding(
+                                top = 18.dp,
+                                start = 24.dp,
+                                end = 24.dp,
+                                bottom = 8.dp
+                            )
+                    )
+                }
+                colorPickerController.setWheelColor(
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                )
+                HsvColorPicker(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .padding(horizontal = 24.dp),
+                    controller = colorPickerController,
+                    onColorChanged = { colorEnvelope: ColorEnvelope ->
+                        selectedColorInt = colorEnvelope.color.toArgb()
+                        hexCode = colorEnvelope.hexCode
+                    },
+                    initialColor = intToColor(
+                        sharedPreferences.getInt(key, android.graphics.Color.WHITE)
+                    )
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextField(
+                        value = hexCode,
+                        onValueChange = { newHexCode ->
+
+                            hexCode = newHexCode
+
+                            if (isValidHexCode(newHexCode)) {
+                                selectedColorInt = hexStringToColorInt(hexCode)
+                                colorPickerController.selectByColor(Color(android.graphics.Color.parseColor("#$hexCode")), false)
+                            }
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = intToColor(intValue = selectedColorInt),
+                            unfocusedTextColor = intToColor(intValue = selectedColorInt),
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        ),
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = 16.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f), // Take available horizontal space
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "reset",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .padding(start = 24.dp, bottom = 8.dp)
+                                .clickable {
+                                    selectedColorInt = android.graphics.Color.WHITE
+                                    colorPickerController.selectByColor(
+                                        Color(android.graphics.Color.WHITE),
+                                        false
+                                    )
+                                    sharedPreferences
+                                        .edit()
+                                        .putInt(key, selectedColorInt)
+                                        .apply()
+                                    sendBroadcast(context, key, selectedColorInt)
+                                }
+
+                        )
+                    }
+                    TextButton(
+                        onClick = { onDismissRequest() },
+                        modifier = Modifier
+                            .padding(
+                                end = 4.dp,
+                                bottom = 4.dp
+                            ),
+                    ) {
+                        Text(text = "Dismiss",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            sharedPreferences.edit().putInt(key, selectedColorInt).apply()
+                            sendBroadcast(context, key, selectedColorInt)
+                            onConfirmation()
+                        },
+                        modifier = Modifier
+                            .padding(
+                                start = 4.dp,
+                                end = 16.dp,
+                                bottom = 4.dp
+                            ),
+                    ) {
+                        Text(
+                            text = "Confirm",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+fun isValidHexCode(hexCode: String): Boolean {
+    return try {
+        // Check if the hex code contains any spaces
+        if (hexCode.contains(" ")) {
+            false // Spaces are not allowed
+        } else {
+            // Attempt to parse the hex code
+            val color = Color(android.graphics.Color.parseColor("#$hexCode"))
+
+            // Check if parsing succeeds and if the hex code has exactly 8 digits
+            hexCode.length == 8
+        }
+    } catch (e: IllegalArgumentException) {
+        false // Parsing failed, invalid hex code
+    }
+}
+fun hexStringToColorInt(hexString: String): Int {
+    // Convert hex string to Color
+    val color = Color(android.graphics.Color.parseColor("#$hexString"))
+
+    // Extract RGBA components and pack them into a single Int
+    return android.graphics.Color.argb(
+        (color.alpha * 255).toInt(),
+        (color.red * 255).toInt(),
+        (color.green * 255).toInt(),
+        (color.blue * 255).toInt()
+    )
+}
+
+@Composable
+fun TweakSelectionRow(
     label: String,
     description: String,
     key: String,
@@ -939,8 +1531,8 @@ fun TweaksSelectionRow(
 
     // Conditionally render the dialog if isDialogVisible is true
     if (isDialogVisible) {
-        // Call the TweaksSelectionDialog Composable
-        TweaksSelectionDialog(
+        // Call the TweakSelectionDialog Composable
+        TweakSelectionDialog(
             onDismissRequest = { isDialogVisible = false },
             onConfirmation = { isDialogVisible = false },
             label = label,

@@ -1,32 +1,23 @@
 package com.mwilky.androidenhanced.ui
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,12 +29,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.R
-import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -85,7 +74,7 @@ fun SettingsScrollableContent(
     val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
     val sharedPreferences: SharedPreferences =
         deviceProtectedStorageContext.getSharedPreferences(
-            BroadcastUtils.PREFS, ComponentActivity.MODE_PRIVATE
+            BroadcastUtils.PREFS, MODE_PRIVATE
         )
 
     // Create a Composable state variable that depends on the SharedPreferences value
@@ -117,7 +106,7 @@ fun SettingsScrollableContent(
             )
     ) {
         item {
-            TweaksSectionHeader(
+            TweakSectionHeader(
                 label = stringResource(
                     id = R.string.backup_restore
                 )

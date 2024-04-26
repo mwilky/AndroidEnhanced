@@ -1,13 +1,18 @@
 package com.mwilky.androidenhanced.xposed
 
+import android.animation.ArgbEvaluator
 import android.annotation.SuppressLint
 import android.app.Fragment
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.ArrayMap
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.HapticFeedbackConstants
@@ -16,14 +21,15 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.mwilky.androidenhanced.BroadcastUtils
+import android.widget.TextView
 import com.mwilky.androidenhanced.MainActivity
-import com.mwilky.androidenhanced.Utils
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
+import de.robv.android.xposed.XposedHelpers.callStaticMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
 import de.robv.android.xposed.XposedHelpers.getBooleanField
@@ -31,7 +37,10 @@ import de.robv.android.xposed.XposedHelpers.getFloatField
 import de.robv.android.xposed.XposedHelpers.getIntField
 import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
+import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
+import de.robv.android.xposed.XposedHelpers.setFloatField
+import de.robv.android.xposed.XposedHelpers.setIntField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,6 +67,28 @@ class Statusbar {
         private const val CLOCK_CLASS =
             "com.android.systemui.statusbar.policy.Clock"
 
+        private const val DARK_ICON_DISPATCHER_IMPL_CLASS =
+            "com.android.systemui.statusbar.phone.DarkIconDispatcherImpl"
+        private const val SYSUI_DARK_ICON_DISPATCHER_DARK_CHANGE_CLASS =
+            "com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher\$DarkChange"
+        private const val BATTERY_METER_VIEW_CLASS =
+            "com.android.systemui.battery.BatteryMeterView"
+        private const val DUAL_TONE_HANDLER_CLASS =
+            "com.android.systemui.DualToneHandler"
+        private const val DUAL_TONE_HANDLER_COLOR_CLASS =
+            "com.android.systemui.DualToneHandler\$Color"
+        private const val STATUSBAR_ICON_VIEW_CLASS =
+            "com.android.systemui.statusbar.StatusBarIconView"
+
+        private const val STATUSBAR_ICON_CONTROLLER_TINTED_ICON =
+            "com.android.systemui.statusbar.phone.StatusBarIconController\$TintedIconManager"
+
+        private const val STATUSBAR_ICON_CONTROLLER_DARK_ICON =
+            "com.android.systemui.statusbar.phone.StatusBarIconController\$DarkIconManager"
+
+        private const val STATUSBAR_ICON_CONTROLLER_ICON_MANAGER =
+            "com.android.systemui.statusbar.phone.StatusBarIconController\$IconManager"
+
         // Tweak Variables
         var mDoubleTapToSleepEnabled: Boolean = false
         var mStatusbarBrightnessControlEnabled: Boolean = false
@@ -82,6 +113,7 @@ class Statusbar {
         private var `headsUpAppearanceController$$ExternalSyntheticLambda1`: Class<*>? = null
         private var `headsUpAppearanceController$$ExternalSyntheticLambda2`: Class<*>? = null
         private var `carrierTextManager$$ExternalSyntheticLambda1`: Class<*>? = null
+
 
         // Statusbar brightness control
         private var minimumBacklight: Float = 0f
@@ -151,7 +183,8 @@ class Statusbar {
             )
 
             // Statusbar brightness control
-            brightnessUtilsClass = findClass("com.android.settingslib.display.BrightnessUtils", classLoader)
+            brightnessUtilsClass =
+                findClass("com.android.settingslib.display.BrightnessUtils", classLoader)
 
 
             //Clock position
@@ -191,19 +224,22 @@ class Statusbar {
             //Clock position
             `headsUpAppearanceController$$ExternalSyntheticLambda0` =
                 findClass(
-                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda0",
+                    "com.android.systemui.statusbar.phone." +
+                            "HeadsUpAppearanceController$\$ExternalSyntheticLambda0",
                     classLoader
                 )
 
             `headsUpAppearanceController$$ExternalSyntheticLambda1` =
                 findClass(
-                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda1",
+                    "com.android.systemui.statusbar.phone." +
+                            "HeadsUpAppearanceController$\$ExternalSyntheticLambda1",
                     classLoader
                 )
 
             `headsUpAppearanceController$$ExternalSyntheticLambda2` =
                 findClass(
-                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda2",
+                    "com.android.systemui.statusbar.phone." +
+                            "HeadsUpAppearanceController$\$ExternalSyntheticLambda2",
                     classLoader
                 )
 
@@ -452,7 +488,7 @@ class Statusbar {
                             callMethod(param.thisObject, "hide", mClockView, 4, null)
                         }
 
-                        if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                        if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                             callMethod(
                                 mOperatorNameViewOptional, "ifPresent",
                                 XposedHelpers.newInstance(
@@ -482,7 +518,7 @@ class Statusbar {
                                 2
                             )
                         )
-                        if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                        if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                             callMethod(
                                 param.thisObject, "hide", mView, 8,
                                 XposedHelpers.newInstance(
@@ -706,7 +742,6 @@ class Statusbar {
 
             }
         }
-
     }
 
     class BrightnessControl(private val value: Float) {

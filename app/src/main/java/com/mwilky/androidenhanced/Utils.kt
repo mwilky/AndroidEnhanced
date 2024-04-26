@@ -1,5 +1,6 @@
 package com.mwilky.androidenhanced
 
+import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Color
 import android.hardware.camera2.CameraAccessException
@@ -8,12 +9,14 @@ import android.hardware.camera2.CameraManager
 import android.os.Handler
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
 import android.util.Log
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSTileHost
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.getObjectField
+
 
 class Utils(context: Context, handler: Handler) {
 
@@ -52,6 +55,19 @@ class Utils(context: Context, handler: Handler) {
         const val qsColumns = "int_QSColumns"
         const val qsBrightnessSliderPosition = "int_QSBrightnessSliderPosition"
         const val qqsBrightnessSlider = "boolean_QQSBrightnesSlider"
+        const val customStatusbarIconColors = "boolean_CustomStatusbarIconColors"
+        const val customStatusbarClockColor = "int_CustomStatusbarClockColor"
+        const val customStatusbarBatteryIconColor = "int_CustomStatusbarBatteryIconColor"
+        const val customStatusbarBatteryPercentColor = "int_CustomStatusbarBatteryPercentColor"
+        const val customStatusbarWifiIconColor = "int_CustomStatusbarWifiIconColor"
+        const val customStatusbarMobileIconColor = "int_CustomStatusbarMobileIconColor"
+        const val customStatusbarNotificationIconColor = "int_CustomStatusbarNotificationIconColor"
+        const val customStatusbarOtherIconColor = "int_CustomStatusbarOtherIconColor"
+        const val customStatusbarDndIconColor = "int_CustomStatusbarDndIconColor"
+        const val customStatusbarAirplaneIconColor = "int_CustomStatusbarAirplaneIconColor"
+        const val customStatusbarHotspotIconColor = "int_CustomStatusbarHotspotIconColor"
+        const val customStatusbarBluetoothIconColor = "int_CustomStatusbarBluetoothIconColor"
+        const val customStatusbarGlobalIconColor = "int_CustomStatusbarGlobalIconColor"
 
         var mReloadTiles: Boolean = false
 
@@ -60,12 +76,12 @@ class Utils(context: Context, handler: Handler) {
         fun reloadTiles() {
             mReloadTiles = true
 
-            val value = callMethod(
-                getObjectField(
-                    QSTileHost,
-                    "mTunerService"
-                ), "getValue", "sysui_qs_tiles"
-            ) as String
+            val mTunerService = getObjectField(QSTileHost, "mTunerService")
+            val mContentResolver = getObjectField(mTunerService, "mContentResolver")
+                    as ContentResolver
+
+            val value = Settings.Secure.getString(mContentResolver, "sysui_qs_tiles")
+
             callMethod(
                 QSTileHost,
                 "onTuningChanged",
@@ -115,7 +131,12 @@ class Utils(context: Context, handler: Handler) {
             )
         }
 
-
+        fun getThemeAttr(i: Int, context: Context): Int {
+            val obtainStyledAttributes = context.obtainStyledAttributes(intArrayOf(i))
+            val resourceId = obtainStyledAttributes.getResourceId(0, 0)
+            obtainStyledAttributes.recycle()
+            return resourceId
+        }
     }
 
     private val mContext: Context = context

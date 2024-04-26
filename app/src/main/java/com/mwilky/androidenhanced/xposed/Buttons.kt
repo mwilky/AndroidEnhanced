@@ -11,6 +11,7 @@ import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.ViewConfiguration
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastReceiver
+import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.isTorchEnabled
@@ -30,6 +31,7 @@ import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 import de.robv.android.xposed.XposedHelpers.setIntField
+import java.time.LocalDate
 
 class Buttons {
 
@@ -106,7 +108,6 @@ class Buttons {
                 Message::class.java,
                 handleMessage_hook_PhoneWindowManager
             )
-
             //Torch on power function
             findAndHookMethod(
                 PHONE_WINDOW_MANAGER_CLASS,
@@ -114,7 +115,7 @@ class Buttons {
                 "powerPress",
                 Long::class.javaPrimitiveType,
                 Int::class.javaPrimitiveType,
-                Boolean::class.javaPrimitiveType,
+                Int::class.javaPrimitiveType,
                 powerPress_hook
             )
 
@@ -318,7 +319,11 @@ class Buttons {
                 val eventTime = param.args[0]
                         as Long
 
-                val beganFromNonInteractive = param.args[2]
+                val mSingleKeyGestureDetector =
+                    getObjectField(param.thisObject, "mSingleKeyGestureDetector")
+
+                val beganFromNonInteractive =
+                    callMethod(mSingleKeyGestureDetector, "beganFromNonInteractive")
                         as Boolean
 
                 if (mTorchPowerScreenOff && beganFromNonInteractive) {

@@ -1,6 +1,7 @@
 package com.mwilky.androidenhanced.xposed
 
 import android.content.Context
+import android.graphics.Color
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils
 import java.lang.ref.WeakReference
@@ -137,6 +138,71 @@ class SystemUIApplication {
                                 hookedContext, Utils.qqsBrightnessSlider,
                                 param.thisObject.toString(),
                                 false
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarIconColors,
+                                param.thisObject.toString(),
+                                false
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarClockColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarBatteryIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarBatteryPercentColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarWifiIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarMobileIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarNotificationIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarOtherIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarDndIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarAirplaneIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarHotspotIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarBluetoothIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customStatusbarGlobalIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
                             )
                         }
                     }

@@ -14,6 +14,19 @@ import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarAirplaneIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryPercentColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBluetoothIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarClockColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarDndIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarGlobalIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarHotspotIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarIconColors
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarMobileIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarNotificationIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarOtherIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
@@ -70,12 +83,14 @@ import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownC
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.setBrightnessView
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.animateBrightnessSlider
+import com.mwilky.androidenhanced.xposed.Statusbar
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnessControlEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
+import com.mwilky.androidenhanced.xposed.StatusbarPremium
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.getObjectField
@@ -208,6 +223,54 @@ class BroadcastUtils: BroadcastReceiver() {
                             mQQsBrightnessSliderEnabled= value as Boolean
                             QuicksettingsPremium.mQQsBrightnessSliderEnabled= value as Boolean
                             updateQuicksettings(mContext)
+                        }
+                        customStatusbarClockColor -> {
+                            StatusbarPremium.mStatusbarClockColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarBatteryIconColor -> {
+                            StatusbarPremium.mStatusbarBatteryIconColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarBatteryPercentColor -> {
+                            StatusbarPremium.mStatusbarBatteryPercentColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarWifiIconColor -> {
+                            StatusbarPremium.mStatusbarWifiColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarMobileIconColor -> {
+                            StatusbarPremium.mStatusbarMobileColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarNotificationIconColor -> {
+                            StatusbarPremium.mStatusbarNotificationColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarOtherIconColor -> {
+                            StatusbarPremium.mStatusbarIconColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarDndIconColor -> {
+                            StatusbarPremium.mStatusbarDndColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarAirplaneIconColor -> {
+                            StatusbarPremium.mStatusbarAirplaneColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarHotspotIconColor -> {
+                            StatusbarPremium.mStatusbarHotspotColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarBluetoothIconColor -> {
+                            StatusbarPremium.mStatusbarBluetoothColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                        }
+                        customStatusbarGlobalIconColor -> {
+                            StatusbarPremium.mStatusbarGlobalColor = value as Int
+                            StatusbarPremium.setStatusbarIconColorsOnBoot()
                         }
 
                     }

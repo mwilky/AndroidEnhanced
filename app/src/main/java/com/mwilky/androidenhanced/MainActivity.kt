@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val TAG = "DEBUG: Android Enhanced"
         var DEBUG = BuildConfig.DEBUG
-        val SECURTY_PATCH: LocalDate = LocalDate.parse(Build.VERSION.SECURITY_PATCH);
+        val SECURITY_PATCH: LocalDate = LocalDate.parse(Build.VERSION.SECURITY_PATCH);
     }
 
     private val restoreBackupLauncher: ActivityResultLauncher<String> = registerForActivityResult(

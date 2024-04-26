@@ -3,6 +3,8 @@ package com.mwilky.androidenhanced.xposed
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.VibrationEffect.EFFECT_CLICK
@@ -13,7 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
-import com.mwilky.androidenhanced.MainActivity.Companion.SECURTY_PATCH
+import com.mwilky.androidenhanced.MainActivity.Companion.SECURITY_PATCH
 import com.mwilky.androidenhanced.Utils.Companion.initVibrator
 import com.mwilky.androidenhanced.Utils.Companion.mReloadTiles
 import com.mwilky.androidenhanced.Utils.Companion.mVibrator
@@ -71,10 +73,11 @@ class Quicksettings {
             "com.android.systemui.settings.brightness.BrightnessMirrorHandler"
         private const val BRIGHTNESS_CONTROLLER_CLASS =
             "com.android.systemui.settings.brightness.BrightnessController"
-        private const val QS_FRAGMENT_CLASS =
-            "com.android.systemui.qs.QSFragment"
+        private val QS_IMPL_CLASS = "com.android.systemui.qs.QSImpl"
         private const val QS_ANIMATOR_CLASS =
             "com.android.systemui.qs.QSAnimator"
+        private const val SHADE_HEADER_CONTROLLER_CLASS =
+            "com.android.systemui.shade.ShadeHeaderController"
 
 
 
@@ -211,7 +214,6 @@ class Quicksettings {
                 longClickHook
             )
 
-
             //Hide QS footer build number
             findAndHookMethod(
                 QS_FOOTER_VIEW_CLASS,
@@ -234,13 +236,6 @@ class Quicksettings {
                 classLoader,
                 "updateResources",
                 updateResourceHookSidelabelTileLayout
-            )
-
-            findAndHookConstructor(
-                QUICK_QS_PANEL_QQS_SIDE_LABEL_TILE_LAYOUT_CLASS,
-                classLoader,
-                Context::class.java,
-                ConstructorHookQuickQSPanelSideLabelTileLayout
             )
 
             findAndHookMethod(
@@ -290,33 +285,17 @@ class Quicksettings {
             )
 
             findAndHookMethod(
-                QS_FRAGMENT_CLASS,
+                QS_IMPL_CLASS,
                 classLoader,
                 "updateQsPanelControllerListening",
                 updateQsPanelControllerListeningHook
             )
 
             findAndHookMethod(
-                QUICK_QS_PANEL_CONTROLLER_CLASS,
+                SHADE_HEADER_CONTROLLER_CLASS,
                 classLoader,
-                "onInit",
-                onInitHook
-            )
-
-            findAndHookMethod(
-                QS_ANIMATOR_CLASS,
-                classLoader,
-                "onViewAttachedToWindow",
-                View::class.java,
-                onViewAttachedToWindowHook
-            )
-
-            findAndHookMethod(
-                QS_ANIMATOR_CLASS,
-                classLoader,
-                "onViewDetachedFromWindow",
-                View::class.java,
-                onViewDetachedFromWindowHook
+                "onViewAttached",
+                onViewAttachedHookShadeHeaderController
             )
         }
 
@@ -371,6 +350,38 @@ class Quicksettings {
             override fun afterHookedMethod(param: MethodHookParam) {
                 QuickQSPanelController = param.thisObject
                 QuicksettingsPremium.QuickQSPanelController = QuickQSPanelController
+
+                val mView = getObjectField(param.thisObject, "mView") as ViewGroup
+                val mContext = callMethod(mView, "getContext") as Context
+
+
+                mQQsBrightnessSliderController =
+                    callMethod(
+                        BrightnessSliderControllerFactory,
+                        "create",
+                        mContext,
+                        mView
+                    )
+
+                val mBrightnessView =
+                    getObjectField(mQQsBrightnessSliderController, "mView") as View
+
+                mQQsBrightnessController =
+                    callMethod(
+                        BrightnessControllerFactory,
+                        "create",
+                        mQQsBrightnessSliderController
+                    )
+
+
+                mQQsBrightnessMirrorHandler =
+                    newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
+
+                setBrightnessView(mView, mBrightnessView)
+
+                callMethod(mQQsBrightnessSliderController, "init$10")
+
+
 
                 val brightnessMirrorController =
                     getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
@@ -491,13 +502,6 @@ class Quicksettings {
         private val ConstructorHookTileAdapter: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 setIntField(param.thisObject, "mNumColumns", mQsColumnsConfig)
-            }
-        }
-
-        private val ConstructorHookQuickQSPanelSideLabelTileLayout: XC_MethodHook =
-            object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                callMethod(param.thisObject, "setMaxColumns", mQsColumnsConfig)
             }
         }
 
@@ -635,65 +639,44 @@ class Quicksettings {
             }
         }
 
-        private val onInitHook: XC_MethodHook = object : XC_MethodHook() {
+        //Force battery icon colors so we can eventually separate them from statusbar color
+        private val onViewAttachedHookShadeHeaderController: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
-                val mContext = callMethod(param.thisObject, "getContext") as Context
-                val mView = getObjectField(param.thisObject, "mView") as ViewGroup
+                val batteryIcon = getObjectField(param.thisObject, "batteryIcon")
 
-                mQQsBrightnessSliderController =
-                    callMethod(
-                        BrightnessSliderControllerFactory,
-                        "create",
-                        mContext,
-                        mView
-                    )
+                val mDrawable = getObjectField(batteryIcon, "mDrawable")
+                val shieldPaint = getObjectField(mDrawable, "shieldPaint")
+                callMethod(shieldPaint, "setColor", Color.WHITE)
 
-                val mBrightnessView =
-                    getObjectField(mQQsBrightnessSliderController, "mView") as View
+                val mainBatteryDrawable = callMethod(mDrawable, "getDrawable")
 
-                if (SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                    mQQsBrightnessController =
-                        newInstance(
-                            BrightnessControllerClass,
-                            getObjectField(BrightnessControllerFactory, "mContext"),
-                            mQQsBrightnessSliderController,
-                            getObjectField(BrightnessControllerFactory, "mUserTracker"),
-                            getObjectField(BrightnessControllerFactory, "mDisplayTracker"),
-                            getObjectField(BrightnessControllerFactory, "mMainExecutor"),
-                            getObjectField(BrightnessControllerFactory, "mBackgroundHandler")
-                        )
-                } else {
-                    mQQsBrightnessController =
-                        callMethod(
-                            BrightnessControllerFactory,
-                            "create",
-                            mQQsBrightnessSliderController
-                        )
-                }
+                val mainBatteryDrawableFillPaint =
+                    getObjectField(mainBatteryDrawable, "fillPaint")
 
+                setIntField(
+                    mainBatteryDrawable,
+                    "fillColor",
+                    Color.WHITE
+                )
+                callMethod(
+                    mainBatteryDrawableFillPaint,
+                    "setColor",
+                    Color.WHITE
+                )
 
-                mQQsBrightnessMirrorHandler =
-                    newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
+                setIntField(
+                    batteryIcon, "mTextColor", Color.WHITE
+                )
 
-                setBrightnessView(mView, mBrightnessView)
+                (getObjectField(
+                    batteryIcon,
+                    "mBatteryPercentView"
+                ) as TextView?)?.setTextColor(Color.WHITE)
 
-                callMethod(mQQsBrightnessSliderController, "init")
-            }
-        }
-
-        private val onViewAttachedToWindowHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val mQuickQSPanelController = getObjectField(param.thisObject, "mQuickQSPanelController")
-                val mMediaHost = getObjectField(mQuickQSPanelController, "mMediaHost")
-                callMethod(mMediaHost, "addVisibilityChangeListener", mMediaHostVisibilityListener)
-            }
-        }
-
-        private val onViewDetachedFromWindowHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val mQuickQSPanelController = getObjectField(param.thisObject, "mQuickQSPanelController")
-                val mMediaHost = getObjectField(mQuickQSPanelController, "mMediaHost")
-                callMethod(mMediaHost, "removeVisibilityChangeListener", mMediaHostVisibilityListener)
+                (getObjectField(
+                    batteryIcon,
+                    "mUnknownStateDrawable"
+                ) as Drawable?)?.setTint(Color.WHITE)
             }
         }
 
@@ -852,10 +835,6 @@ class Quicksettings {
                 }
                 mBrightnessView.layoutParams = lp
             }
-        }
-
-        private val mMediaHostVisibilityListener: Function1<Boolean, Unit> = { visible: Boolean? ->
-            setBooleanField(mQsAnimator, "mNeedsAnimatorUpdate", true)
         }
     }
 }

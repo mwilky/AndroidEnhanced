@@ -2,9 +2,13 @@ package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.TextView
 import com.mwilky.androidenhanced.MainActivity
+import com.mwilky.androidenhanced.MainActivity.Companion.SECURITY_PATCH
 import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -39,8 +43,15 @@ class Lockscreen {
             "com.android.server.policy.PhoneWindowManager"
         private const val FOOTER_ACTIONS_VIEW_BINDER_CLASS =
             "com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder"
-        private const val QS_FRAGMENT_CLASS =
-            "com.android.systemui.qs.QSFragment"
+
+        //March 2024 renamed this class to QSImpl
+        private val QS_FRAGMENT_CLASS =
+            if (SECURITY_PATCH.isBefore(LocalDate.parse("2024-03-05"))) {
+                "com.android.systemui.qs.QSFragment"
+            } else {
+                "com.android.systemui.qs.QSImpl"
+            }
+
         private const val CENTRAL_SURFACES_COMMAND_QUEUE_CALLBACKS_CLASS =
             "com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks"
         private const val CENTRAL_SURFACES_IMPL_CLASS =
@@ -204,6 +215,49 @@ class Lockscreen {
 
                 if (hideLockscreenStatusbarEnabled)
                     callMethod(param.thisObject, "setVisibility", View.GONE)
+
+                val mBatteryView = getObjectField(param.thisObject, "mBatteryView")
+
+                val mDrawable = getObjectField(mBatteryView, "mDrawable")
+                val shieldPaint = getObjectField(mDrawable, "shieldPaint")
+                callMethod(shieldPaint, "setColor", Color.WHITE)
+
+                val mainBatteryDrawable =
+                    if (SECURITY_PATCH.isBefore(LocalDate.parse("2024-03-05")))
+                    {
+                        callMethod(mDrawable, "getMainBatteryDrawable")
+                    } else {
+                        callMethod(mDrawable, "getDrawable")
+                    }
+
+                val mainBatteryDrawableFillPaint =
+                    getObjectField(mainBatteryDrawable, "fillPaint")
+
+                setIntField(
+                    mainBatteryDrawable,
+                    "fillColor",
+                    Color.WHITE
+                )
+                callMethod(
+                    mainBatteryDrawableFillPaint,
+                    "setColor",
+                    Color.WHITE
+                )
+
+                setIntField(
+                    mBatteryView, "mTextColor", Color.WHITE
+                )
+
+                (getObjectField(
+                    mBatteryView,
+                    "mBatteryPercentView"
+                ) as TextView?)?.setTextColor(Color.WHITE)
+
+                (getObjectField(
+                    mBatteryView,
+                    "mUnknownStateDrawable"
+                ) as Drawable?)?.setTint(Color.WHITE)
+
             }
         }
 
@@ -232,9 +286,12 @@ class Lockscreen {
         private val updateIsKeyguardHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
 
+                val mKeyguardStateController =
+                    getObjectField(param.thisObject, "mKeyguardStateController")
+
                 val mKeyguardShowing =
-                    callMethod(param.thisObject, "isKeyguardShowing")
-                            as Boolean
+                    getBooleanField(mKeyguardStateController, "mShowing")
+
                 //If on lockscreen and tweak is enabled, hide the button
                 if (powerMenuButton != null) {
                     if (!mKeyguardShowing || !mDisableLockscreenPowerMenuEnabled) {
@@ -425,7 +482,7 @@ class Lockscreen {
                 state2 = adjustDisableFlags(mRemoteInputQuickSettingsDisabler, state2)
                 state2 = adjustQsDisableFlags(mKeyguardStateController, state2)
 
-                val old1 = if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                val old1 = if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                     getIntField(mCentralSurfaces, "mDisabled1")
                 } else {
                     getIntField(param.thisObject, "mDisabled1")
@@ -433,14 +490,14 @@ class Lockscreen {
 
                 val diff1: Int = state1 xor old1
 
-                if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                     setIntField(mCentralSurfaces, "mDisabled1", state1)
                 } else {
                     setIntField(param.thisObject, "mDisabled1", state1)
                 }
 
 
-                val old2 = if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                val old2 = if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                     getIntField(mCentralSurfaces, "mDisabled2")
                 } else {
                     getIntField(param.thisObject, "mDisabled2")
@@ -448,7 +505,7 @@ class Lockscreen {
 
                 val diff2: Int = state2 xor old2
 
-                if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                     setIntField(mCentralSurfaces, "mDisabled2", state2)
                 } else {
                     setIntField(param.thisObject, "mDisabled2", state2)
@@ -466,14 +523,14 @@ class Lockscreen {
                     }
                 }
 
-                if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                     if (diff2 and DISABLE2_QUICK_SETTINGS != 0) {
                         callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
                     }
                 }
 
                 if (diff2 and DISABLE2_NOTIFICATION_SHADE != 0) {
-                    if (MainActivity.SECURTY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
+                    if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
                         callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
                     }
                     if (state2 and DISABLE2_NOTIFICATION_SHADE != 0) {
@@ -489,7 +546,7 @@ class Lockscreen {
 
                 if (disabled != mShadeHeaderControllerQsDisabled) {
                     setBooleanField(mShadeHeaderController, "qsDisabled", disabled)
-                    callMethod(mShadeHeaderController, "updateVisibility")
+                    callMethod(mShadeHeaderController, "updateVisibility$4")
                 }
 
                 return null

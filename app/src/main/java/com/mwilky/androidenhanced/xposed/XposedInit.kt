@@ -40,6 +40,7 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
             SYSTEMUI_PACKAGE -> {
                 SystemUIApplication.init(lpparam.classLoader)
                 Statusbar.init(lpparam.classLoader)
+                StatusbarPremium.init(lpparam.classLoader)
                 Lockscreen.initSystemUI(lpparam.classLoader)
                 Quicksettings.init(lpparam.classLoader)
                 QuicksettingsPremium.init(lpparam.classLoader)
