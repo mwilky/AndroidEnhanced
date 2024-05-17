@@ -263,6 +263,30 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getInt(qsRows, 4) - 2
                 qsBrightnessSliderPosition -> rememberQsBrightnessSliderPosition =
                     sharedPreferences.getInt(qsBrightnessSliderPosition, 0)
+                customStatusbarGlobalIconColor -> rememberStatusbarIconGlobalColor =
+                    sharedPreferences.getInt(customStatusbarGlobalIconColor, -1)
+                customStatusbarClockColor -> rememberStatusbarIconClockColor =
+                    sharedPreferences.getInt(customStatusbarClockColor, -1)
+                customStatusbarBatteryIconColor -> rememberStatusbarIconBatteryIconColor =
+                    sharedPreferences.getInt(customStatusbarBatteryIconColor, -1)
+                customStatusbarBatteryPercentColor -> rememberStatusbarIconBatteryPercentColor =
+                    sharedPreferences.getInt(customStatusbarBatteryPercentColor, -1)
+                customStatusbarWifiIconColor -> rememberStatusbarIconWifiColor =
+                    sharedPreferences.getInt(customStatusbarWifiIconColor, -1)
+                customStatusbarMobileIconColor -> rememberStatusbarIconMobileColor =
+                    sharedPreferences.getInt(customStatusbarMobileIconColor, -1)
+                customStatusbarNotificationIconColor -> rememberStatusbarIconNotificationColor =
+                    sharedPreferences.getInt(customStatusbarNotificationIconColor, -1)
+                customStatusbarDndIconColor -> rememberStatusbarIconDndColor =
+                    sharedPreferences.getInt(customStatusbarDndIconColor, -1)
+                customStatusbarAirplaneIconColor -> rememberStatusbarIconAirplaneColor =
+                    sharedPreferences.getInt(customStatusbarAirplaneIconColor, -1)
+                customStatusbarBluetoothIconColor -> rememberStatusbarIconBluetoothColor =
+                    sharedPreferences.getInt(customStatusbarBluetoothIconColor, -1)
+                customStatusbarHotspotIconColor -> rememberStatusbarIconHotspotColor =
+                    sharedPreferences.getInt(customStatusbarHotspotIconColor, -1)
+                customStatusbarOtherIconColor -> rememberStatusbarIconOtherColor =
+                    sharedPreferences.getInt(customStatusbarOtherIconColor, -1)
             }
         }
 
