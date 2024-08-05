@@ -482,34 +482,17 @@ class Lockscreen {
                 state2 = adjustDisableFlags(mRemoteInputQuickSettingsDisabler, state2)
                 state2 = adjustQsDisableFlags(mKeyguardStateController, state2)
 
-                val old1 = if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                    getIntField(mCentralSurfaces, "mDisabled1")
-                } else {
-                    getIntField(param.thisObject, "mDisabled1")
-                }
+                val old1 = getIntField(param.thisObject, "mDisabled1")
 
                 val diff1: Int = state1 xor old1
 
-                if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                    setIntField(mCentralSurfaces, "mDisabled1", state1)
-                } else {
-                    setIntField(param.thisObject, "mDisabled1", state1)
-                }
+                setIntField(param.thisObject, "mDisabled1", state1)
 
-
-                val old2 = if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                    getIntField(mCentralSurfaces, "mDisabled2")
-                } else {
-                    getIntField(param.thisObject, "mDisabled2")
-                }
+                val old2 = getIntField(param.thisObject, "mDisabled2")
 
                 val diff2: Int = state2 xor old2
 
-                if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                    setIntField(mCentralSurfaces, "mDisabled2", state2)
-                } else {
-                    setIntField(param.thisObject, "mDisabled2", state2)
-                }
+                setIntField(param.thisObject, "mDisabled2", state2)
 
                 if (diff1 and DISABLE_EXPAND != 0) {
                     if (state1 and DISABLE_EXPAND != 0) {
@@ -523,16 +506,7 @@ class Lockscreen {
                     }
                 }
 
-                if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                    if (diff2 and DISABLE2_QUICK_SETTINGS != 0) {
-                        callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
-                    }
-                }
-
                 if (diff2 and DISABLE2_NOTIFICATION_SHADE != 0) {
-                    if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                        callMethod(mCentralSurfaces, "updateQsExpansionEnabled")
-                    }
                     if (state2 and DISABLE2_NOTIFICATION_SHADE != 0) {
                         callMethod(mShadeController, "animateCollapseShade", 0)
                     }
@@ -540,13 +514,12 @@ class Lockscreen {
 
                 val disabled = state2 and DISABLE2_QUICK_SETTINGS != 0
 
-
                 val mShadeHeaderControllerQsDisabled =
                     getBooleanField(mShadeHeaderController, "qsDisabled")
 
                 if (disabled != mShadeHeaderControllerQsDisabled) {
                     setBooleanField(mShadeHeaderController, "qsDisabled", disabled)
-                    callMethod(mShadeHeaderController, "updateVisibility$4")
+                    callMethod(mShadeHeaderController, "updateVisibility$3")
                 }
 
                 return null

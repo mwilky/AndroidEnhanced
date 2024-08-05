@@ -1,18 +1,13 @@
 package com.mwilky.androidenhanced.xposed
 
-import android.animation.ArgbEvaluator
 import android.annotation.SuppressLint
 import android.app.Fragment
 import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.ArrayMap
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.HapticFeedbackConstants
@@ -21,7 +16,6 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.TextView
 import com.mwilky.androidenhanced.MainActivity
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -39,14 +33,13 @@ import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
 import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
-import de.robv.android.xposed.XposedHelpers.setFloatField
-import de.robv.android.xposed.XposedHelpers.setIntField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.roundToInt
+
 
 class Statusbar {
 
@@ -66,34 +59,19 @@ class Statusbar {
             "com.android.systemui.statusbar.phone.HeadsUpAppearanceController"
         private const val CLOCK_CLASS =
             "com.android.systemui.statusbar.policy.Clock"
-
-        private const val DARK_ICON_DISPATCHER_IMPL_CLASS =
-            "com.android.systemui.statusbar.phone.DarkIconDispatcherImpl"
-        private const val SYSUI_DARK_ICON_DISPATCHER_DARK_CHANGE_CLASS =
-            "com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher\$DarkChange"
-        private const val BATTERY_METER_VIEW_CLASS =
-            "com.android.systemui.battery.BatteryMeterView"
-        private const val DUAL_TONE_HANDLER_CLASS =
-            "com.android.systemui.DualToneHandler"
-        private const val DUAL_TONE_HANDLER_COLOR_CLASS =
-            "com.android.systemui.DualToneHandler\$Color"
-        private const val STATUSBAR_ICON_VIEW_CLASS =
-            "com.android.systemui.statusbar.StatusBarIconView"
-
-        private const val STATUSBAR_ICON_CONTROLLER_TINTED_ICON =
-            "com.android.systemui.statusbar.phone.StatusBarIconController\$TintedIconManager"
-
-        private const val STATUSBAR_ICON_CONTROLLER_DARK_ICON =
-            "com.android.systemui.statusbar.phone.StatusBarIconController\$DarkIconManager"
-
-        private const val STATUSBAR_ICON_CONTROLLER_ICON_MANAGER =
-            "com.android.systemui.statusbar.phone.StatusBarIconController\$IconManager"
+        private const val STATUSBAR_ICON_CONTROLLER_IMPL_CLASS =
+            "com.android.systemui.statusbar.phone.StatusBarIconControllerImpl"
 
         // Tweak Variables
         var mDoubleTapToSleepEnabled: Boolean = false
         var mStatusbarBrightnessControlEnabled: Boolean = false
         var mStatusbarClockPosition: Int = 0
         var mStatusbarClockSecondsEnabled: Boolean = false
+        var mHideCollapsedAlarmEnabled: Boolean = true
+        var mHideCollapsedVolumeEnabled: Boolean = true
+        var mHideCollapsedCallStrengthEnabled: Boolean = true
+        var mHideCollapsedWifiEnabled: Boolean = false
+        var mHideAlarmEnabled: Boolean = false
 
         // Class Objects
         lateinit var notificationPanelViewController: Any
@@ -105,14 +83,15 @@ class Statusbar {
         lateinit var shadeController: Any
         lateinit var collapsedStatusBarFragment: Any
         lateinit var clock: Any
+        lateinit var statusBarIconControllerImpl: Any
 
         // Class references
         private var brightnessUtilsClass: Class<*>? = null
         private var viewClippingUtil: Class<*>? = null
         private var `headsUpAppearanceController$$ExternalSyntheticLambda0`: Class<*>? = null
-        private var `headsUpAppearanceController$$ExternalSyntheticLambda1`: Class<*>? = null
-        private var `headsUpAppearanceController$$ExternalSyntheticLambda2`: Class<*>? = null
+        private var `headsUpAppearanceController$$ExternalSyntheticLambda4`: Class<*>? = null
         private var `carrierTextManager$$ExternalSyntheticLambda1`: Class<*>? = null
+        private var blockedIconRunnable: Class<*>? = null
 
 
         // Statusbar brightness control
@@ -137,7 +116,10 @@ class Statusbar {
 
         private lateinit var doubleTapGesture: GestureDetector
 
+        val slotsToReAdd: MutableMap<Any, Any> = mutableMapOf()
+
         fun init(classLoader: ClassLoader?) {
+
             // Hook Constructors
             val notificationPanelViewControllerClass =
                 findClass(NOTIFICATION_PANEL_VIEW_CONTROLLER_CLASS, classLoader)
@@ -153,6 +135,14 @@ class Statusbar {
             hookAllConstructors(
                 phoneStatusBarViewControllerClass,
                 constructorHookPhoneStatusBarViewController
+            )
+
+            val statusBarIconControllerImplClass =
+                findClass(STATUSBAR_ICON_CONTROLLER_IMPL_CLASS, classLoader)
+
+            hookAllConstructors(
+                statusBarIconControllerImplClass,
+                constructorHookStatusBarIconControllerImpl
             )
 
             // Double tap to sleep
@@ -202,8 +192,8 @@ class Statusbar {
                 COLLAPSED_STATUSBAR_FRAGMENT_CLASS,
                 classLoader,
                 "animateHiddenState",
-                Int::class.javaPrimitiveType,
                 View::class.java,
+                Int::class.javaPrimitiveType,
                 Boolean::class.javaPrimitiveType,
                 animateHiddenStateHook
             )
@@ -229,17 +219,10 @@ class Statusbar {
                     classLoader
                 )
 
-            `headsUpAppearanceController$$ExternalSyntheticLambda1` =
+            `headsUpAppearanceController$$ExternalSyntheticLambda4` =
                 findClass(
                     "com.android.systemui.statusbar.phone." +
-                            "HeadsUpAppearanceController$\$ExternalSyntheticLambda1",
-                    classLoader
-                )
-
-            `headsUpAppearanceController$$ExternalSyntheticLambda2` =
-                findClass(
-                    "com.android.systemui.statusbar.phone." +
-                            "HeadsUpAppearanceController$\$ExternalSyntheticLambda2",
+                            "HeadsUpAppearanceController$\$ExternalSyntheticLambda4",
                     classLoader
                 )
 
@@ -265,6 +248,17 @@ class Statusbar {
                 CLOCK_CLASS, classLoader, "onAttachedToWindow",
                 onAttachedToWindowHook
             )
+
+            findAndHookMethod(
+                COLLAPSED_STATUSBAR_FRAGMENT_CLASS,
+                classLoader,
+                "updateBlockedIcons",
+                updateBlockedIconsHook
+            )
+
+            val blockedIconRunnableClass = "com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment\$\$ExternalSyntheticLambda3"
+
+            blockedIconRunnable = findClass(blockedIconRunnableClass, classLoader)
         }
 
         // Hooked methods
@@ -302,6 +296,14 @@ class Statusbar {
                 phoneStatusBarView = view
             }
         }
+
+        private val constructorHookStatusBarIconControllerImpl: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    // Set objects so we can use them in additional functions
+                    statusBarIconControllerImpl = param.thisObject
+                }
+            }
 
         //Register the receiver for clock position
         private val onViewCreatedHook: XC_MethodHook =
@@ -426,7 +428,7 @@ class Statusbar {
         // Don't hide clock if it is in right position
         private val animateHiddenStateHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
-                val view:View = param.args[1]
+                val view:View = param.args[0]
                     as View
 
                 val mClockView:View =
@@ -468,7 +470,7 @@ class Statusbar {
                 if (mShown != isShown) {
                     setBooleanField(param.thisObject, "mShown", isShown)
                     if (isShown) {
-                        XposedHelpers.callStaticMethod(
+                        callStaticMethod(
                             viewClippingUtil,
                             "setClippingDeactivated",
                             mView,
@@ -488,55 +490,34 @@ class Statusbar {
                             callMethod(param.thisObject, "hide", mClockView, 4, null)
                         }
 
-                        if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                            callMethod(
-                                mOperatorNameViewOptional, "ifPresent",
-                                XposedHelpers.newInstance(
-                                    `headsUpAppearanceController$$ExternalSyntheticLambda1`,
-                                    param.thisObject,
-                                    1
-                                )
+                        callMethod(
+                            mOperatorNameViewOptional, "ifPresent",
+                            newInstance(
+                                `headsUpAppearanceController$$ExternalSyntheticLambda0`,
+                                param.thisObject,
+                                1
                             )
-                        } else {
-                            callMethod(
-                                mOperatorNameViewOptional, "ifPresent",
-                                XposedHelpers.newInstance(
-                                    `headsUpAppearanceController$$ExternalSyntheticLambda0`,
-                                    param.thisObject,
-                                    1
-                                )
-                            )
-                        }
+                        )
+
                     } else {
                         callMethod(param.thisObject, "show", mClockView)
 
                         callMethod(
                             mOperatorNameViewOptional, "ifPresent",
-                            XposedHelpers.newInstance(
+                            newInstance(
                                 `headsUpAppearanceController$$ExternalSyntheticLambda0`,
                                 param.thisObject,
                                 2
                             )
                         )
-                        if (MainActivity.SECURITY_PATCH.isBefore(LocalDate.parse("2023-12-05"))) {
-                            callMethod(
-                                param.thisObject, "hide", mView, 8,
-                                XposedHelpers.newInstance(
-                                    `headsUpAppearanceController$$ExternalSyntheticLambda0`,
-                                    param.thisObject,
-                                    1
-                                )
+                        callMethod(
+                            param.thisObject, "hide", mView, 8,
+                            newInstance(
+                                `headsUpAppearanceController$$ExternalSyntheticLambda4`,
+                                param.thisObject,
+                                0
                             )
-                        } else {
-                            callMethod(
-                                param.thisObject, "hide", mView, 8,
-                                XposedHelpers.newInstance(
-                                    `headsUpAppearanceController$$ExternalSyntheticLambda2`,
-                                    param.thisObject,
-                                    1
-                                )
-                            )
-                        }
+                        )
                     }
 
                     if (callMethod(mStatusBarStateController, "getState")
@@ -578,6 +559,82 @@ class Statusbar {
             }
         }
 
+        private val updateBlockedIconsHook: XC_MethodHook = object : XC_MethodReplacement() {
+            @SuppressLint("DiscouragedApi")
+            override fun replaceHookedMethod(param: MethodHookParam): Any? {
+
+                val mContext = (collapsedStatusBarFragment as Fragment).context
+                        as Context
+
+                val mMainExecutor = getObjectField(param.thisObject, "mMainExecutor")
+
+                val mBlockedIcons =
+                    getObjectField(param.thisObject, "mBlockedIcons") as ArrayList<String>
+
+                mBlockedIcons.clear()
+
+                val blockListArray = mContext.resources.getStringArray(
+                    mContext.resources.getIdentifier(
+                        "config_collapsed_statusbar_icon_blocklist",
+                        "array",
+                        "com.android.systemui"
+                    )
+                )
+
+                val blockList = blockListArray.toList()
+
+                val vibrateIconSlot = mContext.resources.getString(
+                    mContext.resources.getIdentifier(
+                        "status_bar_volume",
+                        "string",
+                        "android"
+                    )
+                )
+
+                val showVibrateIcon =
+                    Settings.Secure.getInt(
+                        mContext.contentResolver,
+                        "status_bar_show_vibrate_icon",
+                        0
+                    ) == 0
+
+                for (i in blockList.indices) {
+                    when (blockList[i]) {
+                        vibrateIconSlot -> {
+                            if (showVibrateIcon && mHideCollapsedVolumeEnabled) {
+                                mBlockedIcons.add(blockList[i])
+                            }
+                        }
+                        "alarm_clock" -> {
+                            if (mHideCollapsedAlarmEnabled) {
+                                mBlockedIcons.add(blockList[i])
+                            }
+                        }
+                        "call_strength" -> {
+                            if (mHideCollapsedAlarmEnabled) {
+                                mBlockedIcons.add(blockList[i])
+                            }
+                        }
+                        "wifi" -> {
+                            if (mHideCollapsedWifiEnabled) {
+                                mBlockedIcons.add(blockList[i])
+                            }
+                        }
+                        else -> {
+                            mBlockedIcons.add(blockList[i])
+                        }
+                    }
+                }
+
+                val runnable = newInstance(blockedIconRunnable, param.thisObject)
+                callMethod(mMainExecutor, "execute", runnable)
+
+                return null
+            }
+
+        }
+
+
         // Additional functions
         private fun adjustBrightness(x: Int) {
             brightnessChanged = true
@@ -589,7 +646,7 @@ class Statusbar {
             val raw = x / displayWidth
             val padded = 0.85f.coerceAtMost(BRIGHTNESS_CONTROL_PADDING.coerceAtLeast(raw))
             val value = (padded - BRIGHTNESS_CONTROL_PADDING) / 0.7f
-            val linearFloat = XposedHelpers.callStaticMethod(
+            val linearFloat = callStaticMethod(
                 brightnessUtilsClass, "convertGammaToLinearFloat",
                 (65535.0f * value).roundToInt(),
                 minimumBacklight,
@@ -679,6 +736,69 @@ class Statusbar {
                     displayManager, "setBrightness", displayId, currentBrightness
                 )
             }
+        }
+
+        fun updateHiddenIcons() {
+            if (mHideAlarmEnabled) {
+                hideIcon("alarm_clock")
+            } else {
+                showIcon("alarm_clock")
+            }
+
+            if (mHideCollapsedWifiEnabled) {
+                hideIcon("wifi")
+            } else {
+                showIcon("wifi")
+            }
+
+        }
+
+        private fun hideIcon(slotname: String) {
+
+            val mStatusBarIconList =
+                getObjectField(statusBarIconControllerImpl, "mStatusBarIconList")
+
+            val currentSlots: List<*> =
+                getObjectField(mStatusBarIconList, "mViewOnlySlots") as List<*>
+
+            for (i in currentSlots.size - 1 downTo 0) {
+                val slot = currentSlots[i]
+                val name = getObjectField(slot, "mName") as String
+
+                if (name == slotname) {
+                    slotsToReAdd[slot as Any] =
+                        callMethod(slot, "getHolderListInViewOrder")
+
+                    callMethod(
+                        statusBarIconControllerImpl,
+                        "removeAllIconsForSlot",
+                        name,
+                        false
+                    )
+                }
+            }
+
+        }
+
+        private fun showIcon(slotname: String) {
+
+            val mStatusBarIconList = getObjectField(statusBarIconControllerImpl, "mStatusBarIconList")
+
+            val currentSlots: List<*> = getObjectField(mStatusBarIconList, "mViewOnlySlots") as List<*>
+
+            for (element in currentSlots) {
+                val name = getObjectField(element, "mName") as String
+
+                if (name == slotname) {
+                    val iconsForSlot = slotsToReAdd[element] as? List<*>
+                    if (iconsForSlot != null) {
+                        for (holder in iconsForSlot) {
+                            callMethod(statusBarIconControllerImpl, "setIcon", name, holder)
+                        }
+                    }
+                }
+            }
+
         }
 
         @SuppressLint("DiscouragedApi")

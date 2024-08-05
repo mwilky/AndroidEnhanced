@@ -21,6 +21,9 @@
     <string name="tileLayout">Tile Layout</string>
     <string name="brightnessSlider">Brightness Slider</string>
     <string name="backup_restore">Backup and restore</string>
+    <string name="iconManagement">Icon management</string>
+    <string name="collapsedStatusbarIcons">Hide icons in the collapsed statusbar only. Icons will still be visible in the notification shade and lockscreen statusbar</string>
+    <string name="allStatusbarIcons">Hide icons in all statusbars.</string>
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
@@ -45,6 +48,11 @@
     <string name="customStatusbarGlobalIconColorTitle">Global icon color</string>
     <string name="customStatusbarIndividualIconColorSummary">Set colors individually for each icon</string>
     <string name="customStatusbarIndividualIconColorSummaryDisabled">Reset the global icon color to enable individual control</string>
+    <string name="alarmTitle">Alarm</string>
+    <string name="volumeTitle">Volume</string>
+    <string name="callStrengthTitle">Call strength</string>
+    <string name="wifiTitle">Wifi</string>
+
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>
@@ -77,6 +85,9 @@
     <string name="qqsRowsTitle">Quick quicksettings row count</string>
     <string name="qsRowsTitle">Quicksettings row count</string>
     <string name="qsColumnsTitle">Quicksettings column count</string>
+    <string name="qsColumnsLandscapeTitle">Quicksettings column count in landscape</string>
+    <string name="qqsColumnsTitle">Quick quicksettings column count</string>
+    <string name="qqsColumnsLandscapeTitle">Quick quicksettings column count in landscape</string>
     <string name="qsBrightnessSliderPositionTitle">Brightness slider position</string>
     <string name="qqsBrightnessSliderTitle">Quick quicksetting brightness slider</string>
     <string name="qqsBrightnessSliderSummary">Show the brightness slider in the quick quicksettings panel</string>

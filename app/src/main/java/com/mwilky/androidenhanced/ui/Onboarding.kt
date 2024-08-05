@@ -12,21 +12,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
-import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 
 @Composable
 fun OnboardingScreen(navController: NavController, context: Context) {
@@ -100,14 +96,3 @@ fun OnboardingScreen(navController: NavController, context: Context) {
         }
     }
 }
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun OnboardingScreenPreview() {
-    AndroidEnhancedTheme {
-        val navController = rememberNavController()
-        val context = LocalContext.current
-        //OnboardingScreen(navController, context, pa)
-    }
-}
-

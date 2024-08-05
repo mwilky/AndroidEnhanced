@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -44,10 +43,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -57,30 +54,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.mwilky.androidenhanced.dataclasses.BottomNavigationItem
 import com.mwilky.androidenhanced.dataclasses.EnvironmentProp
 import com.mwilky.androidenhanced.dataclasses.TweaksCard
-import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -389,7 +381,7 @@ fun TweaksItem(
                 Spacer(modifier = Modifier.padding(horizontal = 10.dp))
                 //OutlinedButton(onClick = { /*TODO*/ }) { Text(text = "Enter") }
                 Icon(
-                    imageVector = Icons.Filled.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = "back",
                     tint =  MaterialTheme.colorScheme.primary
                 )
@@ -647,7 +639,7 @@ fun ScaffoldTweaksAppBar(
         navigationIcon = {
             if (showBackIcon) {
                 IconButton(
-                    onClick = { navController.popBackStack() }
+                    onClick = { navController.navigateUp() }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -724,15 +716,5 @@ fun ScaffoldNavigationBar(
                 alwaysShowLabel = false
             )
         }
-    }
-}
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun HomeScreenPreview() {
-    AndroidEnhancedTheme {
-        val navController = rememberNavController()
-        val context = LocalContext.current
-        HomeScreen(navController, context)
     }
 }

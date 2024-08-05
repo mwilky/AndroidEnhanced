@@ -120,6 +120,21 @@ class SystemUIApplication {
                                 2
                             )
                             BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsColumnsLandscape,
+                                param.thisObject.toString(),
+                                4
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qqsColumns,
+                                param.thisObject.toString(),
+                                2
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qqsColumnsLandscape,
+                                param.thisObject.toString(),
+                                4
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
                                 hookedContext, Utils.qqsRows,
                                 param.thisObject.toString(),
                                 2
@@ -203,6 +218,31 @@ class SystemUIApplication {
                                 hookedContext, Utils.customStatusbarGlobalIconColor,
                                 param.thisObject.toString(),
                                 Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.hideCollapsedAlarmIcon,
+                                param.thisObject.toString(),
+                                true
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.hideCollapsedVolumeIcon,
+                                param.thisObject.toString(),
+                                true
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.hideCollapsedCallStrengthIcon,
+                                param.thisObject.toString(),
+                                true
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.hideCollapsedWifiIcon,
+                                param.thisObject.toString(),
+                                false
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.hideAlarmIcon,
+                                param.thisObject.toString(),
+                                false
                             )
                         }
                     }

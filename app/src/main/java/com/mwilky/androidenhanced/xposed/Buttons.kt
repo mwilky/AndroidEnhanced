@@ -327,7 +327,13 @@ class Buttons {
                         as Boolean
 
                 if (mTorchPowerScreenOff && beganFromNonInteractive) {
-                    callMethod(param.thisObject, "wakeUpFromPowerKey", eventTime)
+                    callMethod(
+                        param.thisObject,
+                        "wakeUpFromWakeKey",
+                        eventTime,
+                        KeyEvent.KEYCODE_POWER,
+                        false
+                    )
                     param.result = null
                 }
             }
@@ -386,8 +392,8 @@ class Buttons {
                     if (!interactive) {
                         if (!mTorchPowerScreenOff) {
                             callMethod(param.thisObject,
-                                "wakeUpFromPowerKey",
-                                event.downTime)
+                                "wakeUpFromWakeKey",
+                                event)
                         }
                         param.result = null
                     }

@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -15,17 +16,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
-import com.mwilky.androidenhanced.MainActivity.Companion.SECURITY_PATCH
 import com.mwilky.androidenhanced.Utils.Companion.initVibrator
-import com.mwilky.androidenhanced.Utils.Companion.mReloadTiles
 import com.mwilky.androidenhanced.Utils.Companion.mVibrator
-import com.mwilky.androidenhanced.UtilsPremium
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
-import de.robv.android.xposed.XposedHelpers.findAndHookConstructor
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
 import de.robv.android.xposed.XposedHelpers.getBooleanField
@@ -36,7 +33,6 @@ import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 import de.robv.android.xposed.XposedHelpers.setIntField
 import de.robv.android.xposed.XposedHelpers.setObjectField
-import java.time.LocalDate
 
 
 class Quicksettings {
@@ -78,6 +74,10 @@ class Quicksettings {
             "com.android.systemui.qs.QSAnimator"
         private const val SHADE_HEADER_CONTROLLER_CLASS =
             "com.android.systemui.shade.ShadeHeaderController"
+        private const val PAGED_TILE_LAYOUT_CLASS =
+            "com.android.systemui.qs.PagedTileLayout"
+        private const val QUICK_QS_PANEL_CLASS =
+            "com.android.systemui.qs.QuickQSPanel"
 
 
 
@@ -96,6 +96,7 @@ class Quicksettings {
         lateinit var BrightnessSliderControllerFactory: Any
         lateinit var BrightnessControllerClass: Class<*>
         lateinit var BrightnessControllerFactory: Any
+        lateinit var PagedTileLayout: Any
 
         //Tweak Variables
         var mClickVibrationEnabled: Boolean = false
@@ -104,6 +105,9 @@ class Quicksettings {
         var mQuickPulldownConfig: Int = 0
         var mQQsRowsConfig: Int = 2
         var mQsColumnsConfig: Int = 2
+        var mQsColumnsConfigLandscape: Int = 4
+        var mQqsColumnsConfig: Int = 2
+        var mQqsColumnsConfigLandscape: Int = 4
         var mQsRowsConfig: Int = 4
         var mQsBrightnessSliderPositionConfig: Int = 0
         var mQQsBrightnessSliderEnabled: Boolean = false
@@ -118,6 +122,16 @@ class Quicksettings {
         lateinit var mBrightnessMirrorHandler: Any
 
         fun init(classLoader: ClassLoader?) {
+
+            // PagedTileLayout CLASS
+            val pagedTileLayout = findClass(
+                PAGED_TILE_LAYOUT_CLASS, classLoader
+            )
+
+            // HOOK CONSTRUCTOR to set object
+            hookAllConstructors(
+                pagedTileLayout, ConstructorHookPagedTileLayout
+            )
 
             // QSTileHost CLASS
             val qSAnimator = findClass(
@@ -239,13 +253,6 @@ class Quicksettings {
             )
 
             findAndHookMethod(
-                TILE_LAYOUT_CLASS,
-                classLoader,
-                "updateResources",
-                updateResourceHookTileLayout
-            )
-
-            findAndHookMethod(
                 QUICK_QS_PANEL_QQS_SIDE_LABEL_TILE_LAYOUT_CLASS,
                 classLoader,
                 "updateResources",
@@ -297,19 +304,39 @@ class Quicksettings {
                 "onViewAttached",
                 onViewAttachedHookShadeHeaderController
             )
+
+            findAndHookMethod(
+                QUICK_QS_PANEL_CLASS,
+                classLoader,
+                "getOrCreateTileLayout",
+                getOrCreateTileLayoutHook
+            )
+
+            findAndHookMethod(
+                QS_PANEL_CONTROLLER_BASE_CLASS,
+                classLoader,
+                "switchTileLayout",
+                Boolean::class.javaPrimitiveType,
+                switchTileLayoutHook
+            )
         }
 
         // Hooked functions
         private val ConstructorHookQSTileHost: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 QSTileHost = param.thisObject
-                mReloadTiles = false
             }
         }
 
         private val ConstructorHookQSAnimator: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 mQsAnimator = param.thisObject
+            }
+        }
+
+        private val ConstructorHookPagedTileLayout: XC_MethodHook = object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                PagedTileLayout = param.thisObject
             }
         }
 
@@ -487,13 +514,44 @@ class Quicksettings {
         private val onConfigurationChangedQuickQSPanelController: XC_MethodHook =
             object : XC_MethodReplacement() {
             override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                val mView = getObjectField(param.thisObject, "mView")
+                val mView = getObjectField(param.thisObject, "mView") as View
                 val maxTiles  = getIntField(mView, "mMaxTiles")
+                val configuration = mView.context.resources.configuration
 
-                if (maxTiles != mQsColumnsConfig * mQQsRowsConfig) {
-                    setIntField(mView, "mMaxTiles", mQsColumnsConfig * mQQsRowsConfig)
-                    callMethod(param.thisObject, "setTiles")
+                val mMediaHost = getObjectField(param.thisObject, "mMediaHost")
+
+                if (configuration.orientation == ORIENTATION_LANDSCAPE) {
+
+                    if (callMethod(mMediaHost, "getVisible") as Boolean) {
+
+                        log("mwilky: is potrait and media playing")
+
+                        setIntField(QuickQSPanelQQSSideLabelTileLayout, "mMaxAllowedRows", 2)
+
+                        setIntField(mView, "mMaxTiles", 4)
+                        callMethod(param.thisObject, "setTiles")
+
+
+                    } else {
+
+                        setIntField(QuickQSPanelQQSSideLabelTileLayout, "mMaxAllowedRows", 1)
+
+                        setIntField(mView, "mMaxTiles", mQqsColumnsConfigLandscape)
+                        callMethod(param.thisObject, "setTiles")
+
+                    }
+
+                } else {
+
+                    setIntField(QuickQSPanelQQSSideLabelTileLayout, "mMaxAllowedRows", mQQsRowsConfig)
+
+                    if (maxTiles != mQqsColumnsConfig * mQQsRowsConfig) {
+                        setIntField(mView, "mMaxTiles", mQqsColumnsConfig * mQQsRowsConfig)
+                        callMethod(param.thisObject, "setTiles")
+                    }
+
                 }
+
                 callMethod(param.thisObject, "updateMediaExpansion")
                 return null
             }
@@ -505,12 +563,130 @@ class Quicksettings {
             }
         }
 
-        private val updateResourceHookSidelabelTileLayout: XC_MethodHook = object
-            : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                setIntField(param.thisObject, "mMaxAllowedRows", mQsRowsConfig);
+        private val updateResourceHookSidelabelTileLayout: XC_MethodHook =
+            object : XC_MethodReplacement() {
+                override fun replaceHookedMethod(param: MethodHookParam): Any {
+
+                    val sideLabelTileLayout = param.thisObject as ViewGroup
+
+                    val mContext = getObjectField(param.thisObject, "mContext") as Context
+
+                    val resources = sideLabelTileLayout.resources
+
+                    val mIsSmallLandscapeLockscreenEnabled =
+                        getObjectField(sideLabelTileLayout, "mIsSmallLandscapeLockscreenEnabled") as Boolean
+
+                    val mIsSmallLandscape =
+                        resources.getBoolean(
+                            mContext.resources.getIdentifier(
+                                "is_small_screen_landscape",
+                                "bool",
+                                "com.android.systemui"
+                            )
+                        )
+
+                    val columns =
+                        if (mIsSmallLandscapeLockscreenEnabled && mIsSmallLandscape)
+                            resources.getInteger(
+                                mContext.resources.getIdentifier(
+                                    "small_land_lockscreen_quick_settings_num_columns",
+                                    "integer",
+                                    "com.android.systemui"
+                                )
+                            )
+                        else
+
+                            //Check for landscape
+                            mQqsColumnsConfig
+
+                    setIntField(
+                        param.thisObject, "mResourceColumns", 1.coerceAtLeast(columns)
+                    )
+
+                    val mResourceCellHeightResId = getIntField(param.thisObject, "mResourceCellHeightResId")
+
+                    val mResourceCellHeight =
+                        resources.getDimensionPixelSize(mResourceCellHeightResId)
+
+                    setIntField(param.thisObject, "mResourceCellHeight", mResourceCellHeight)
+
+                    val mCellMarginHorizontal =
+                        resources.getDimensionPixelSize(
+                            mContext.resources.getIdentifier(
+                                "qs_tile_margin_horizontal",
+                                "dimen",
+                                "com.android.systemui"
+                            )
+                        )
+
+                    setIntField(param.thisObject, "mCellMarginHorizontal", mCellMarginHorizontal)
+
+                    val mCellMarginVertical =
+                        resources.getDimensionPixelSize(
+                            mContext.resources.getIdentifier(
+                                "qs_tile_margin_vertical",
+                                "dimen",
+                                "com.android.systemui"
+                            )
+                        )
+
+                    setIntField(param.thisObject, "mCellMarginVertical", mCellMarginVertical)
+
+                    val rows =
+                        if (mIsSmallLandscapeLockscreenEnabled && mIsSmallLandscape)
+                            resources.getInteger(
+                                mContext.resources.getIdentifier(
+                                    "small_land_lockscreen_quick_settings_max_rows",
+                                    "integer",
+                                    "com.android.systemui"
+                                )
+                            )
+                        else
+                            mQsRowsConfig
+
+                    setIntField(
+                        param.thisObject, "mMaxAllowedRows", 1.coerceAtLeast(rows)
+                    )
+
+                    val mLessRows = getBooleanField(param.thisObject, "mLessRows")
+
+                    if (mLessRows) {
+                        val mMinRows = getIntField(param.thisObject, "mMinRows")
+
+                        val mMaxAllowedRows = getIntField(param.thisObject, "mMaxAllowedRows")
+
+                        setIntField(
+                            param.thisObject, "mMaxAllowedRows", mMinRows.coerceAtLeast(mMaxAllowedRows - 1)
+                        )
+
+                    }
+
+                    val mTempTextView = getObjectField(param.thisObject, "mTempTextView")
+                            as TextView
+
+                    mTempTextView.dispatchConfigurationChanged(mContext.resources.configuration)
+
+                    QuicksettingsPremium.Companion.updateTileMargins(param.thisObject)
+
+                    callMethod(param.thisObject, "estimateCellHeight")
+
+                    val updateColumns = callMethod(param.thisObject, "updateColumns")
+                            as Boolean
+
+                    var mReturn = false
+
+                    if (updateColumns) {
+                        callMethod(param.thisObject, "requestLayout")
+                        mReturn = true
+                    }
+
+                    setIntField(
+                        param.thisObject, "mMaxAllowedRows", rows
+                    )
+
+                    return mReturn
+                }
             }
-        }
 
         private val updateResourceHookQuickQSPanelQQSSidelabelTileLayout: XC_MethodHook = object
             : XC_MethodHook() {
@@ -519,30 +695,6 @@ class Quicksettings {
                 if (QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout == null) {
                     QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout =
                         QuickQSPanelQQSSideLabelTileLayout
-                }
-                val mContext = getObjectField(param.thisObject, "mContext") as Context
-                if (mContext.resources.configuration.orientation == ORIENTATION_PORTRAIT) {
-                    setIntField(param.thisObject, "mMaxAllowedRows", mQQsRowsConfig)
-                }
-            }
-        }
-
-        private val updateResourceHookTileLayout: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-
-                setIntField(
-                    param.thisObject, "mResourceColumns", 1.coerceAtLeast(mQsColumnsConfig)
-                )
-                setIntField(
-                    param.thisObject, "mMaxAllowedRows", 1.coerceAtLeast(mQsRowsConfig)
-                )
-
-                if (QuicksettingsPremium.updateColumns(param.thisObject)) {
-                    log("${UtilsPremium.TAG}: requestLayout called")
-                    callMethod(param.thisObject, "requestLayout")
-                    param.result=true
-                } else {
-                    param.result = false
                 }
             }
         }
@@ -677,6 +829,61 @@ class Quicksettings {
                     batteryIcon,
                     "mUnknownStateDrawable"
                 ) as Drawable?)?.setTint(Color.WHITE)
+            }
+        }
+
+        private val getOrCreateTileLayoutHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+
+                val mQQSSideLabelTileLayout = param.result
+
+                callMethod(mQQSSideLabelTileLayout, "setMaxColumns", mQqsColumnsConfig)
+            }
+        }
+
+        private val switchTileLayoutHook: XC_MethodHook = object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+
+                val horizontal = callMethod(param.thisObject, "shouldUseHorizontalLayout")
+                        as Boolean
+
+                val mView = getObjectField(param.thisObject, "mView") as View
+
+                val mTileLayout = getObjectField(mView, "mTileLayout") as View
+
+                callMethod(mTileLayout, "setMinRows", if (horizontal) 2 else 1)
+
+                if (mView.javaClass.name.equals(QUICK_QS_PANEL_CLASS)) {
+
+                    if (mView.context.resources.configuration.orientation == ORIENTATION_PORTRAIT) {
+
+
+
+                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQqsColumnsConfig)
+
+                    } else {
+
+                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQqsColumnsConfigLandscape)
+
+                    }
+
+                } else if (mView.javaClass.name.equals(QS_PANEL_CLASS)) {
+
+                    if (mView.context.resources.configuration.orientation == ORIENTATION_PORTRAIT) {
+
+                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQsColumnsConfig)
+
+                    } else {
+
+                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQsColumnsConfigLandscape)
+
+                    }
+                }
+
+                val mUsingHorizontalLayoutChangedListener = getObjectField(param.thisObject, "mUsingHorizontalLayoutChangedListener") as Runnable?
+
+                mUsingHorizontalLayoutChangedListener?.run()
+
             }
         }
 

@@ -3,6 +3,7 @@ package com.mwilky.androidenhanced.ui
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.provider.Settings
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,8 +25,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -78,6 +80,9 @@ import androidx.compose.ui.text.font.FontWeight
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedAlarmIcon
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedCallStrengthIcon
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedVolumeIcon
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarAirplaneIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryPercentColor
@@ -93,13 +98,18 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
+import com.mwilky.androidenhanced.Utils.Companion.hideAlarmIcon
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedWifiIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
+import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
+import com.mwilky.androidenhanced.Utils.Companion.qqsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qqsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
+import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
@@ -111,12 +121,12 @@ import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 
 class Tweaks {
     companion object {
-        fun readSwitchState(context: Context, key: String): Boolean {
+        fun readSwitchState(context: Context, key: String, defaultValue: Boolean = false): Boolean {
             return try {
                 val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
                 val sharedPreferences =
                     deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
-                sharedPreferences.getBoolean(key, false)
+                sharedPreferences.getBoolean(key, defaultValue)
             } catch (e: Exception) {
                 Log.e(TAG, "readSwitchState error: $e")
                 false
@@ -202,6 +212,15 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     var rememberQsColumns by remember {
         mutableIntStateOf(sharedPreferences.getInt(qsColumns, 2) -2)
     }
+    var rememberQsColumnsLandscape by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsColumnsLandscape, 4) -2)
+    }
+    var rememberQQsColumns by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qqsColumns, 2) -2)
+    }
+    var rememberQQsColumnsLandscape by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qqsColumnsLandscape, 4) -2)
+    }
     var rememberQsBrightnessSliderPosition by remember {
         mutableIntStateOf(sharedPreferences.getInt(qsBrightnessSliderPosition, 0))
     }
@@ -245,7 +264,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            //For certain keys we need to offset the index
             when (key) {
                 statusBarClockPosition -> rememberStatusBarClockPosition =
                     sharedPreferences.getInt(statusBarClockPosition, 0)
@@ -259,6 +277,12 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getInt(qqsRows, 2) - 1
                 qsColumns -> rememberQsColumns =
                     sharedPreferences.getInt(qsColumns, 2) - 2
+                qsColumnsLandscape -> rememberQsColumnsLandscape =
+                    sharedPreferences.getInt(qsColumnsLandscape, 4) - 2
+                qqsColumns -> rememberQQsColumns =
+                    sharedPreferences.getInt(qqsColumns, 2) - 2
+                qqsColumnsLandscape -> rememberQQsColumnsLandscape =
+                    sharedPreferences.getInt(qqsColumnsLandscape, 4) - 2
                 qsRows -> rememberQsRows =
                     sharedPreferences.getInt(qsRows, 4) - 2
                 qsBrightnessSliderPosition -> rememberQsBrightnessSliderPosition =
@@ -315,6 +339,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         val quicksettings = "Quicksettings"
         val notifications = "Notifications"
         val statusbarColors = "Individual icon colors"
+        val collapsedIcons = "Hide collapsed statusbar icons"
+        val allStatusbarIcons = "Hide statusbar icons"
 
         when (screen) {
             //Pages
@@ -352,12 +378,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         statusBarBrightnessControl
                     )
                 }
-                item {
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                }
                 //Clock section
                 item {
                     TweakSectionHeader(
@@ -387,12 +407,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                             id = R.string.statusbarClockSecondsSummary
                         ),
                         statusBarClockSeconds
-                    )
-                }
-                item {
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                 }
                 //Icon section
@@ -430,9 +444,88 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.iconManagement
+                        )
+                    )
+                }
+                item {
+                    TweakRow(
+                        context = context,
+                        label = allStatusbarIcons,
+                        description = stringResource(
+                            id = R.string.allStatusbarIcons),
+                        navController = navController,
+                        sharedPreferences = sharedPreferences,
+                        false
+                    )
+                }
+                item {
+                    TweakRow(
+                        context = context,
+                        label = collapsedIcons,
+                        description = stringResource(
+                            id = R.string.collapsedStatusbarIcons),
+                        navController = navController,
+                        sharedPreferences = sharedPreferences,
+                        false
+                    )
+                }
+                item {
                     Spacer(
                         modifier = Modifier
                             .height(64.dp)
+                    )
+                }
+            }
+            allStatusbarIcons -> {
+                //Tweaks Items
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            id = R.string.alarmTitle
+                        ),
+                        "",
+                        hideAlarmIcon,
+                        false
+                    )
+                }
+            }
+            collapsedIcons -> {
+                //Tweaks Items
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            id = R.string.alarmTitle
+                        ),
+                        "",
+                        hideCollapsedAlarmIcon,
+                        true
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            id = R.string.volumeTitle
+                        ),
+                        "",
+                        hideCollapsedVolumeIcon,
+                        true
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        context,
+                        stringResource(
+                            id = R.string.callStrengthTitle
+                        ),
+                        "",
+                        hideCollapsedCallStrengthIcon,
+                        true
                     )
                 }
             }
@@ -595,12 +688,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                }
-                item {
                     TweakSectionHeader(
                         label = stringResource(
                             id = R.string.volumeButton
@@ -730,12 +817,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                }
-                item {
                     TweakSectionHeader(
                         label = stringResource(
                             id = R.string.expansion
@@ -765,12 +846,6 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                }
-                item {
                     TweakSectionHeader(
                         label = stringResource(
                             id = R.string.tileLayout
@@ -785,7 +860,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         description = qsStyleEntries[rememberQsStyle],
                         key = qsStyle,
                         entries = context.resources.getStringArray(R.array.quicksettingsStyle),
-                        0
+                        0,
+                        disabledIndex = 1
                     )
                 }
                 item {
@@ -797,6 +873,28 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         key = qqsRows,
                         entries = context.resources.getStringArray(R.array.qqs_rows_entries),
                         1
+                    )
+                }
+                item {
+                    TweakSelectionRow(
+                        label = stringResource(
+                            id = R.string.qqsColumnsTitle
+                        ),
+                        description = qsColumnsEntries[rememberQQsColumns],
+                        key = qqsColumns,
+                        entries = context.resources.getStringArray(R.array.qs_columns),
+                        0
+                    )
+                }
+                item {
+                    TweakSelectionRow(
+                        label = stringResource(
+                            id = R.string.qqsColumnsLandscapeTitle
+                        ),
+                        description = qsColumnsEntries[rememberQQsColumnsLandscape],
+                        key = qqsColumnsLandscape,
+                        entries = context.resources.getStringArray(R.array.qs_columns),
+                        2
                     )
                 }
                 item {
@@ -822,9 +920,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
+                    TweakSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsColumnsLandscapeTitle
+                        ),
+                        description = qsColumnsEntries[rememberQsColumnsLandscape],
+                        key = qsColumnsLandscape,
+                        entries = context.resources.getStringArray(R.array.qs_columns),
+                        2
                     )
                 }
                 item {
@@ -898,63 +1001,73 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
 }
 
 @Composable
-fun TweakSwitch(context: Context, label: String, description: String, key: String) {
-    var switchState by remember { mutableStateOf(readSwitchState(context, key)) }
+fun TweakSwitch(context: Context, label: String, description: String, key: String, defaultValue: Boolean = false) {
+    var switchState by remember { mutableStateOf(readSwitchState(context, key, defaultValue)) }
 
-    Row(
+    ElevatedCard(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                top = 16.dp,
-                bottom = 16.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(8.dp)
+            .fillMaxSize(),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.elevatedCardColors()
     ) {
-        Column(
+
+        Row(
             modifier = Modifier
-                .weight(1f), // Take available horizontal space
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .padding(
+                    top = 16.dp,
+                    bottom = 16.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+            Column(
                 modifier = Modifier
-                    .padding(
-                        start = 16.dp,
-                        top = 8.dp,
-                        end = 4.dp
-                    )
-            )
-            if (description != "") {
+                    .weight(1f), // Take available horizontal space
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = label,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(
                             start = 16.dp,
-                            bottom = 8.dp,
-                            end = 16.dp
+                            top = 8.dp,
+                            bottom = if (description.isNotEmpty()) 0.dp else 8.dp,
+                            end = 4.dp
                         )
                 )
+                if (description.isNotEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(
+                                start = 16.dp,
+                                bottom = 8.dp,
+                                end = 16.dp
+                            )
+                    )
+                }
             }
-        }
-        Switch(
-            checked = switchState,
-            onCheckedChange = {
-                switchState = !switchState
-                writeSwitchState(context, key, switchState)
-                sendBroadcast(context, key, switchState)
+            Switch(
+                checked = switchState,
+                onCheckedChange = {
+                    switchState = !switchState
+                    writeSwitchState(context, key, switchState)
+                    sendBroadcast(context, key, switchState)
                 },
-            modifier = Modifier
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                ),
-            colors = SwitchDefaults.colors()
-        )
+                modifier = Modifier
+                    .padding(
+                        horizontal = 24.dp
+                    )
+                    .size(32.dp),
+                colors = SwitchDefaults.colors()
+            )
+        }
     }
 }
 
@@ -965,61 +1078,71 @@ fun TweakRow(
     description: String,
     navController: NavController,
     sharedPreferences: SharedPreferences,
-    individualColorsDisabled: Boolean
+    disabled: Boolean
 ) {
 
-    Row(
+    ElevatedCard(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                top = 16.dp,
-                bottom = 16.dp
-            )
-            .clickable(
-                enabled = !individualColorsDisabled,
-                onClick = {
-                    navController.navigate(Screens.Tweaks.withArgs(label))
-                }
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(8.dp)
+            .fillMaxSize(),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.elevatedCardColors()
     ) {
-        Column(
+
+        Row(
             modifier = Modifier
-                .weight(1f), // Take available horizontal space
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .padding(
+                    top = 16.dp,
+                    bottom = 16.dp
+                )
+                .clickable(
+                    enabled = !disabled,
+                    onClick = {
+                        navController.navigate(Screens.Tweaks.withArgs(label))
+                    }
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleLarge,
-                color = if (individualColorsDisabled)
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        else
-                            MaterialTheme.colorScheme.onSurface,
+            Column(
                 modifier = Modifier
-                    .padding(
-                        start = 16.dp,
-                        top = 8.dp,
-                        end = 4.dp
-                    )
-            )
-            if (description != "") {
+                    .weight(1f), // Take available horizontal space
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (individualColorsDisabled)
+                    text = label,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = if (disabled)
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     else
                         MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(
                             start = 16.dp,
-                            bottom = 8.dp,
-                            end = 16.dp
+                            top = 8.dp,
+                            end = 4.dp
                         )
                 )
+                if (description != "") {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (disabled)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else
+                            MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(
+                                start = 16.dp,
+                                bottom = 8.dp,
+                                end = 16.dp
+                            )
+                    )
+                }
             }
         }
+
     }
 }
 
@@ -1047,67 +1170,61 @@ fun TweakColor(
             label = label
         )
     }
-
-    Row(
+    ElevatedCard(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                top = 16.dp,
-                bottom = 16.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+            .padding(8.dp)
+            .fillMaxSize(),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.elevatedCardColors()
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .weight(1f), // Take available horizontal space
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .padding(
+                    top = 16.dp,
+                    bottom = 16.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+            Column(
+                modifier = Modifier
+                    .weight(1f), // Take available horizontal space
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(
+                            start = 16.dp,
+                            top = 8.dp,
+                            end = 4.dp,
+                            bottom = 8.dp,
+                        )
+                )
+            }
+            Box(
                 modifier = Modifier
                     .padding(
-                        start = 16.dp,
-                        top = 8.dp,
-                        end = 4.dp,
-                        bottom = 8.dp,
+                        horizontal = 16.dp
                     )
+                    .size(32.dp)
+                    .background(
+                        color = intToColor(previewColor),
+                        shape = CircleShape
+                    )
+                    .clickable {
+                        isColorPickerVisible = true
+                        //sharedPreferences.edit().putInt(key, android.graphics.Color.RED).apply()
+                        //sendBroadcast(context, key, android.graphics.Color.RED)
+                    }
             )
         }
-        Box(
-            modifier = Modifier
-                .padding(
-                    horizontal = 16.dp
-                )
-                .size(32.dp) // Adjust the size as needed
-                .background(
-                    color = intToColor(previewColor),
-                    shape = CircleShape
-                )
-                .clickable {
-                    isColorPickerVisible = true
-                    //sharedPreferences.edit().putInt(key, android.graphics.Color.RED).apply()
-                    //sendBroadcast(context, key, android.graphics.Color.RED)
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            // You can add content inside the clickable box if needed
-//            Box(
-//                modifier = Modifier
-//                    .size(32.dp) // Adjust the size as needed
-//                    .background(
-//                        color = intToColor(previewColor),
-//                        shape = CircleShape
-//                    )
-//                    .clickable {
-//                        sharedPreferences.edit().putInt(key, android.graphics.Color.RED).apply()
-//                        sendBroadcast(context, key, android.graphics.Color.RED)
-//                    },
-//            )
-        }
+
     }
+
 }
 
 @Composable
@@ -1145,7 +1262,8 @@ fun TweakSelectionDialog(
     label: String,
     key: String,
     entries: Array<String>,
-    defaultIndex: Int
+    defaultIndex: Int,
+    disabledIndex: Int?
 ) {
 
     val context = LocalContext.current
@@ -1196,6 +1314,27 @@ fun TweakSelectionDialog(
                     selectedOption
                 }
             }
+            qsColumnsLandscape -> {
+                if (sharedPreferences.contains(qsColumnsLandscape)) {
+                    selectedOption - 2
+                } else {
+                    selectedOption
+                }
+            }
+            qqsColumns -> {
+                if (sharedPreferences.contains(qqsColumns)) {
+                    selectedOption - 2
+                } else {
+                    selectedOption
+                }
+            }
+            qqsColumnsLandscape -> {
+                if (sharedPreferences.contains(qqsColumnsLandscape)) {
+                    selectedOption - 2
+                } else {
+                    selectedOption
+                }
+            }
             qsRows -> {
                 if (sharedPreferences.contains(qsRows)) {
                     selectedOption - 2
@@ -1233,14 +1372,6 @@ fun TweakSelectionDialog(
                             bottom = 8.dp
                         )
                 )
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    modifier = Modifier
-                        .padding(
-                            top = 8.dp
-                        )
-                )
                 LazyColumn(
                     modifier = Modifier
                         .padding(
@@ -1249,10 +1380,13 @@ fun TweakSelectionDialog(
                 ) {
                     items(options.size) { index ->
                         val option = options[index]
+                        val isClickable = index != disabledIndex
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onOptionSelected(index) }
+                                .let {
+                                    if (isClickable) it.clickable { onOptionSelected(index) } else it
+                                }
                                 .padding(
                                     top = 16.dp,
                                     bottom = 16.dp
@@ -1261,7 +1395,11 @@ fun TweakSelectionDialog(
                         ) {
                             RadioButton(
                                 selected = index == selectedOption,
-                                onClick = { onOptionSelected(index) },
+                                onClick = {
+                                    if (isClickable) {
+                                        onOptionSelected(index)
+                                    }
+                                },
                                 modifier = Modifier
                                     .size(20.dp)
                                     .padding(
@@ -1280,19 +1418,11 @@ fun TweakSelectionDialog(
                                         end = 24.dp
                                     ),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (isClickable) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
                         }
                     }
                 }
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    modifier = Modifier
-                        .padding(
-                            bottom = 8.dp
-                        )
-                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -1317,6 +1447,9 @@ fun TweakSelectionDialog(
                             selectedOption += when (key) {
                                 qqsRows -> 1
                                 qsColumns -> 2
+                                qsColumnsLandscape -> 2
+                                qqsColumns -> 2
+                                qqsColumnsLandscape -> 2
                                 qsRows -> 2
                                 else -> 0
                             }
@@ -1392,9 +1525,7 @@ fun TweakColorDialog(
                             )
                     )
                 }
-                colorPickerController.setWheelColor(
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                )
+                colorPickerController.wheelColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 HsvColorPicker(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1548,7 +1679,8 @@ fun TweakSelectionRow(
     description: String,
     key: String,
     entries: Array<String>,
-    defaultIndex: Int
+    defaultIndex: Int,
+    disabledIndex: Int? = null
 ) {
     // Create a state variable to track whether the dialog should be shown
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -1562,56 +1694,67 @@ fun TweakSelectionRow(
             label = label,
             key = key,
             entries = entries,
-            defaultIndex = defaultIndex
+            defaultIndex = defaultIndex,
+            disabledIndex = disabledIndex
         )
     }
 
-    Row(
+    ElevatedCard(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                top = 16.dp,
-                bottom = 16.dp
-            )
-            .clickable(
-                enabled = true,
-                onClick = {
-                    // Show the dialog when the row is clicked
-                    isDialogVisible = true
-                }
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(8.dp)
+            .fillMaxSize(),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.elevatedCardColors()
     ) {
-        Column(
+
+        Row(
             modifier = Modifier
-                .weight(1f), // Take available horizontal space
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .padding(
+                    top = 16.dp,
+                    bottom = 16.dp
+                )
+                .clickable(
+                    enabled = true,
+                    onClick = {
+                        // Show the dialog when the row is clicked
+                        isDialogVisible = true
+                    }
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+            Column(
                 modifier = Modifier
-                    .padding(
-                        start = 16.dp,
-                        top = 8.dp,
-                        end = 4.dp
-                    )
-            )
-            if (description != "") {
+                    .weight(1f), // Take available horizontal space
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = label,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(
                             start = 16.dp,
-                            bottom = 8.dp,
-                            end = 16.dp
+                            top = 8.dp,
+                            end = 4.dp
                         )
                 )
+                if (description != "") {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(
+                                start = 16.dp,
+                                bottom = 8.dp,
+                                end = 16.dp
+                            )
+                    )
+                }
             }
         }
+
     }
 }

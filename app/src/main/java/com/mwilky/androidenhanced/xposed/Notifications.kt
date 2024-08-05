@@ -85,7 +85,7 @@ class Notifications {
             }
         }
 
-        private val buzzBeepBlinkLockedHook: XC_MethodHook? = object : XC_MethodHook() {
+        private val buzzBeepBlinkLockedHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val mScreenOn = getBooleanField(param.thisObject, "mScreenOn")
                 val mSystemReady = getBooleanField(param.thisObject, "mSystemReady")

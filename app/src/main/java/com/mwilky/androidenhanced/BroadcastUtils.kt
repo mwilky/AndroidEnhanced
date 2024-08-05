@@ -22,7 +22,6 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarClockColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarDndIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarGlobalIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarHotspotIconColor
-import com.mwilky.androidenhanced.Utils.Companion.customStatusbarIconColors
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarMobileIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarNotificationIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarOtherIconColor
@@ -32,18 +31,25 @@ import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
+import com.mwilky.androidenhanced.Utils.Companion.hideAlarmIcon
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedAlarmIcon
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedCallStrengthIcon
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedVolumeIcon
+import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedWifiIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
+import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
+import com.mwilky.androidenhanced.Utils.Companion.qqsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qqsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
+import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
-import com.mwilky.androidenhanced.Utils.Companion.reloadTiles
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
@@ -68,32 +74,45 @@ import com.mwilky.androidenhanced.xposed.Notifications.Companion.mExpandedNotifi
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNotificationsEnabled
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationExpansion
 import com.mwilky.androidenhanced.xposed.Quicksettings
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.PagedTileLayout
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSPanel
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibrationEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsBrightnessSliderEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsRowsConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQqsColumnsConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQqsColumnsConfigLandscape
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsAnimator
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsBrightnessSliderPositionConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsColumnsConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsColumnsConfigLandscape
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsRowsConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQuickPulldownConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.setBrightnessView
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.CurrentTilesInteractorImpl
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.QSTileViewImpl
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.animateBrightnessSlider
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.tileList
 import com.mwilky.androidenhanced.xposed.Statusbar
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideAlarmEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedAlarmEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedCallStrengthEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedVolumeEnabled
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedWifiEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnessControlEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
+import com.mwilky.androidenhanced.xposed.Statusbar.Companion.updateHiddenIcons
 import com.mwilky.androidenhanced.xposed.StatusbarPremium
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.getObjectField
+import de.robv.android.xposed.XposedHelpers.setIntField
 
 class BroadcastUtils: BroadcastReceiver() {
     companion object {
@@ -198,7 +217,7 @@ class BroadcastUtils: BroadcastReceiver() {
                         //QS Style
                         qsStyle -> {
                             QuicksettingsPremium.mQsStyleConfig = value as Int
-                            Quicksettings.mQsStyleConfig = value as Int
+                            Quicksettings.mQsStyleConfig = value
                             updateQuicksettings(mContext)
                         }
                         qsColumns -> {
@@ -215,13 +234,13 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                         qsBrightnessSliderPosition -> {
                             mQsBrightnessSliderPositionConfig = value as Int
-                            QuicksettingsPremium.mQsBrightnessSliderPositionConfig = value as Int
+                            QuicksettingsPremium.mQsBrightnessSliderPositionConfig = value
                             updateQuicksettings(mContext)
 
                         }
                         qqsBrightnessSlider -> {
                             mQQsBrightnessSliderEnabled= value as Boolean
-                            QuicksettingsPremium.mQQsBrightnessSliderEnabled= value as Boolean
+                            QuicksettingsPremium.mQQsBrightnessSliderEnabled= value
                             updateQuicksettings(mContext)
                         }
                         customStatusbarClockColor -> {
@@ -272,7 +291,38 @@ class BroadcastUtils: BroadcastReceiver() {
                             StatusbarPremium.mStatusbarGlobalColor = value as Int
                             StatusbarPremium.setStatusbarIconColorsOnBoot()
                         }
-
+                        hideCollapsedAlarmIcon -> {
+                            mHideCollapsedAlarmEnabled = value as Boolean
+                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
+                        }
+                        hideCollapsedVolumeIcon -> {
+                            mHideCollapsedVolumeEnabled = value as Boolean
+                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
+                        }
+                        hideCollapsedCallStrengthIcon -> {
+                            mHideCollapsedCallStrengthEnabled = value as Boolean
+                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
+                        }
+                        hideCollapsedWifiIcon -> {
+                            mHideCollapsedWifiEnabled = value as Boolean
+                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
+                        }
+                        hideAlarmIcon -> {
+                            mHideAlarmEnabled = value as Boolean
+                            updateHiddenIcons()
+                        }
+                        qsColumnsLandscape -> {
+                            mQsColumnsConfigLandscape= value as Int
+                            updateQuicksettings(mContext)
+                        }
+                        qqsColumns -> {
+                            mQqsColumnsConfig= value as Int
+                            updateQuicksettings(mContext)
+                        }
+                        qqsColumnsLandscape -> {
+                            mQqsColumnsConfigLandscape= value as Int
+                            updateQuicksettings(mContext)
+                        }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
                 }
@@ -303,6 +353,7 @@ class BroadcastUtils: BroadcastReceiver() {
         }
 
         fun updateQuicksettings(mContext: Context) {
+
             callMethod(
                 QuicksettingsPremium.QSPanel,
                 "onConfigurationChanged",
@@ -330,7 +381,16 @@ class BroadcastUtils: BroadcastReceiver() {
                 "onConfigurationChanged"
             )
 
-            reloadTiles()
+            callMethod(
+                QSTileViewImpl,
+                "onConfigurationChanged",
+                mContext.resources.configuration
+            )
+
+            callMethod(
+                QuicksettingsPremium.QSPanelController,
+                "refreshAllTiles"
+            )
 
             val mView =
                 getObjectField(Quicksettings.QSPanelController, "mView")
@@ -349,6 +409,25 @@ class BroadcastUtils: BroadcastReceiver() {
             setBrightnessView(mQQsView, mQQsBrightnessView)
 
             animateBrightnessSlider(mQsAnimator)
+
+            val firstTile = tileList.first()
+
+            val lastTile = tileList.last()
+
+            callMethod(CurrentTilesInteractorImpl, "removeTiles", listOf(lastTile, firstTile))
+
+            callMethod(CurrentTilesInteractorImpl, "addTile",Integer.MAX_VALUE, lastTile)
+
+            callMethod(CurrentTilesInteractorImpl, "addTile",0, firstTile)
+
+            callMethod(Quicksettings.QuickQSPanelController, "switchTileLayout", true)
+
+            callMethod(Quicksettings.QSPanelController, "switchTileLayout", true)
+
+            callMethod(PagedTileLayout, "forceTilesRedistribution", "Android Enhanced change")
+
+            callMethod(PagedTileLayout, "requestLayout")
+
         }
 
     }
@@ -363,12 +442,12 @@ class BroadcastUtils: BroadcastReceiver() {
         )
         bootCompleted =
             Intent.ACTION_LOCKED_BOOT_COMPLETED == action
-    if (!bootCompleted) {
-            return
-        }
+
+    if (!bootCompleted)
+        return
 
         //Pause for 2 seconds before sending the boot broadcasts to allow things to init
-        Thread.sleep(2000)
+        //Thread.sleep(2000)
 
         //Send the preferences and their values via broadcast
         val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()

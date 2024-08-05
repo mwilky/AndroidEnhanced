@@ -1,6 +1,5 @@
 package com.mwilky.androidenhanced
 
-import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Color
 import android.hardware.camera2.CameraAccessException
@@ -9,13 +8,9 @@ import android.hardware.camera2.CameraManager
 import android.os.Handler
 import android.os.Vibrator
 import android.os.VibratorManager
-import android.provider.Settings
 import android.util.Log
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSTileHost
 import de.robv.android.xposed.XposedHelpers
-import de.robv.android.xposed.XposedHelpers.callMethod
-import de.robv.android.xposed.XposedHelpers.getObjectField
 
 
 class Utils(context: Context, handler: Handler) {
@@ -53,6 +48,9 @@ class Utils(context: Context, handler: Handler) {
         const val qqsRows = "int_QQsRows"
         const val qsRows = "int_QsRows"
         const val qsColumns = "int_QSColumns"
+        const val qsColumnsLandscape = "int_QSColumnsLandscape"
+        const val qqsColumns = "int_QQSColumns"
+        const val qqsColumnsLandscape = "int_QQSColumnsLandscape"
         const val qsBrightnessSliderPosition = "int_QSBrightnessSliderPosition"
         const val qqsBrightnessSlider = "boolean_QQSBrightnesSlider"
         const val customStatusbarIconColors = "boolean_CustomStatusbarIconColors"
@@ -68,34 +66,14 @@ class Utils(context: Context, handler: Handler) {
         const val customStatusbarHotspotIconColor = "int_CustomStatusbarHotspotIconColor"
         const val customStatusbarBluetoothIconColor = "int_CustomStatusbarBluetoothIconColor"
         const val customStatusbarGlobalIconColor = "int_CustomStatusbarGlobalIconColor"
+        const val hideCollapsedAlarmIcon = "bool_HideCollapsedAlarmIcon"
+        const val hideCollapsedVolumeIcon = "bool_HideCollapsedVolumeIcon"
+        const val hideCollapsedCallStrengthIcon = "bool_HideCollapsedCallStrengthIcon"
+        const val hideCollapsedWifiIcon = "bool_HideCollapsedWifiIcon"
 
-        var mReloadTiles: Boolean = false
+        const val hideAlarmIcon = "bool_HideAlarmIcon"
 
         lateinit var mVibrator: Vibrator
-
-        fun reloadTiles() {
-            mReloadTiles = true
-
-            val mTunerService = getObjectField(QSTileHost, "mTunerService")
-            val mContentResolver = getObjectField(mTunerService, "mContentResolver")
-                    as ContentResolver
-
-            val value = Settings.Secure.getString(mContentResolver, "sysui_qs_tiles")
-
-            callMethod(
-                QSTileHost,
-                "onTuningChanged",
-                "sysui_qs_tiles",
-                "flashlight"
-            )
-            callMethod(
-                QSTileHost,
-                "onTuningChanged",
-                "sysui_qs_tiles",
-                value
-            )
-            mReloadTiles = false
-        }
 
         fun initVibrator(context: Context) {
             if (!::mVibrator.isInitialized) {
