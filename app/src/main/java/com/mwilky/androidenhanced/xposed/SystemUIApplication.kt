@@ -240,9 +240,9 @@ class SystemUIApplication {
                                 false
                             )
                             BroadcastUtils.registerBroadcastReceiver(
-                                hookedContext, Utils.hideAlarmIcon,
+                                hookedContext, Utils.iconBlacklist,
                                 param.thisObject.toString(),
-                                false
+                                "false"
                             )
                         }
                     }

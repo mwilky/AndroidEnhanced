@@ -98,10 +98,10 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
-import com.mwilky.androidenhanced.Utils.Companion.hideAlarmIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedWifiIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
+import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
@@ -117,13 +117,15 @@ import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
+import com.mwilky.androidenhanced.ui.Tweaks.Companion.readIconSwitchState
+import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeIconSwitchState
+import de.robv.android.xposed.XposedBridge.log
 
 
 class Tweaks {
     companion object {
-        fun readSwitchState(context: Context, key: String, defaultValue: Boolean = false): Boolean {
+        fun readSwitchState(deviceProtectedStorageContext: Context, key: String, defaultValue: Boolean = false): Boolean {
             return try {
-                val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
                 val sharedPreferences =
                     deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
                 sharedPreferences.getBoolean(key, defaultValue)
@@ -133,9 +135,8 @@ class Tweaks {
             }
         }
 
-        fun writeSwitchState(context: Context, key: String, state: Boolean) {
+        fun writeSwitchState(deviceProtectedStorageContext: Context, key: String, state: Boolean) {
             try {
-                val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
 
                 val sharedPreferences =
                     deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
@@ -144,50 +145,100 @@ class Tweaks {
                 Log.e(TAG, "writeSwitchState error: $e")
             }
         }
+
+        fun writeIconSwitchState(deviceProtectedStorageContext: Context, key: String, slot: String) {
+            try {
+                val sharedPreferences =
+                    deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+
+                val currentBlockedIcons: String? = sharedPreferences.getString(key, "")
+
+                val blockedIconsList = (currentBlockedIcons ?: "").split(",")
+                    .filter { it.isNotBlank() } // Filter out any blank strings
+                    .map { it.trim() }
+                    .toMutableList()
+
+
+                if (blockedIconsList.contains(slot)) {
+
+                    blockedIconsList.remove(slot)
+                } else {
+
+                    blockedIconsList.add(slot)
+                }
+
+                val updatedBlockedIcons = blockedIconsList.joinToString(",")
+
+                sharedPreferences.edit().putString(key, updatedBlockedIcons).apply()
+            } catch (e: Exception) {
+                Log.e(TAG, "writeIconSwitchState error: $e")
+            }
+        }
+
+        fun readIconSwitchState(deviceProtectedStorageContext: Context, key: String, slot: String): Boolean {
+            return try {
+                val sharedPreferences =
+                    deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+
+                val currentBlockedIcons: String? = sharedPreferences.getString(key, "")
+
+                val blockedIconsList = (currentBlockedIcons ?: "").split(",")
+                    .filter { it.isNotBlank() } // Filter out any blank strings
+                    .map { it.trim() }
+                    .toMutableList()
+
+                Log.e(TAG, "currentBlockedIcons = $currentBlockedIcons")
+
+                blockedIconsList.contains(slot)
+            } catch (e: Exception) {
+                Log.e(TAG, "readIconSwitchState error: $e")
+                false
+            }
+        }
+
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Tweaks(navController: NavController, context: Context, screen : String) {
+fun Tweaks(navController: NavController, deviceProtectedStorageContext: Context, screen : String) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             ScaffoldTweaksAppBar(navController = navController, screen = screen, showBackIcon = true)
         },
         content = {
-            TweaksScrollableContent(topPadding = it, screen = screen, navController = navController)
+            TweaksScrollableContent(topPadding = it, screen = screen, navController = navController, deviceProtectedStorageContext)
         }
     )
 }
 
 @Composable
-fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navController: NavController) {
-    val context = LocalContext.current
-
+fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navController: NavController, deviceProtectedStorageContext: Context) {
     //The below code is for updating the description of TweakSelectionRow based off the user's section.
     // It forces a recomposition each time the value is changed
-    val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
+
     val sharedPreferences =
         deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
 
     val statusBarClockPositionEntries =
-        context.resources.getStringArray(R.array.statusbar_clock_position_entries)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.statusbar_clock_position_entries)
     val smartPulldownEntries =
-        context.resources.getStringArray(R.array.smart_pulldown_entries)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.smart_pulldown_entries)
     val quickPulldownEntries =
-        context.resources.getStringArray(R.array.quick_pulldown_entries)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.quick_pulldown_entries)
     val qqsRowsEntries =
-        context.resources.getStringArray(R.array.qqs_rows_entries)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.qqs_rows_entries)
     val qsRowsEntries =
-        context.resources.getStringArray(R.array.qs_rows_entries)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_rows_entries)
     val qsColumnsEntries =
-        context.resources.getStringArray(R.array.qs_columns)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns)
     val qsStyleEntries =
-        context.resources.getStringArray(R.array.quicksettingsStyle)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsStyle)
     val qsBrightnessSliderPositionEntries =
-        context.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition)
+        deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition)
 
 
     // Create a Composable state variable that depends on the SharedPreferences value
@@ -356,7 +407,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.doubleTapToSleepTitle
                         ),
@@ -368,7 +419,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.statusbarBrightnessControlTitle
                         ),
@@ -393,13 +444,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = statusBarClockPositionEntries[rememberStatusBarClockPosition],
                         key = statusBarClockPosition,
-                        entries = context.resources.getStringArray(R.array.statusbar_clock_position_entries),
-                        0
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.statusbar_clock_position_entries),
+                        0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.statusbarClockSecondsTitle
                         ),
@@ -419,7 +471,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarGlobalIconColorTitle
                         ),
@@ -430,7 +482,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakRow(
-                        context = context,
+                        context = deviceProtectedStorageContext,
                         label = statusbarColors,
                         description = stringResource(
                             id = if (!individualColorsDisabled)
@@ -452,7 +504,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakRow(
-                        context = context,
+                        context = deviceProtectedStorageContext,
                         label = allStatusbarIcons,
                         description = stringResource(
                             id = R.string.allStatusbarIcons),
@@ -463,7 +515,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakRow(
-                        context = context,
+                        context = deviceProtectedStorageContext,
                         label = collapsedIcons,
                         description = stringResource(
                             id = R.string.collapsedStatusbarIcons),
@@ -482,14 +534,163 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             allStatusbarIcons -> {
                 //Tweaks Items
                 item {
-                    TweakSwitch(
-                        context,
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.airplaneTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "airplane"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.alarmTitle
                         ),
                         "",
-                        hideAlarmIcon,
-                        false
+                        iconBlacklist,
+                        "alarm_clock"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.batteryIconTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "battery"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.bluetoothTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "bluetooth"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.castTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "cast"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.zenTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "zen"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.hotspotTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "hotspot"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.locationTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "location"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.mobileTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "mobile"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.screenRecordTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "screen_record"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.speakerTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "speakerphone"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.volumeTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "volume"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.vpnTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "vpn"
+                    )
+                }
+                item {
+                    TweakIconSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.wifiTitle
+                        ),
+                        "",
+                        iconBlacklist,
+                        "wifi"
+                    )
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .height(64.dp)
                     )
                 }
             }
@@ -497,7 +698,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 //Tweaks Items
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.alarmTitle
                         ),
@@ -508,7 +709,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.volumeTitle
                         ),
@@ -519,7 +720,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.callStrengthTitle
                         ),
@@ -532,7 +733,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             statusbarColors -> {
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarClockColorTitle
                         ),
@@ -543,7 +744,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarBatteryIconColorTitle
                         ),
@@ -554,7 +755,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarBatteryPercentColorTitle
                         ),
@@ -565,7 +766,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarWifiIconColorTitle
                         ),
@@ -576,7 +777,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarMobileIconColorTitle
                         ),
@@ -587,7 +788,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarNotificationIconColorTitle
                         ),
@@ -598,7 +799,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarDndIconColorTitle
                         ),
@@ -609,7 +810,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarAirplaneIconColorTitle
                         ),
@@ -620,7 +821,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarBluetoothIconColorTitle
                         ),
@@ -631,7 +832,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarHotspotIconColorTitle
                         ),
@@ -642,7 +843,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakColor(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             id = R.string.customStatusbarOtherIconColorTitle
                         ),
@@ -669,7 +870,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.longPressPowerTorchScreenOffTitle),
                         stringResource(
@@ -679,7 +880,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.torchAutoOffScreenOnTitle),
                         stringResource(
@@ -696,7 +897,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.volKeyMediaControlTitle),
                         stringResource(
@@ -716,7 +917,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.allowAllRotationsTitle),
                         stringResource(
@@ -726,7 +927,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.disableSecureScreenshotsTitle),
                         stringResource(
@@ -747,7 +948,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.hideLockscreenStatusbarTitle),
                         stringResource(
@@ -757,7 +958,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.randomKeypadTitle),
                         stringResource(
@@ -767,7 +968,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.disableLockscreenPowerMenuTitle),
                         stringResource(
@@ -777,7 +978,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.disableQsLockscreenTitle),
                         stringResource(
@@ -798,7 +999,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.qsTileClickVibrationTitle),
                         stringResource(
@@ -808,7 +1009,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.hideQsFooterBuildNumberTitle),
                         stringResource(
@@ -830,8 +1031,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = smartPulldownEntries[rememberSmartPulldown],
                         key = smartPulldown,
-                        entries = context.resources.getStringArray(R.array.smart_pulldown_entries),
-                        0
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.smart_pulldown_entries),
+                        0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -841,8 +1043,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = quickPulldownEntries[rememberQuickPulldown],
                         key = quickPulldown,
-                        entries = context.resources.getStringArray(R.array.quick_pulldown_entries),
-                        0
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.quick_pulldown_entries),
+                        0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -859,8 +1062,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsStyleEntries[rememberQsStyle],
                         key = qsStyle,
-                        entries = context.resources.getStringArray(R.array.quicksettingsStyle),
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsStyle),
                         0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext,
                         disabledIndex = 1
                     )
                 }
@@ -871,8 +1075,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qqsRowsEntries[rememberQqsRows],
                         key = qqsRows,
-                        entries = context.resources.getStringArray(R.array.qqs_rows_entries),
-                        1
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qqs_rows_entries),
+                        1,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -882,8 +1087,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQQsColumns],
                         key = qqsColumns,
-                        entries = context.resources.getStringArray(R.array.qs_columns),
-                        0
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -893,8 +1099,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQQsColumnsLandscape],
                         key = qqsColumnsLandscape,
-                        entries = context.resources.getStringArray(R.array.qs_columns),
-                        2
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        2,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -904,8 +1111,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsRowsEntries[rememberQsRows],
                         key = qsRows,
-                        entries = context.resources.getStringArray(R.array.qs_rows_entries),
-                        2
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_rows_entries),
+                        2,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -915,8 +1123,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQsColumns],
                         key = qsColumns,
-                        entries = context.resources.getStringArray(R.array.qs_columns),
-                        0
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -926,8 +1135,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQsColumnsLandscape],
                         key = qsColumnsLandscape,
-                        entries = context.resources.getStringArray(R.array.qs_columns),
-                        2
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        2,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
@@ -944,13 +1154,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsBrightnessSliderPositionEntries[rememberQsBrightnessSliderPosition],
                         key = qsBrightnessSliderPosition,
-                        entries = context.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition),
-                        0
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition),
+                        0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.qqsBrightnessSliderTitle),
                         stringResource(
@@ -976,7 +1187,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.expandedNotificationsTitle),
                         stringResource(
@@ -986,7 +1197,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 }
                 item {
                     TweakSwitch(
-                        context,
+                        deviceProtectedStorageContext,
                         stringResource(
                             R.string.muteScreenOnNotificationsTitle),
                         stringResource(
@@ -1059,6 +1270,77 @@ fun TweakSwitch(context: Context, label: String, description: String, key: Strin
                     switchState = !switchState
                     writeSwitchState(context, key, switchState)
                     sendBroadcast(context, key, switchState)
+                },
+                modifier = Modifier
+                    .padding(
+                        horizontal = 24.dp
+                    )
+                    .size(32.dp),
+                colors = SwitchDefaults.colors()
+            )
+        }
+    }
+}
+
+@Composable
+fun TweakIconSwitch(context: Context, label: String, description: String, key: String, slot: String) {
+    var switchState by remember { mutableStateOf(readIconSwitchState(context, key, slot)) }
+
+    ElevatedCard(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.elevatedCardColors()
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = 16.dp,
+                    bottom = 16.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f), // Take available horizontal space
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(
+                            start = 16.dp,
+                            top = 8.dp,
+                            bottom = if (description.isNotEmpty()) 0.dp else 8.dp,
+                            end = 4.dp
+                        )
+                )
+                if (description.isNotEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(
+                                start = 16.dp,
+                                bottom = 8.dp,
+                                end = 16.dp
+                            )
+                    )
+                }
+            }
+            Switch(
+                checked = switchState,
+                onCheckedChange = {
+                    switchState = !switchState
+                    writeIconSwitchState(context, key, slot)
+                    sendBroadcast(context, key, slot)
                 },
                 modifier = Modifier
                     .padding(
@@ -1148,7 +1430,7 @@ fun TweakRow(
 
 @Composable
 fun TweakColor(
-    context: Context,
+    deviceProtectedStorageContext: Context,
     label: String,
     key: String,
     previewColor: Int,
@@ -1165,7 +1447,7 @@ fun TweakColor(
             onDismissRequest = { isColorPickerVisible = false },
             onConfirmation = { isColorPickerVisible = false },
             key = key,
-            context = context,
+            context = deviceProtectedStorageContext,
             sharedPreferences = sharedPreferences,
             label = label
         )
@@ -1263,11 +1545,9 @@ fun TweakSelectionDialog(
     key: String,
     entries: Array<String>,
     defaultIndex: Int,
-    disabledIndex: Int?
+    disabledIndex: Int?,
+    deviceProtectedStorageContext: Context
 ) {
-
-    val context = LocalContext.current
-    val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
     val coroutineScope = rememberCoroutineScope()
 
     // Create a state variable to track the selected radio button
@@ -1454,7 +1734,7 @@ fun TweakSelectionDialog(
                                 else -> 0
                             }
                             saveToSharedPreferences()
-                            sendBroadcast(context, key, selectedOption)
+                            sendBroadcast(deviceProtectedStorageContext, key, selectedOption)
                                   },
                         modifier = Modifier
                             .padding(
@@ -1680,7 +1960,8 @@ fun TweakSelectionRow(
     key: String,
     entries: Array<String>,
     defaultIndex: Int,
-    disabledIndex: Int? = null
+    disabledIndex: Int? = null,
+    deviceProtectedStorageContext: Context
 ) {
     // Create a state variable to track whether the dialog should be shown
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -1695,7 +1976,8 @@ fun TweakSelectionRow(
             key = key,
             entries = entries,
             defaultIndex = defaultIndex,
-            disabledIndex = disabledIndex
+            disabledIndex = disabledIndex,
+            deviceProtectedStorageContext = deviceProtectedStorageContext
         )
     }
 

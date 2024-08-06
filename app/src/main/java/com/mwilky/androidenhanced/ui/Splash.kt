@@ -23,9 +23,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 @Composable
-fun SplashScreen(navController: NavController, context: Context) {
+fun SplashScreen(navController: NavController, deviceProtectedStorageContext: Context) {
     //Get SharedPreferences
-    val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
     val sharedPreferences: SharedPreferences =
         deviceProtectedStorageContext.getSharedPreferences(
             PREFS, MODE_PRIVATE

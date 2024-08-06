@@ -48,10 +48,22 @@
     <string name="customStatusbarGlobalIconColorTitle">Global icon color</string>
     <string name="customStatusbarIndividualIconColorSummary">Set colors individually for each icon</string>
     <string name="customStatusbarIndividualIconColorSummaryDisabled">Reset the global icon color to enable individual control</string>
+
+    <string name="airplaneTitle">Airplane mode</string>
     <string name="alarmTitle">Alarm</string>
+    <string name="batteryIconTitle">Battery icon</string>
+    <string name="bluetoothTitle">Bluetooth</string>
+    <string name="castTitle">Cast</string>
+    <string name="hotspotTitle">Hotspot</string>
+    <string name="locationTitle">Location</string>
+    <string name="mobileTitle">Mobile data</string>
+    <string name="screenRecordTitle">Screen record</string>
+    <string name="speakerTitle">Speaker phone</string>
     <string name="volumeTitle">Volume</string>
+    <string name="vpnTitle">VPN</string>
     <string name="callStrengthTitle">Call strength</string>
-    <string name="wifiTitle">Wifi</string>
+    <string name="wifiTitle">WiFi</string>
+    <string name="zenTitle">Do not disturb</string>
 
 <!--    Buttons-->
     <string name="longPressPowerTorchScreenOffTitle">Torch on power button</string>

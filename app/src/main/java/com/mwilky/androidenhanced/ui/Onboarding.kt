@@ -25,8 +25,7 @@ import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 
 @Composable
-fun OnboardingScreen(navController: NavController, context: Context) {
-    val deviceProtectedStorageContext: Context = context.createDeviceProtectedStorageContext()
+fun OnboardingScreen(navController: NavController, deviceProtectedStorageContext: Context) {
     val sharedPreferences: SharedPreferences =
         deviceProtectedStorageContext.getSharedPreferences(
             BroadcastUtils.PREFS, Context.MODE_PRIVATE

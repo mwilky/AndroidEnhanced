@@ -40,7 +40,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Settings(navController: NavController, context: Context) {
+fun Settings(navController: NavController, deviceProtectedStorageContext: Context) {
 
     //Top App Bar
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -51,7 +51,7 @@ fun Settings(navController: NavController, context: Context) {
         topBar = {
             ScaffoldTweaksAppBar(
                 navController = navController,
-                screen = context.resources.getString(R.string.settings),
+                screen = deviceProtectedStorageContext.resources.getString(R.string.settings),
                 showBackIcon = false
             )
         },
@@ -59,7 +59,7 @@ fun Settings(navController: NavController, context: Context) {
             ScaffoldNavigationBar(navController = navController)
         },
         content = {
-            SettingsScrollableContent(topPadding = it, bottomPadding = it, navController, context)
+            SettingsScrollableContent(topPadding = it, bottomPadding = it, navController, deviceProtectedStorageContext)
         }
     )
 }
@@ -69,9 +69,8 @@ fun SettingsScrollableContent(
     topPadding: PaddingValues,
     bottomPadding: PaddingValues,
     navController: NavController,
-    context: Context
+    deviceProtectedStorageContext: Context
 ) {
-    val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
     val sharedPreferences: SharedPreferences =
         deviceProtectedStorageContext.getSharedPreferences(
             BroadcastUtils.PREFS, MODE_PRIVATE
@@ -92,7 +91,7 @@ fun SettingsScrollableContent(
             }
         }
 
-    val formattedDate = dateFromSharedPrefs?.let { convertDate(it, context) }
+    val formattedDate = dateFromSharedPrefs?.let { convertDate(it, deviceProtectedStorageContext) }
 
 
 
@@ -153,7 +152,7 @@ fun SettingsScrollableContent(
             }
         }
         item{
-            BackupButtonsRow(context = context)
+            BackupButtonsRow(context = deviceProtectedStorageContext)
         }
 
     }

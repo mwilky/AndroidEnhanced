@@ -31,13 +31,14 @@ import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
-import com.mwilky.androidenhanced.Utils.Companion.hideAlarmIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedAlarmIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedCallStrengthIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedVolumeIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedWifiIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
+import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
+import com.mwilky.androidenhanced.Utils.Companion.mIsInitialBoot
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
@@ -98,7 +99,6 @@ import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.tileList
 import com.mwilky.androidenhanced.xposed.Statusbar
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideAlarmEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedAlarmEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedCallStrengthEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedVolumeEnabled
@@ -107,12 +107,10 @@ import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnes
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.updateHiddenIcons
 import com.mwilky.androidenhanced.xposed.StatusbarPremium
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.getObjectField
-import de.robv.android.xposed.XposedHelpers.setIntField
 
 class BroadcastUtils: BroadcastReceiver() {
     companion object {
@@ -307,10 +305,6 @@ class BroadcastUtils: BroadcastReceiver() {
                             mHideCollapsedWifiEnabled = value as Boolean
                             callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
                         }
-                        hideAlarmIcon -> {
-                            mHideAlarmEnabled = value as Boolean
-                            updateHiddenIcons()
-                        }
                         qsColumnsLandscape -> {
                             mQsColumnsConfigLandscape= value as Int
                             updateQuicksettings(mContext)
@@ -323,8 +317,15 @@ class BroadcastUtils: BroadcastReceiver() {
                             mQqsColumnsConfigLandscape= value as Int
                             updateQuicksettings(mContext)
                         }
+                        iconBlacklist -> {
+                            Utils.setIconBlacklist(mContext, value as String)
+
+                            mIsInitialBoot= false
+
+                        }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
+
                 }
             }
 
@@ -392,24 +393,6 @@ class BroadcastUtils: BroadcastReceiver() {
                 "refreshAllTiles"
             )
 
-            val mView =
-                getObjectField(Quicksettings.QSPanelController, "mView")
-                        as ViewGroup
-            val mBrightnessView = getObjectField(mView, "mBrightnessView")
-                    as View
-
-            setBrightnessView(mView, mBrightnessView)
-
-            val mQQsView =
-                getObjectField(Quicksettings.QuickQSPanelController, "mView")
-                        as ViewGroup
-            val mQQsBrightnessView = getObjectField(mQQsView, "mBrightnessView")
-                    as View
-
-            setBrightnessView(mQQsView, mQQsBrightnessView)
-
-            animateBrightnessSlider(mQsAnimator)
-
             val firstTile = tileList.first()
 
             val lastTile = tileList.last()
@@ -427,6 +410,24 @@ class BroadcastUtils: BroadcastReceiver() {
             callMethod(PagedTileLayout, "forceTilesRedistribution", "Android Enhanced change")
 
             callMethod(PagedTileLayout, "requestLayout")
+
+            val mView =
+                getObjectField(Quicksettings.QSPanelController, "mView")
+                        as ViewGroup
+            val mBrightnessView = getObjectField(mView, "mBrightnessView")
+                    as View
+
+            setBrightnessView(mView, mBrightnessView)
+
+            val mQQsView =
+                getObjectField(Quicksettings.QuickQSPanelController, "mView")
+                        as ViewGroup
+            val mQQsBrightnessView = getObjectField(mQQsView, "mBrightnessView")
+                    as View
+
+            setBrightnessView(mQQsView, mQQsBrightnessView)
+
+            animateBrightnessSlider(mQsAnimator)
 
         }
 
@@ -457,6 +458,7 @@ class BroadcastUtils: BroadcastReceiver() {
             )
         val allPrefs = sharedPreferences.all
         for ((key, value) in allPrefs) {
+
             sendBroadcast(deviceProtectedStorageContext, key, value)
         }
     }

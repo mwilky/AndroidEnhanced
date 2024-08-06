@@ -23,6 +23,8 @@ import com.mwilky.androidenhanced.ui.Tweaks
 fun Navigation(context: Context) {
     val navController = rememberNavController()
 
+    val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
+
     NavHost(
         navController = navController,
         startDestination = Screens.Splash.route
@@ -30,31 +32,31 @@ fun Navigation(context: Context) {
         composable(route = Screens.Splash.route) {
             SplashScreen(
                 navController = navController,
-                context = context
+                deviceProtectedStorageContext = deviceProtectedStorageContext
             )
         }
         composable(route = Screens.Onboarding.route) {
             OnboardingScreen(
                 navController = navController,
-                context = context
+                deviceProtectedStorageContext = deviceProtectedStorageContext
             )
         }
         composable(route = Screens.Home.route) {
             HomeScreen(
                 navController = navController,
-                context = context
+                deviceProtectedStorageContext = deviceProtectedStorageContext
             )
         }
         composable(route = Screens.Logs.route) {
             Logs(
                 navController = navController,
-                context = context
+                deviceProtectedStorageContext = deviceProtectedStorageContext
             )
         }
         composable(route = Screens.Settings.route) {
             Settings(
                 navController = navController,
-                context = context
+                deviceProtectedStorageContext = deviceProtectedStorageContext
             )
         }
         composable(
@@ -68,7 +70,7 @@ fun Navigation(context: Context) {
             entry.arguments?.getString("screen")?.let {
                 Tweaks(
                     navController = navController,
-                    context = context,
+                    deviceProtectedStorageContext = deviceProtectedStorageContext,
                     screen = it
                 )
             }

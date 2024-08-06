@@ -16,12 +16,9 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.mwilky.androidenhanced.MainActivity
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
-import de.robv.android.xposed.XposedBridge.log
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.callStaticMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
@@ -36,7 +33,6 @@ import de.robv.android.xposed.XposedHelpers.setBooleanField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -615,11 +611,6 @@ class Statusbar {
                                 mBlockedIcons.add(blockList[i])
                             }
                         }
-                        "wifi" -> {
-                            if (mHideCollapsedWifiEnabled) {
-                                mBlockedIcons.add(blockList[i])
-                            }
-                        }
                         else -> {
                             mBlockedIcons.add(blockList[i])
                         }
@@ -744,13 +735,6 @@ class Statusbar {
             } else {
                 showIcon("alarm_clock")
             }
-
-            if (mHideCollapsedWifiEnabled) {
-                hideIcon("wifi")
-            } else {
-                showIcon("wifi")
-            }
-
         }
 
         private fun hideIcon(slotname: String) {

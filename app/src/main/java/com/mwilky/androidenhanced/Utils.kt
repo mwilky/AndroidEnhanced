@@ -8,8 +8,10 @@ import android.hardware.camera2.CameraManager
 import android.os.Handler
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
 import android.util.Log
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers
 
 
@@ -70,8 +72,9 @@ class Utils(context: Context, handler: Handler) {
         const val hideCollapsedVolumeIcon = "bool_HideCollapsedVolumeIcon"
         const val hideCollapsedCallStrengthIcon = "bool_HideCollapsedCallStrengthIcon"
         const val hideCollapsedWifiIcon = "bool_HideCollapsedWifiIcon"
+        const val iconBlacklist = "str_IconBlacklist"
 
-        const val hideAlarmIcon = "bool_HideAlarmIcon"
+        var mIsInitialBoot = true
 
         lateinit var mVibrator: Vibrator
 
@@ -115,6 +118,34 @@ class Utils(context: Context, handler: Handler) {
             obtainStyledAttributes.recycle()
             return resourceId
         }
+
+        fun setIconBlacklist(mContext: Context, iconBlacklist: String) {
+
+            val currentBlockedIcons: String = Settings.Secure.getString(mContext.contentResolver, "icon_blacklist") ?: ""
+
+            val blockedIconsList = currentBlockedIcons.split(",")
+                .filter { it.isNotBlank() } // Filter out any blank strings
+                .map { it.trim() }
+                .toMutableList()
+
+            val newIconsList = iconBlacklist.split(",")
+                .filter { it.isNotBlank() }
+                .map { it.trim() }
+
+            // We don't want to toggle values on the initial boot.
+            for (icon in newIconsList) {
+                if (blockedIconsList.contains(icon)) {
+                    blockedIconsList.remove(icon)
+                } else {
+                    blockedIconsList.add(icon)
+                }
+            }
+
+            val updatedBlockedIcons = blockedIconsList.joinToString(",")
+
+            Settings.Secure.putString(mContext.contentResolver, "icon_blacklist", if (mIsInitialBoot) iconBlacklist else updatedBlockedIcons)
+        }
+
     }
 
     private val mContext: Context = context

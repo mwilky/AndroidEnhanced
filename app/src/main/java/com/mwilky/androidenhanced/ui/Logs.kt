@@ -17,7 +17,7 @@ import androidx.compose.runtime.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Logs(navController: NavController, context: Context) {
+fun Logs(navController: NavController, deviceProtectedStorageContext: Context) {
 
     //Top App Bar
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
