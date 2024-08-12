@@ -233,14 +233,6 @@ class Statusbar {
 
             //Clock seconds
             findAndHookMethod(
-                CLOCK_CLASS,
-                classLoader,
-                "getSmallTime",
-                getSmallTimeHook
-            )
-
-            //Clock seconds
-            findAndHookMethod(
                 CLOCK_CLASS, classLoader, "onAttachedToWindow",
                 onAttachedToWindowHook
             )
@@ -529,15 +521,6 @@ class Statusbar {
             }
         }
 
-        private val getSmallTimeHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun beforeHookedMethod(param: MethodHookParam) {
-                setBooleanField(
-                    param.thisObject,
-                    "mShowSeconds",
-                    mStatusbarClockSecondsEnabled
-                )
-            }
-        }
         private val updateShowSecondsHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 setBooleanField(

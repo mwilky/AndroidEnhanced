@@ -203,6 +203,7 @@ class BroadcastUtils: BroadcastReceiver() {
                         statusBarClockSeconds -> {
                             mStatusbarClockSecondsEnabled = value as Boolean
                             callMethod(clock, "updateShowSeconds")
+                            callMethod(getObjectField(ShadeHeaderController, "clock"), "updateShowSeconds")
                         }
                         //Hide lockscreen statusbar
                         hideLockscreenStatusBar -> {
