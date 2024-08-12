@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.VibrationEffect.EFFECT_CLICK
@@ -21,7 +19,6 @@ import com.mwilky.androidenhanced.Utils.Companion.mVibrator
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
-import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
@@ -72,12 +69,11 @@ class Quicksettings {
         private val QS_IMPL_CLASS = "com.android.systemui.qs.QSImpl"
         private const val QS_ANIMATOR_CLASS =
             "com.android.systemui.qs.QSAnimator"
-        private const val SHADE_HEADER_CONTROLLER_CLASS =
-            "com.android.systemui.shade.ShadeHeaderController"
         private const val PAGED_TILE_LAYOUT_CLASS =
             "com.android.systemui.qs.PagedTileLayout"
         private const val QUICK_QS_PANEL_CLASS =
             "com.android.systemui.qs.QuickQSPanel"
+
 
 
 
@@ -299,13 +295,6 @@ class Quicksettings {
             )
 
             findAndHookMethod(
-                SHADE_HEADER_CONTROLLER_CLASS,
-                classLoader,
-                "onViewAttached",
-                onViewAttachedHookShadeHeaderController
-            )
-
-            findAndHookMethod(
                 QUICK_QS_PANEL_CLASS,
                 classLoader,
                 "getOrCreateTileLayout",
@@ -523,8 +512,6 @@ class Quicksettings {
                 if (configuration.orientation == ORIENTATION_LANDSCAPE) {
 
                     if (callMethod(mMediaHost, "getVisible") as Boolean) {
-
-                        log("mwilky: is potrait and media playing")
 
                         setIntField(QuickQSPanelQQSSideLabelTileLayout, "mMaxAllowedRows", 2)
 
@@ -791,47 +778,6 @@ class Quicksettings {
             }
         }
 
-        //Force battery icon colors so we can eventually separate them from statusbar color
-        private val onViewAttachedHookShadeHeaderController: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val batteryIcon = getObjectField(param.thisObject, "batteryIcon")
-
-                val mDrawable = getObjectField(batteryIcon, "mDrawable")
-                val shieldPaint = getObjectField(mDrawable, "shieldPaint")
-                callMethod(shieldPaint, "setColor", Color.WHITE)
-
-                val mainBatteryDrawable = callMethod(mDrawable, "getDrawable")
-
-                val mainBatteryDrawableFillPaint =
-                    getObjectField(mainBatteryDrawable, "fillPaint")
-
-                setIntField(
-                    mainBatteryDrawable,
-                    "fillColor",
-                    Color.WHITE
-                )
-                callMethod(
-                    mainBatteryDrawableFillPaint,
-                    "setColor",
-                    Color.WHITE
-                )
-
-                setIntField(
-                    batteryIcon, "mTextColor", Color.WHITE
-                )
-
-                (getObjectField(
-                    batteryIcon,
-                    "mBatteryPercentView"
-                ) as TextView?)?.setTextColor(Color.WHITE)
-
-                (getObjectField(
-                    batteryIcon,
-                    "mUnknownStateDrawable"
-                ) as Drawable?)?.setTint(Color.WHITE)
-            }
-        }
-
         private val getOrCreateTileLayoutHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
 
@@ -856,8 +802,6 @@ class Quicksettings {
                 if (mView.javaClass.name.equals(QUICK_QS_PANEL_CLASS)) {
 
                     if (mView.context.resources.configuration.orientation == ORIENTATION_PORTRAIT) {
-
-
 
                         callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQqsColumnsConfig)
 

@@ -43,11 +43,22 @@
     <string name="customStatusbarOtherIconColorTitle">Other</string>
     <string name="customStatusbarDndIconColorTitle">Do not disturb</string>
     <string name="customStatusbarAirplaneIconColorTitle">Airplane mode</string>
+    <string name="customStatusbarDateColorTitle">Date</string>
+    <string name="customStatusbarCarrierColorTitle">Carrier</string>
     <string name="customStatusbarBluetoothIconColorTitle">Bluetooth</string>
     <string name="customStatusbarHotspotIconColorTitle">Hotspot</string>
     <string name="customStatusbarGlobalIconColorTitle">Global icon color</string>
+    <string name="customStatusbarGlobalIconColorSummary">Set a global color for all statusbar icons</string>
+    <string name="customQsStatusbarGlobalIconColorSummary">Set a global color for all quicksettings statusbar icons</string>
+    <string name="customLsStatusbarGlobalIconColorSummary">Set a global color for all lockscreen statusbar icons</string>
+    <string name="customStatusbarIndividualIconColorTitle">Individual icon colors</string>
     <string name="customStatusbarIndividualIconColorSummary">Set colors individually for each icon</string>
     <string name="customStatusbarIndividualIconColorSummaryDisabled">Reset the global icon color to enable individual control</string>
+    <string name="customStatusbarColorsSummaryDisabled">Disable \"use accent color\" to use this feature</string>
+    <string name="statusbarIconUseAccentColorTitle">Use accent color</string>
+    <string name="statusbarIconUseAccentColorSummary">Set the statusbar icons to the system accent color</string>
+    <string name="qsStatusbarIconUseAccentColorSummary">Set the quicksettings statusbar icons to the system accent color</string>
+    <string name="lsStatusbarIconUseAccentColorSummary">Set the lockscreen statusbar icons to the system accent color</string>
 
     <string name="airplaneTitle">Airplane mode</string>
     <string name="alarmTitle">Alarm</string>

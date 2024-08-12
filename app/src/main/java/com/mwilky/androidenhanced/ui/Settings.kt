@@ -52,7 +52,8 @@ fun Settings(navController: NavController, deviceProtectedStorageContext: Contex
             ScaffoldTweaksAppBar(
                 navController = navController,
                 screen = deviceProtectedStorageContext.resources.getString(R.string.settings),
-                showBackIcon = false
+                showBackIcon = false,
+                scrollBehavior
             )
         },
         bottomBar = {

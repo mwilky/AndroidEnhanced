@@ -34,6 +34,9 @@ class SystemUIApplication {
                         }
 
                         if (hookedContext != null) {
+
+                            StatusbarPremium.mContext = hookedContext
+
                             BroadcastUtils.registerBroadcastReceiver(
                                 hookedContext, Utils.qsTileVibration,
                                 param.thisObject.toString(),
@@ -154,11 +157,7 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 false
                             )
-                            BroadcastUtils.registerBroadcastReceiver(
-                                hookedContext, Utils.customStatusbarIconColors,
-                                param.thisObject.toString(),
-                                false
-                            )
+
                             BroadcastUtils.registerBroadcastReceiver(
                                 hookedContext, Utils.customStatusbarClockColor,
                                 param.thisObject.toString(),
@@ -214,11 +213,135 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 Color.WHITE
                             )
+
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarClockColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarBatteryIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarBatteryPercentColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarWifiIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarMobileIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarCarrierColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarDateColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarOtherIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarDndIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarAirplaneIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarHotspotIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarBluetoothIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarBatteryIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarBatteryPercentColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarWifiIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarMobileIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarOtherIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarDndIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarAirplaneIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarHotspotIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarBluetoothIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarCarrierColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+
                             BroadcastUtils.registerBroadcastReceiver(
                                 hookedContext, Utils.customStatusbarGlobalIconColor,
                                 param.thisObject.toString(),
                                 Color.WHITE
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customQsStatusbarGlobalIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.customLsStatusbarGlobalIconColor,
+                                param.thisObject.toString(),
+                                Color.WHITE
+                            )
+
                             BroadcastUtils.registerBroadcastReceiver(
                                 hookedContext, Utils.hideCollapsedAlarmIcon,
                                 param.thisObject.toString(),
@@ -242,7 +365,22 @@ class SystemUIApplication {
                             BroadcastUtils.registerBroadcastReceiver(
                                 hookedContext, Utils.iconBlacklist,
                                 param.thisObject.toString(),
-                                "false"
+                                ""
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.statusbarIconAccentColor,
+                                param.thisObject.toString(),
+                                false
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsStatusbarIconAccentColor,
+                                param.thisObject.toString(),
+                                false
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.lsStatusbarIconAccentColor,
+                                param.thisObject.toString(),
+                                false
                             )
                         }
                     }

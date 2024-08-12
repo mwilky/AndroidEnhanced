@@ -10,10 +10,35 @@ import android.content.SharedPreferences
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarAirplaneIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryPercentColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBluetoothIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarCarrierColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarDndIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarGlobalIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarHotspotIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarMobileIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarOtherIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarWifiIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarAirplaneIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarBatteryIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarBatteryPercentColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarBluetoothIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarCarrierColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarClockColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarDateColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarDndIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarGlobalIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarHotspotIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarMobileIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarOtherIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarAirplaneIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarBatteryPercentColor
@@ -34,10 +59,10 @@ import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedAlarmIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedCallStrengthIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedVolumeIcon
-import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedWifiIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
+import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.mIsInitialBoot
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
@@ -48,6 +73,7 @@ import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
@@ -56,9 +82,14 @@ import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
+import com.mwilky.androidenhanced.Utils.Companion.statusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
+import com.mwilky.androidenhanced.UtilsPremium.Companion.getIconColorForSlotName
+import com.mwilky.androidenhanced.UtilsPremium.Companion.mLsStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.UtilsPremium.Companion.mQsStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.UtilsPremium.Companion.mStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
@@ -93,16 +124,20 @@ import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownC
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.setBrightnessView
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.CurrentTilesInteractorImpl
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.ModernShadeCarrierGroupMobileView
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.QSTileViewImpl
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.ShadeHeaderController
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.TintedIconManager
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.animateBrightnessSlider
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.tileList
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.updateBatteryIconColors
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.updateCarrierLabelColor
 import com.mwilky.androidenhanced.xposed.Statusbar
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.clock
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mDoubleTapToSleepEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedAlarmEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedCallStrengthEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedVolumeEnabled
-import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mHideCollapsedWifiEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarBrightnessControlEnabled
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSecondsEnabled
@@ -243,52 +278,162 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                         customStatusbarClockColor -> {
                             StatusbarPremium.mStatusbarClockColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarBatteryIconColor -> {
                             StatusbarPremium.mStatusbarBatteryIconColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarBatteryPercentColor -> {
                             StatusbarPremium.mStatusbarBatteryPercentColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarWifiIconColor -> {
                             StatusbarPremium.mStatusbarWifiColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
+
                         }
                         customStatusbarMobileIconColor -> {
                             StatusbarPremium.mStatusbarMobileColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarNotificationIconColor -> {
                             StatusbarPremium.mStatusbarNotificationColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarOtherIconColor -> {
                             StatusbarPremium.mStatusbarIconColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarDndIconColor -> {
                             StatusbarPremium.mStatusbarDndColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarAirplaneIconColor -> {
                             StatusbarPremium.mStatusbarAirplaneColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarHotspotIconColor -> {
                             StatusbarPremium.mStatusbarHotspotColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
                         customStatusbarBluetoothIconColor -> {
                             StatusbarPremium.mStatusbarBluetoothColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
+
+
                         customStatusbarGlobalIconColor -> {
                             StatusbarPremium.mStatusbarGlobalColor = value as Int
-                            StatusbarPremium.setStatusbarIconColorsOnBoot()
+                            updateStatusbarIconColors(mContext)
                         }
+                        customQsStatusbarGlobalIconColor -> {
+                            StatusbarPremium.mQsStatusbarGlobalColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarGlobalIconColor -> {
+                            StatusbarPremium.mLsStatusbarGlobalColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+
+
+
+                        customQsStatusbarClockColor -> {
+                            StatusbarPremium.mQsStatusbarClockColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarBatteryIconColor -> {
+                            StatusbarPremium.mQsStatusbarBatteryIconColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarBatteryPercentColor -> {
+                            StatusbarPremium.mQsStatusbarBatteryPercentColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarWifiIconColor -> {
+                            StatusbarPremium.mQsStatusbarWifiColor = value as Int
+                            updateStatusbarIconColors(mContext)
+
+                        }
+                        customQsStatusbarCarrierColor -> {
+                            StatusbarPremium.mQsStatusbarCarrierColor = value as Int
+                            updateStatusbarIconColors(mContext)
+
+                        }
+                        customQsStatusbarDateColor -> {
+                            StatusbarPremium.mQsStatusbarDateColor = value as Int
+                            updateStatusbarIconColors(mContext)
+
+                        }
+                        customQsStatusbarMobileIconColor -> {
+                            StatusbarPremium.mQsStatusbarMobileColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarOtherIconColor -> {
+                            StatusbarPremium.mQsStatusbarIconColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarDndIconColor -> {
+                            StatusbarPremium.mQsStatusbarDndColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarAirplaneIconColor -> {
+                            StatusbarPremium.mQsStatusbarAirplaneColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarHotspotIconColor -> {
+                            StatusbarPremium.mQsStatusbarHotspotColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customQsStatusbarBluetoothIconColor -> {
+                            StatusbarPremium.mQsStatusbarBluetoothColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+
+
+                        customLsStatusbarBatteryIconColor -> {
+                            StatusbarPremium.mLsStatusbarBatteryIconColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarBatteryPercentColor -> {
+                            StatusbarPremium.mLsStatusbarBatteryPercentColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarWifiIconColor -> {
+                            StatusbarPremium.mLsStatusbarWifiColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarMobileIconColor -> {
+                            StatusbarPremium.mLsStatusbarMobileColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarOtherIconColor -> {
+                            StatusbarPremium.mLsStatusbarIconColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarDndIconColor -> {
+                            StatusbarPremium.mLsStatusbarDndColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarAirplaneIconColor -> {
+                            StatusbarPremium.mLsStatusbarAirplaneColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarHotspotIconColor -> {
+                            StatusbarPremium.mLsStatusbarHotspotColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarBluetoothIconColor -> {
+                            StatusbarPremium.mLsStatusbarBluetoothColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        customLsStatusbarCarrierColor -> {
+                            StatusbarPremium.mLsStatusbarCarrierColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+
+
+
                         hideCollapsedAlarmIcon -> {
                             mHideCollapsedAlarmEnabled = value as Boolean
                             callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
@@ -301,26 +446,36 @@ class BroadcastUtils: BroadcastReceiver() {
                             mHideCollapsedCallStrengthEnabled = value as Boolean
                             callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
                         }
-                        hideCollapsedWifiIcon -> {
-                            mHideCollapsedWifiEnabled = value as Boolean
-                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
-                        }
                         qsColumnsLandscape -> {
-                            mQsColumnsConfigLandscape= value as Int
+                            mQsColumnsConfigLandscape = value as Int
                             updateQuicksettings(mContext)
                         }
                         qqsColumns -> {
-                            mQqsColumnsConfig= value as Int
+                            mQqsColumnsConfig = value as Int
                             updateQuicksettings(mContext)
                         }
                         qqsColumnsLandscape -> {
-                            mQqsColumnsConfigLandscape= value as Int
+                            mQqsColumnsConfigLandscape = value as Int
                             updateQuicksettings(mContext)
                         }
                         iconBlacklist -> {
                             Utils.setIconBlacklist(mContext, value as String)
+                            mIsInitialBoot = false
 
-                            mIsInitialBoot= false
+                        }
+                        statusbarIconAccentColor -> {
+                            mStatusbarIconUseAccentColor = value as Boolean
+                            updateStatusbarIconColors(mContext)
+
+                        }
+                        qsStatusbarIconAccentColor -> {
+                            mQsStatusbarIconUseAccentColor = value as Boolean
+                            updateStatusbarIconColors(mContext)
+
+                        }
+                        lsStatusbarIconAccentColor -> {
+                            mLsStatusbarIconUseAccentColor = value as Boolean
+                            updateStatusbarIconColors(mContext)
 
                         }
                     }
@@ -429,6 +584,37 @@ class BroadcastUtils: BroadcastReceiver() {
 
             animateBrightnessSlider(mQsAnimator)
 
+        }
+
+        fun updateStatusbarIconColors(mContext: Context) {
+
+            // Home icons
+            StatusbarPremium.setStatusbarIconColorsOnBoot(mContext)
+
+            // Lockscreen icons
+            callMethod(keyguardStatusBarView, "onThemeChanged", TintedIconManager)
+            callMethod(keyguardStatusBarView, "updateVisibilities")
+
+            val mCarrierLabel = getObjectField(keyguardStatusBarView, "mCarrierLabel") as TextView
+            mCarrierLabel.setTextColor(getIconColorForSlotName("carrier", mContext, "KEYGUARD"))
+
+            // QS icons
+            callMethod(
+                getObjectField(ShadeHeaderController, "iconManager"),
+                "setTint",
+                -1,
+                -1
+            )
+
+            updateBatteryIconColors(getObjectField(ShadeHeaderController, "batteryIcon"), "QS")
+
+            val clock = getObjectField(ShadeHeaderController, "clock") as TextView
+            clock.setTextColor(getIconColorForSlotName("clock", mContext, "QS"))
+
+            val date = getObjectField(ShadeHeaderController, "date") as TextView
+            date.setTextColor(getIconColorForSlotName("date", mContext, "QS"))
+
+            updateCarrierLabelColor(ModernShadeCarrierGroupMobileView as View, mContext)
         }
 
     }

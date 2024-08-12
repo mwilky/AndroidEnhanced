@@ -10,6 +10,8 @@ import android.widget.TextView
 import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.MainActivity.Companion.SECURITY_PATCH
 import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.ShadeHeaderController
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.updateBatteryIconColors
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
@@ -206,6 +208,8 @@ class Lockscreen {
         private val onFinishInflateHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 keyguardStatusBarView = param.thisObject
+
+                //updateBatteryIconColors(getObjectField(keyguardStatusBarView, "mBatteryView"), "KEYGUARD")
             }
         }
 
@@ -218,45 +222,7 @@ class Lockscreen {
 
                 val mBatteryView = getObjectField(param.thisObject, "mBatteryView")
 
-                val mDrawable = getObjectField(mBatteryView, "mDrawable")
-                val shieldPaint = getObjectField(mDrawable, "shieldPaint")
-                callMethod(shieldPaint, "setColor", Color.WHITE)
-
-                val mainBatteryDrawable =
-                    if (SECURITY_PATCH.isBefore(LocalDate.parse("2024-03-05")))
-                    {
-                        callMethod(mDrawable, "getMainBatteryDrawable")
-                    } else {
-                        callMethod(mDrawable, "getDrawable")
-                    }
-
-                val mainBatteryDrawableFillPaint =
-                    getObjectField(mainBatteryDrawable, "fillPaint")
-
-                setIntField(
-                    mainBatteryDrawable,
-                    "fillColor",
-                    Color.WHITE
-                )
-                callMethod(
-                    mainBatteryDrawableFillPaint,
-                    "setColor",
-                    Color.WHITE
-                )
-
-                setIntField(
-                    mBatteryView, "mTextColor", Color.WHITE
-                )
-
-                (getObjectField(
-                    mBatteryView,
-                    "mBatteryPercentView"
-                ) as TextView?)?.setTextColor(Color.WHITE)
-
-                (getObjectField(
-                    mBatteryView,
-                    "mUnknownStateDrawable"
-                ) as Drawable?)?.setTint(Color.WHITE)
+                updateBatteryIconColors(mBatteryView, "KEYGUARD")
 
             }
         }

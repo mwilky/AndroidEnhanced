@@ -33,7 +33,6 @@ import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -624,16 +623,33 @@ fun ScaffoldHomeCenteredAppBar(scrollBehavior: TopAppBarScrollBehavior
 fun ScaffoldTweaksAppBar(
     navController: NavController,
     screen: String,
-    showBackIcon: Boolean
+    showBackIcon: Boolean,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    var pageText = screen
+
+    when (screen) {
+
+        "Individual statusbar icon colors" -> {
+            pageText = "Individual icon colors"
+        }
+        "Individual quicksettings statusbar icon colors" -> {
+            pageText = "Individual icon colors"
+        }
+        "Individual lockscreen statusbar icon colors" -> {
+            pageText = "Individual icon colors"
+        }
+
+    }
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
         ),
         scrollBehavior = scrollBehavior,
         title = {
             Text(
-                text = screen,
+                text = pageText,
                 style = MaterialTheme.typography.titleLarge
             )
         },

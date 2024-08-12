@@ -25,7 +25,7 @@ fun Logs(navController: NavController, deviceProtectedStorageContext: Context) {
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            ScaffoldTweaksAppBar(navController = navController, screen = "Logs", showBackIcon = false)
+            ScaffoldTweaksAppBar(navController = navController, screen = "Logs", showBackIcon = false, scrollBehavior)
         },
         bottomBar = {
             ScaffoldNavigationBar(navController = navController)

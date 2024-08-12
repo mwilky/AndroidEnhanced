@@ -3,7 +3,6 @@ package com.mwilky.androidenhanced.ui
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
-import android.provider.Settings
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +27,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -41,6 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -51,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -80,6 +80,30 @@ import androidx.compose.ui.text.font.FontWeight
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarAirplaneIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryPercentColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBluetoothIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarCarrierColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarDndIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarGlobalIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarHotspotIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarMobileIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarOtherIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarWifiIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarAirplaneIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarBatteryIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarBatteryPercentColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarBluetoothIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarCarrierColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarClockColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarDateColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarDndIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarGlobalIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarHotspotIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarMobileIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarOtherIconColor
+import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedAlarmIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedCallStrengthIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedVolumeIcon
@@ -98,10 +122,10 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
-import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedWifiIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
+import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
@@ -111,15 +135,16 @@ import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
+import com.mwilky.androidenhanced.Utils.Companion.statusbarIconAccentColor
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readIconSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeIconSwitchState
-import de.robv.android.xposed.XposedBridge.log
 
 
 class Tweaks {
@@ -202,12 +227,12 @@ class Tweaks {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Tweaks(navController: NavController, deviceProtectedStorageContext: Context, screen : String) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            ScaffoldTweaksAppBar(navController = navController, screen = screen, showBackIcon = true)
+            ScaffoldTweaksAppBar(navController = navController, screen = screen, showBackIcon = true, scrollBehavior = scrollBehavior)
         },
         content = {
             TweaksScrollableContent(topPadding = it, screen = screen, navController = navController, deviceProtectedStorageContext)
@@ -308,8 +333,96 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     var rememberStatusbarIconBluetoothColor by remember {
         mutableIntStateOf(sharedPreferences.getInt(customStatusbarBluetoothIconColor, android.graphics.Color.WHITE))
     }
+
+
+    var rememberLsStatusbarCarrierColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarCarrierColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconBatteryIconColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarBatteryIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconBatteryPercentColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarBatteryPercentColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconWifiColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarWifiIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconMobileColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarMobileIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconOtherColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarOtherIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconDndColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarDndIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconAirplaneColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarAirplaneIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconHotspotColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarHotspotIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconBluetoothColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarBluetoothIconColor, android.graphics.Color.WHITE))
+    }
+
+
+
+    var rememberQsStatusbarIconClockColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarClockColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconBatteryIconColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarBatteryIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconBatteryPercentColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarBatteryPercentColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconWifiColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarWifiIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconMobileColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarMobileIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarCarrierColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarCarrierColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarDateColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarDateColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconOtherColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarOtherIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconDndColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarDndIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconAirplaneColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarAirplaneIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconHotspotColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarHotspotIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconBluetoothColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarBluetoothIconColor, android.graphics.Color.WHITE))
+    }
+
+
     var rememberStatusbarIconGlobalColor by remember {
         mutableIntStateOf(sharedPreferences.getInt(customStatusbarGlobalIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberQsStatusbarIconGlobalColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customQsStatusbarGlobalIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberLsStatusbarIconGlobalColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(customLsStatusbarGlobalIconColor, android.graphics.Color.WHITE))
+    }
+    var rememberStatusbarIconAccentColor by remember {
+        mutableStateOf(sharedPreferences.getBoolean(statusbarIconAccentColor, false))
+    }
+    var rememberQsStatusbarIconAccentColor by remember {
+        mutableStateOf(sharedPreferences.getBoolean(qsStatusbarIconAccentColor, false))
+    }
+    var rememberLsStatusbarIconAccentColor by remember {
+        mutableStateOf(sharedPreferences.getBoolean(lsStatusbarIconAccentColor, false))
     }
 
     // Set the listener and update the remembered value on change to force a recomposition
@@ -340,6 +453,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getInt(qsBrightnessSliderPosition, 0)
                 customStatusbarGlobalIconColor -> rememberStatusbarIconGlobalColor =
                     sharedPreferences.getInt(customStatusbarGlobalIconColor, -1)
+                customQsStatusbarGlobalIconColor -> rememberQsStatusbarIconGlobalColor =
+                    sharedPreferences.getInt(customQsStatusbarGlobalIconColor, -1)
+                customLsStatusbarGlobalIconColor -> rememberLsStatusbarIconGlobalColor =
+                    sharedPreferences.getInt(customLsStatusbarGlobalIconColor, -1)
                 customStatusbarClockColor -> rememberStatusbarIconClockColor =
                     sharedPreferences.getInt(customStatusbarClockColor, -1)
                 customStatusbarBatteryIconColor -> rememberStatusbarIconBatteryIconColor =
@@ -362,10 +479,72 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getInt(customStatusbarHotspotIconColor, -1)
                 customStatusbarOtherIconColor -> rememberStatusbarIconOtherColor =
                     sharedPreferences.getInt(customStatusbarOtherIconColor, -1)
+
+
+                customQsStatusbarClockColor -> rememberQsStatusbarIconClockColor =
+                    sharedPreferences.getInt(customQsStatusbarClockColor, -1)
+                customQsStatusbarBatteryIconColor -> rememberQsStatusbarIconBatteryIconColor =
+                    sharedPreferences.getInt(customQsStatusbarBatteryIconColor, -1)
+                customQsStatusbarBatteryPercentColor -> rememberQsStatusbarIconBatteryPercentColor =
+                    sharedPreferences.getInt(customQsStatusbarBatteryPercentColor, -1)
+                customQsStatusbarWifiIconColor -> rememberQsStatusbarIconWifiColor =
+                    sharedPreferences.getInt(customQsStatusbarWifiIconColor, -1)
+                customQsStatusbarMobileIconColor -> rememberQsStatusbarIconMobileColor =
+                    sharedPreferences.getInt(customQsStatusbarMobileIconColor, -1)
+                customQsStatusbarCarrierColor -> rememberQsStatusbarCarrierColor =
+                    sharedPreferences.getInt(customQsStatusbarCarrierColor, -1)
+                customQsStatusbarDateColor -> rememberQsStatusbarDateColor =
+                    sharedPreferences.getInt(customQsStatusbarDateColor, -1)
+                customQsStatusbarDndIconColor -> rememberQsStatusbarIconDndColor =
+                    sharedPreferences.getInt(customQsStatusbarDndIconColor, -1)
+                customQsStatusbarAirplaneIconColor -> rememberQsStatusbarIconAirplaneColor =
+                    sharedPreferences.getInt(customQsStatusbarAirplaneIconColor, -1)
+                customQsStatusbarBluetoothIconColor -> rememberQsStatusbarIconBluetoothColor =
+                    sharedPreferences.getInt(customQsStatusbarBluetoothIconColor, -1)
+                customQsStatusbarHotspotIconColor -> rememberQsStatusbarIconHotspotColor =
+                    sharedPreferences.getInt(customQsStatusbarHotspotIconColor, -1)
+                customQsStatusbarOtherIconColor -> rememberQsStatusbarIconOtherColor =
+                    sharedPreferences.getInt(customQsStatusbarOtherIconColor, -1)
+
+                customLsStatusbarBatteryIconColor -> rememberLsStatusbarIconBatteryIconColor =
+                    sharedPreferences.getInt(customLsStatusbarBatteryIconColor, -1)
+                customLsStatusbarBatteryPercentColor -> rememberLsStatusbarIconBatteryPercentColor =
+                    sharedPreferences.getInt(customLsStatusbarBatteryPercentColor, -1)
+                customLsStatusbarWifiIconColor -> rememberLsStatusbarIconWifiColor =
+                    sharedPreferences.getInt(customLsStatusbarWifiIconColor, -1)
+                customLsStatusbarMobileIconColor -> rememberLsStatusbarIconMobileColor =
+                    sharedPreferences.getInt(customLsStatusbarMobileIconColor, -1)
+                customLsStatusbarCarrierColor -> rememberLsStatusbarCarrierColor =
+                    sharedPreferences.getInt(customLsStatusbarCarrierColor, -1)
+                customLsStatusbarDndIconColor -> rememberLsStatusbarIconDndColor =
+                    sharedPreferences.getInt(customLsStatusbarDndIconColor, -1)
+                customLsStatusbarAirplaneIconColor -> rememberLsStatusbarIconAirplaneColor =
+                    sharedPreferences.getInt(customLsStatusbarAirplaneIconColor, -1)
+                customLsStatusbarBluetoothIconColor -> rememberLsStatusbarIconBluetoothColor =
+                    sharedPreferences.getInt(customLsStatusbarBluetoothIconColor, -1)
+                customLsStatusbarHotspotIconColor -> rememberLsStatusbarIconHotspotColor =
+                    sharedPreferences.getInt(customLsStatusbarHotspotIconColor, -1)
+                customLsStatusbarOtherIconColor -> rememberLsStatusbarIconOtherColor =
+                    sharedPreferences.getInt(customLsStatusbarOtherIconColor, -1)
+
+
+
+                statusbarIconAccentColor -> rememberStatusbarIconAccentColor =
+                    sharedPreferences.getBoolean(statusbarIconAccentColor, false)
+                qsStatusbarIconAccentColor -> rememberQsStatusbarIconAccentColor =
+                    sharedPreferences.getBoolean(qsStatusbarIconAccentColor, false)
+                lsStatusbarIconAccentColor -> rememberLsStatusbarIconAccentColor =
+                    sharedPreferences.getBoolean(lsStatusbarIconAccentColor, false)
             }
         }
 
-    val individualColorsDisabled = rememberStatusbarIconGlobalColor != -1
+    val individualStatusbarColorsDisabled = rememberStatusbarIconGlobalColor != -1
+    val individualQsStatusbarColorsDisabled = rememberQsStatusbarIconGlobalColor != -1
+    val individualLsStatusbarColorsDisabled = rememberLsStatusbarIconGlobalColor != -1
+
+    val statusbarIconAccentEnabled = rememberStatusbarIconAccentColor
+    val qsStatusbarIconAccentEnabled = rememberQsStatusbarIconAccentColor
+    val lsStatusbarIconAccentEnabled = rememberLsStatusbarIconAccentColor
 
     // Add the listener when this Composable is first composed
     DisposableEffect(Unit) {
@@ -389,7 +568,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         val lockscreen = "Lockscreen"
         val quicksettings = "Quicksettings"
         val notifications = "Notifications"
-        val statusbarColors = "Individual icon colors"
+        val statusbarColors = "Individual statusbar icon colors"
+        val qsStatusbarColors = "Individual quicksettings statusbar icon colors"
+        val lsStatusbarColors = "Individual lockscreen statusbar icon colors"
         val collapsedIcons = "Hide collapsed statusbar icons"
         val allStatusbarIcons = "Hide statusbar icons"
 
@@ -470,6 +651,18 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     )
                 }
                 item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.statusbarIconUseAccentColorTitle
+                        ),
+                        stringResource(
+                            id = com.mwilky.androidenhanced.R.string.statusbarIconUseAccentColorSummary
+                        ),
+                        statusbarIconAccentColor
+                    )
+                }
+                item {
                     TweakColor(
                         deviceProtectedStorageContext,
                         stringResource(
@@ -477,7 +670,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         customStatusbarGlobalIconColor,
                         rememberStatusbarIconGlobalColor,
-                        sharedPreferences
+                        sharedPreferences,
+                        statusbarIconAccentEnabled,
+                        stringResource(
+                             id = if (statusbarIconAccentEnabled)
+                                 R.string.customStatusbarColorsSummaryDisabled
+                             else
+                                 R.string.customStatusbarGlobalIconColorSummary
+                        ),
                     )
                 }
                 item {
@@ -485,14 +685,16 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         context = deviceProtectedStorageContext,
                         label = statusbarColors,
                         description = stringResource(
-                            id = if (!individualColorsDisabled)
-                                    R.string.customStatusbarIndividualIconColorSummary
-                                else
-                                    R.string.customStatusbarIndividualIconColorSummaryDisabled
+                            id = if (statusbarIconAccentEnabled)
+                                R.string.customStatusbarColorsSummaryDisabled
+                            else if (!individualStatusbarColorsDisabled)
+                                R.string.customStatusbarIndividualIconColorSummary
+                            else
+                                R.string.customStatusbarIndividualIconColorSummaryDisabled
                         ),
                         navController = navController,
                         sharedPreferences = sharedPreferences,
-                        individualColorsDisabled
+                        statusbarIconAccentEnabled || individualStatusbarColorsDisabled
                     )
                 }
                 item {
@@ -735,10 +937,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     TweakColor(
                         deviceProtectedStorageContext,
                         stringResource(
-                            id = R.string.customStatusbarClockColorTitle
+                            id = R.string.customStatusbarAirplaneIconColorTitle
                         ),
-                        customStatusbarClockColor,
-                        rememberStatusbarIconClockColor,
+                        customStatusbarAirplaneIconColor,
+                        rememberStatusbarIconAirplaneColor,
                         sharedPreferences
                     )
                 }
@@ -768,10 +970,43 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     TweakColor(
                         deviceProtectedStorageContext,
                         stringResource(
-                            id = R.string.customStatusbarWifiIconColorTitle
+                            id = R.string.customStatusbarBluetoothIconColorTitle
                         ),
-                        customStatusbarWifiIconColor,
-                        rememberStatusbarIconWifiColor,
+                        customStatusbarBluetoothIconColor,
+                        rememberStatusbarIconBluetoothColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarClockColorTitle
+                        ),
+                        customStatusbarClockColor,
+                        rememberStatusbarIconClockColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarDndIconColorTitle
+                        ),
+                        customStatusbarDndIconColor,
+                        rememberStatusbarIconDndColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarHotspotIconColorTitle
+                        ),
+                        customStatusbarHotspotIconColor,
+                        rememberStatusbarIconHotspotColor,
                         sharedPreferences
                     )
                 }
@@ -801,43 +1036,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     TweakColor(
                         deviceProtectedStorageContext,
                         stringResource(
-                            id = R.string.customStatusbarDndIconColorTitle
+                            id = R.string.customStatusbarWifiIconColorTitle
                         ),
-                        customStatusbarDndIconColor,
-                        rememberStatusbarIconDndColor,
-                        sharedPreferences
-                    )
-                }
-                item {
-                    TweakColor(
-                        deviceProtectedStorageContext,
-                        stringResource(
-                            id = R.string.customStatusbarAirplaneIconColorTitle
-                        ),
-                        customStatusbarAirplaneIconColor,
-                        rememberStatusbarIconAirplaneColor,
-                        sharedPreferences
-                    )
-                }
-                item {
-                    TweakColor(
-                        deviceProtectedStorageContext,
-                        stringResource(
-                            id = R.string.customStatusbarBluetoothIconColorTitle
-                        ),
-                        customStatusbarBluetoothIconColor,
-                        rememberStatusbarIconBluetoothColor,
-                        sharedPreferences
-                    )
-                }
-                item {
-                    TweakColor(
-                        deviceProtectedStorageContext,
-                        stringResource(
-                            id = R.string.customStatusbarHotspotIconColorTitle
-                        ),
-                        customStatusbarHotspotIconColor,
-                        rememberStatusbarIconHotspotColor,
+                        customStatusbarWifiIconColor,
+                        rememberStatusbarIconWifiColor,
                         sharedPreferences
                     )
                 }
@@ -849,6 +1051,264 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         customStatusbarOtherIconColor,
                         rememberStatusbarIconOtherColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .height(64.dp)
+                    )
+                }
+            }
+            lsStatusbarColors -> {
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarAirplaneIconColorTitle
+                        ),
+                        customLsStatusbarAirplaneIconColor,
+                        rememberLsStatusbarIconAirplaneColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarBatteryIconColorTitle
+                        ),
+                        customLsStatusbarBatteryIconColor,
+                        rememberLsStatusbarIconBatteryIconColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarBatteryPercentColorTitle
+                        ),
+                        customLsStatusbarBatteryPercentColor,
+                        rememberLsStatusbarIconBatteryPercentColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarBluetoothIconColorTitle
+                        ),
+                        customLsStatusbarBluetoothIconColor,
+                        rememberLsStatusbarIconBluetoothColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarCarrierColorTitle
+                        ),
+                        customLsStatusbarCarrierColor,
+                        rememberLsStatusbarCarrierColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarDndIconColorTitle
+                        ),
+                        customLsStatusbarDndIconColor,
+                        rememberLsStatusbarIconDndColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarHotspotIconColorTitle
+                        ),
+                        customLsStatusbarHotspotIconColor,
+                        rememberLsStatusbarIconHotspotColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarMobileIconColorTitle
+                        ),
+                        customLsStatusbarMobileIconColor,
+                        rememberLsStatusbarIconMobileColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarWifiIconColorTitle
+                        ),
+                        customLsStatusbarWifiIconColor,
+                        rememberLsStatusbarIconWifiColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarOtherIconColorTitle
+                        ),
+                        customLsStatusbarOtherIconColor,
+                        rememberLsStatusbarIconOtherColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .height(64.dp)
+                    )
+                }
+            }
+            qsStatusbarColors -> {
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarAirplaneIconColorTitle
+                        ),
+                        customQsStatusbarAirplaneIconColor,
+                        rememberQsStatusbarIconAirplaneColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarBatteryIconColorTitle
+                        ),
+                        customQsStatusbarBatteryIconColor,
+                        rememberQsStatusbarIconBatteryIconColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarBatteryPercentColorTitle
+                        ),
+                        customQsStatusbarBatteryPercentColor,
+                        rememberQsStatusbarIconBatteryPercentColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarBluetoothIconColorTitle
+                        ),
+                        customQsStatusbarBluetoothIconColor,
+                        rememberQsStatusbarIconBluetoothColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarCarrierColorTitle
+                        ),
+                        customQsStatusbarCarrierColor,
+                        rememberQsStatusbarCarrierColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarClockColorTitle
+                        ),
+                        customQsStatusbarClockColor,
+                        rememberQsStatusbarIconClockColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarDateColorTitle
+                        ),
+                        customQsStatusbarDateColor,
+                        rememberQsStatusbarDateColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarDndIconColorTitle
+                        ),
+                        customQsStatusbarDndIconColor,
+                        rememberQsStatusbarIconDndColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarHotspotIconColorTitle
+                        ),
+                        customQsStatusbarHotspotIconColor,
+                        rememberQsStatusbarIconHotspotColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarMobileIconColorTitle
+                        ),
+                        customQsStatusbarMobileIconColor,
+                        rememberQsStatusbarIconMobileColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarWifiIconColorTitle
+                        ),
+                        customQsStatusbarWifiIconColor,
+                        rememberQsStatusbarIconWifiColor,
+                        sharedPreferences
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarOtherIconColorTitle
+                        ),
+                        customQsStatusbarOtherIconColor,
+                        rememberQsStatusbarIconOtherColor,
                         sharedPreferences
                     )
                 }
@@ -984,6 +1444,66 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.disableQsLockscreenSummary),
                         disableQsLockscreen
+                    )
+                }
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.iconColors
+                        )
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.statusbarIconUseAccentColorTitle
+                        ),
+                        stringResource(
+                            id = R.string.qsStatusbarIconUseAccentColorSummary
+                        ),
+                        lsStatusbarIconAccentColor
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarGlobalIconColorTitle
+                        ),
+                        customLsStatusbarGlobalIconColor,
+                        rememberLsStatusbarIconGlobalColor,
+                        sharedPreferences,
+                        lsStatusbarIconAccentEnabled,
+                        stringResource(
+                            id = if (lsStatusbarIconAccentEnabled)
+                                R.string.customStatusbarColorsSummaryDisabled
+                            else
+                                R.string.customLsStatusbarGlobalIconColorSummary
+                        ),
+                    )
+                }
+                item {
+                    TweakRow(
+                        context = deviceProtectedStorageContext,
+                        label = lsStatusbarColors,
+                        description = stringResource(
+                            id = if (lsStatusbarIconAccentEnabled)
+                                R.string.customStatusbarColorsSummaryDisabled
+                            else if (!individualLsStatusbarColorsDisabled)
+                                R.string.customStatusbarIndividualIconColorSummary
+                            else
+                                R.string.customStatusbarIndividualIconColorSummaryDisabled
+                        ),
+                        navController = navController,
+                        sharedPreferences = sharedPreferences,
+                        lsStatusbarIconAccentEnabled || individualLsStatusbarColorsDisabled
+                    )
+                }
+                item {
+                    Spacer(
+                        modifier = Modifier
+                            .height(64.dp)
                     )
                 }
             }
@@ -1167,6 +1687,60 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.qqsBrightnessSliderSummary),
                         qqsBrightnessSlider
+                    )
+                }
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.iconColors
+                        )
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.statusbarIconUseAccentColorTitle
+                        ),
+                        stringResource(
+                            id = R.string.qsStatusbarIconUseAccentColorSummary
+                        ),
+                        qsStatusbarIconAccentColor
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarGlobalIconColorTitle
+                        ),
+                        customQsStatusbarGlobalIconColor,
+                        rememberQsStatusbarIconGlobalColor,
+                        sharedPreferences,
+                        qsStatusbarIconAccentEnabled,
+                        stringResource(
+                            id = if (qsStatusbarIconAccentEnabled)
+                                R.string.customStatusbarColorsSummaryDisabled
+                            else
+                                R.string.customQsStatusbarGlobalIconColorSummary
+                        ),
+                    )
+                }
+                item {
+                    TweakRow(
+                        context = deviceProtectedStorageContext,
+                        label = qsStatusbarColors,
+                        description = stringResource(
+                            id = if (qsStatusbarIconAccentEnabled)
+                                R.string.customStatusbarColorsSummaryDisabled
+                            else if (!individualQsStatusbarColorsDisabled)
+                                R.string.customStatusbarIndividualIconColorSummary
+                            else
+                                R.string.customStatusbarIndividualIconColorSummaryDisabled
+                        ),
+                        navController = navController,
+                        sharedPreferences = sharedPreferences,
+                        qsStatusbarIconAccentEnabled || individualQsStatusbarColorsDisabled
                     )
                 }
                 item {
@@ -1435,6 +2009,8 @@ fun TweakColor(
     key: String,
     previewColor: Int,
     sharedPreferences: SharedPreferences,
+    disabled: Boolean = false,
+    description: String? = null,
 ) {
 
     var isColorPickerVisible by remember { mutableStateOf(false) }
@@ -1477,15 +2053,29 @@ fun TweakColor(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(
                             start = 16.dp,
                             top = 8.dp,
                             end = 4.dp,
-                            bottom = 8.dp,
                         )
                 )
+                if (description != "") {
+                    if (description != null) {
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .padding(
+                                    start = 16.dp,
+                                    bottom = 8.dp,
+                                    end = 4.dp
+                                )
+                        )
+                    }
+                }
             }
             Box(
                 modifier = Modifier
@@ -1497,7 +2087,9 @@ fun TweakColor(
                         color = intToColor(previewColor),
                         shape = CircleShape
                     )
-                    .clickable {
+                    .clickable(
+                        enabled = !disabled,
+                    ) {
                         isColorPickerVisible = true
                         //sharedPreferences.edit().putInt(key, android.graphics.Color.RED).apply()
                         //sendBroadcast(context, key, android.graphics.Color.RED)
@@ -1640,17 +2232,22 @@ fun TweakSelectionDialog(
                     .wrapContentHeight(),
             ) {
                 Text(
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     text = label,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .padding(
                             top = 24.dp,
-                            start = 24.dp,
-                            end = 24.dp,
-                            bottom = 8.dp
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 16.dp
                         )
+                )
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
                 )
                 LazyColumn(
                     modifier = Modifier
@@ -1703,6 +2300,11 @@ fun TweakSelectionDialog(
                         }
                     }
                 }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -1714,7 +2316,7 @@ fun TweakSelectionDialog(
                         modifier = Modifier
                             .padding(
                                 end = 8.dp,
-                                bottom = 16.dp
+                                bottom = 8.dp
                             ),
                     ) {
                         Text(text = "Dismiss",
@@ -1740,7 +2342,7 @@ fun TweakSelectionDialog(
                             .padding(
                                 start = 8.dp,
                                 end = 24.dp,
-                                bottom = 16.dp
+                                bottom = 8.dp
                             ),
                     ) {
                         Text(text = "Confirm",
@@ -1792,19 +2394,24 @@ fun TweakColorDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.titleLarge,
                         text = label,
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .padding(
-                                top = 18.dp,
-                                start = 24.dp,
-                                end = 24.dp,
-                                bottom = 8.dp
+                                top = 24.dp,
+                                start = 16.dp,
+                                end = 16.dp,
+                                bottom = 16.dp
                             )
                     )
                 }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
                 colorPickerController.wheelColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 HsvColorPicker(
                     modifier = Modifier
@@ -1854,12 +2461,14 @@ fun TweakColorDialog(
                         )
                     )
                 }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = 16.dp
-                        ),
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -1873,7 +2482,7 @@ fun TweakColorDialog(
                             contentDescription = "reset",
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
-                                .padding(start = 24.dp, bottom = 8.dp)
+                                .padding(start = 24.dp, bottom = 8.dp, top = 4.dp)
                                 .clickable {
                                     selectedColorInt = android.graphics.Color.WHITE
                                     colorPickerController.selectByColor(
@@ -1894,11 +2503,12 @@ fun TweakColorDialog(
                         modifier = Modifier
                             .padding(
                                 end = 4.dp,
-                                bottom = 4.dp
+                                bottom = 8.dp,
+                                top = 4.dp
                             ),
                     ) {
                         Text(text = "Dismiss",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
                     TextButton(
@@ -1911,12 +2521,13 @@ fun TweakColorDialog(
                             .padding(
                                 start = 4.dp,
                                 end = 16.dp,
-                                bottom = 4.dp
+                                bottom = 8.dp,
+                                top = 4.dp
                             ),
                     ) {
                         Text(
                             text = "Confirm",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
                 }
