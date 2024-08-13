@@ -1,7 +1,18 @@
 package com.mwilky.androidenhanced.xposed
+import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.bluetooth.BluetoothA2dp
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.AudioManager
+import android.media.AudioPlaybackCaptureConfiguration
+import android.media.MediaRecorder
+import android.media.MediaRouter
+import android.media.session.MediaSessionManager
+import android.os.Build
 import android.os.Handler
 import android.os.Message
 import android.telecom.TelecomManager
@@ -21,6 +32,7 @@ import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.callStaticMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
@@ -707,7 +719,7 @@ class Buttons {
                                 result = result or 1
                             } else if (result and 1 == 0) {
                                 var mayChangeVolume = false
-                                if (isMusicActive()) {
+                                if (isMusicPlayingInActiveSessions(mContext)) {
                                     if (mVolKeyMedia && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE) {
                                         // Detect long key presses.
                                         if (down) {
@@ -891,14 +903,17 @@ class Buttons {
                 }
             }
 
-        private fun isMusicActive(): Boolean {
-            val mContext: Context = getObjectField(PhoneWindowManagerObject, "mContext")
-                    as Context
-            val am: AudioManager =
-                mContext.getSystemService(
-                    AudioManager::class.java
-                )
-            return am.isMusicActive
+        private fun isMusicPlayingInActiveSessions(context: Context): Boolean {
+            val mediaSessionManager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+            val mediaControllers = mediaSessionManager.getActiveSessions(null)
+
+            for (controller in mediaControllers) {
+                val playbackState = controller.playbackState
+                if (playbackState != null && playbackState.state == android.media.session.PlaybackState.STATE_PLAYING) {
+                    return true
+                }
+            }
+            return false
         }
 
         private fun isVolumeKey(code: Int): Boolean {
