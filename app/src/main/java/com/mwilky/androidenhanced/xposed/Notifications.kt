@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.xposed
 
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
@@ -15,8 +16,8 @@ class Notifications {
 
     companion object {
         //Hook Classes
-        private const val NOTIFICATION_MANAGER_SERVICE_CLASS =
-            "com.android.server.notification.NotificationManagerService"
+        private const val NOTIFICATION_ATTENTION_HELPER_CLASS =
+            "com.android.server.notification.NotificationAttentionHelper"
 
         private const val NOTIFICATION_RECORD_CLASS =
             "com.android.server.notification.NotificationRecord"
@@ -42,10 +43,11 @@ class Notifications {
 
             // Silent screen on notifications
             findAndHookMethod(
-                NOTIFICATION_MANAGER_SERVICE_CLASS,
+                NOTIFICATION_ATTENTION_HELPER_CLASS,
                 classLoader,
                 "buzzBeepBlinkLocked",
                 notificationRecord,
+                "$NOTIFICATION_ATTENTION_HELPER_CLASS\$Signals",
                 buzzBeepBlinkLockedHook
             )
 
@@ -93,6 +95,8 @@ class Notifications {
                 val skipSound =
                     mScreenOn && mMuteScreenOnNotificationsEnabled && mSystemReady
                             && mAudioManager != null
+
+                log("mwilky: mScreenOn = $mScreenOn, mSystemReady = $mSystemReady, mAudioManager = $mAudioManager")
                 if (skipSound)
                     param.result = 0
             }
