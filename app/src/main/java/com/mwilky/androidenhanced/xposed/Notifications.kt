@@ -96,7 +96,6 @@ class Notifications {
                     mScreenOn && mMuteScreenOnNotificationsEnabled && mSystemReady
                             && mAudioManager != null
 
-                log("mwilky: mScreenOn = $mScreenOn, mSystemReady = $mSystemReady, mAudioManager = $mAudioManager")
                 if (skipSound)
                     param.result = 0
             }
