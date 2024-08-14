@@ -16,6 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 import org.json.JSONArray
@@ -33,7 +35,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val TAG = "DEBUG: Android Enhanced"
         var DEBUG = BuildConfig.DEBUG
-        val SECURITY_PATCH: LocalDate = LocalDate.parse(Build.VERSION.SECURITY_PATCH)
     }
 
     private val restoreBackupLauncher: ActivityResultLauncher<String> = registerForActivityResult(
@@ -56,7 +57,11 @@ class MainActivity : ComponentActivity() {
             deviceProtectedStorageContext.getSharedPreferences(
                 BroadcastUtils.PREFS, MODE_PRIVATE
             )
-        val dataToBackup = sharedPreferences.all // This gets all key-value pairs in the SharedPreferences
+
+        // Exclude none tweak related keys
+        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY)
+
+        val dataToBackup = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
         // Convert SharedPreferences data to JSON
         val jsonArray = JSONArray()
