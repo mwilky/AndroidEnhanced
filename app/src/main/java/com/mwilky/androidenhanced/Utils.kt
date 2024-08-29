@@ -20,10 +20,12 @@ class Utils(context: Context, handler: Handler) {
     companion object {
         //Torch enabled
         var isTorchEnabled: Boolean = false
-        //App Settings
+        //Shared Prefs Keys
         const val ISDEVICESUPPORTEDKEY = "isDeviceSupported"
         const val ISONBOARDINGCOMPLETEDKEY = "isOnboardingComplete"
         const val LASTBACKUP = "lastBackupDate"
+        const val LOGSKEY = "logs"
+
         //Tweak Values
         //Framework
         const val torchPowerScreenOff = "bool_LongPressPowerTorchScreenOff"

@@ -27,6 +27,9 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
         var QSCellMarginHorizontal = 0
         var QSCellMarginVertical = 0
         var QSTileTextLineHeight = 0
+
+        var iconContainerBackground = 0
+        var iconContainerBackgroundShape = 0
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
@@ -72,6 +75,12 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
         QSTileTextLineHeight =
             resparam.res.addResource(modRes, R.dimen.qs_tile_text_line_height)
 
+        iconContainerBackground =
+            resparam.res.addResource(modRes, com.mwilky.androidenhanced.R.drawable.icon_container_background)
+
+        iconContainerBackgroundShape =
+            resparam.res.addResource(modRes, com.mwilky.androidenhanced.R.drawable.icon_container_background_shape)
+
         //Send modified resources to premium module
         QuicksettingsPremium.QSQuickTileSize = QSQuickTileSize
         QuicksettingsPremium.QSLabelContainerMargin = QSLabelContainerMargin
@@ -81,6 +90,8 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
         QuicksettingsPremium.QSCellMarginHorizontal = QSCellMarginHorizontal
         QuicksettingsPremium.QSCellMarginVertical = QSCellMarginVertical
         QuicksettingsPremium.QSTileTextLineHeight = QSTileTextLineHeight
+
+        QuicksettingsPremium.iconContainerBackground = iconContainerBackground
     }
 
     override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam?) {

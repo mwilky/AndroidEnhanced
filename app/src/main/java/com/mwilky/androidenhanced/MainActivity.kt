@@ -19,6 +19,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
+import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 import org.json.JSONArray
 import org.json.JSONObject
@@ -59,7 +60,7 @@ class MainActivity : ComponentActivity() {
             )
 
         // Exclude none tweak related keys
-        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY)
+        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY)
 
         val dataToBackup = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
@@ -94,18 +95,70 @@ class MainActivity : ComponentActivity() {
                     SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date()))
                     .apply()
                 Toast.makeText(applicationContext, R.string.backupSuccess, Toast.LENGTH_LONG).show()
+                LogManager.log("Settings", applicationContext.resources.getString(R.string.backupSuccess))
             }
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(applicationContext, R.string.backupFailed, Toast.LENGTH_LONG).show()
-            Log.e(TAG, "backup failed: ${e.printStackTrace()}")
+            Log.e(TAG, ", ${R.string.backupFailed}: ${e.printStackTrace()}")
+            LogManager.log("Settings", "${applicationContext.resources.getString(R.string.backupFailed)}: ${e.printStackTrace()}")
         }
     }
+
+    private val backupLogsLauncher: ActivityResultLauncher<String> = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri ->
+        if (uri == null) return@registerForActivityResult
+
+        try {
+            // Retrieve the logs from logsState
+            val logs = LogManager.logsState.value.toMutableList()
+
+            // Prepare the content to write to the file
+            val logContent = StringBuilder()
+            logs.forEach { logEntry ->
+                val formattedLog = "${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(logEntry.timestamp))}  ${logEntry.title}: ${logEntry.summary}\n"
+                logContent.append(formattedLog)
+            }
+
+            // Write the logs to the file
+            val outputStream = contentResolver.openOutputStream(uri)
+            if (outputStream != null) {
+                val writer = OutputStreamWriter(outputStream)
+                writer.write(logContent.toString())
+                writer.close()
+                outputStream.close()
+
+                // Optionally, save the backup timestamp in SharedPreferences
+                val sharedPreferences = getSharedPreferences(BroadcastUtils.PREFS, MODE_PRIVATE)
+                sharedPreferences.edit().putString(
+                    LASTBACKUP,
+                    SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                ).apply()
+
+                Toast.makeText(applicationContext, applicationContext.resources.getString(R.string.backupSuccess), Toast.LENGTH_LONG).show()
+                LogManager.log("Logs", applicationContext.resources.getString(R.string.backupSuccess))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(applicationContext, "Logs backup failed", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "Logs backup failed: ${e.printStackTrace()}")
+            LogManager.log("Logs", "Logs backup failed: ${e.printStackTrace()}")
+        }
+    }
+
+    fun createLogsBackup() {
+        val timestamp =
+            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "AndroidEnhanced_logs_$timestamp.txt"
+        backupLogsLauncher.launch(fileName)
+    }
+
 
     fun createBackup() {
         val timestamp =
             SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "AndroidEnhanced_$timestamp.json"
+        val fileName = "AndroidEnhanced_settings_$timestamp.json"
         createBackupLauncher.launch(fileName)
     }
 
@@ -166,16 +219,14 @@ class MainActivity : ComponentActivity() {
                     // Handle additional data here, if required
                 }
 
-                Toast.makeText(
-                    applicationContext,
-                    R.string.restoreSuccess,
-                    Toast.LENGTH_LONG)
-                        .show()
+                Toast.makeText(applicationContext, R.string.restoreSuccess, Toast.LENGTH_LONG).show()
+                LogManager.log("Settings", applicationContext.resources.getString(R.string.restoreSuccess))
             }
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(applicationContext, R.string.restoreFailed, Toast.LENGTH_LONG).show()
-            Log.e(TAG, "restore failed: ${e.printStackTrace()}")
+            Log.e(TAG, "${R.string.restoreFailed}: ${e.printStackTrace()}")
+            LogManager.log("Settings", "${applicationContext.resources.getString(R.string.restoreFailed)}: ${e.printStackTrace()}")
         }
     }
 

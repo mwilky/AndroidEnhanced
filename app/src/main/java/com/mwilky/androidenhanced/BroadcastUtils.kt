@@ -14,6 +14,10 @@ import android.widget.TextView
 import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
+import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
+import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarAirplaneIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryIconColor
@@ -152,7 +156,10 @@ class BroadcastUtils: BroadcastReceiver() {
 
         const val PREFS = "prefs"
 
-        fun registerBroadcastReceiver(mContext: Context, key: String, registeredClass: String, defaultValue: Any) {
+        //This receives the broadcasts in the hooked processes
+        fun registerBroadcastReceiver(
+            mContext: Context, key: String, registeredClass: String, defaultValue: Any
+        ) {
             val myReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     val value = when (intent.extras?.get(key)) {
@@ -203,7 +210,10 @@ class BroadcastUtils: BroadcastReceiver() {
                         statusBarClockSeconds -> {
                             mStatusbarClockSecondsEnabled = value as Boolean
                             callMethod(clock, "updateShowSeconds")
-                            callMethod(getObjectField(ShadeHeaderController, "clock"), "updateShowSeconds")
+                            callMethod(
+                                getObjectField(ShadeHeaderController, "clock"),
+                                "updateShowSeconds"
+                            )
                         }
                         //Hide lockscreen statusbar
                         hideLockscreenStatusBar -> {
@@ -322,8 +332,6 @@ class BroadcastUtils: BroadcastReceiver() {
                             StatusbarPremium.mStatusbarBluetoothColor = value as Int
                             updateStatusbarIconColors(mContext)
                         }
-
-
                         customStatusbarGlobalIconColor -> {
                             StatusbarPremium.mStatusbarGlobalColor = value as Int
                             updateStatusbarIconColors(mContext)
@@ -336,9 +344,6 @@ class BroadcastUtils: BroadcastReceiver() {
                             StatusbarPremium.mLsStatusbarGlobalColor = value as Int
                             updateStatusbarIconColors(mContext)
                         }
-
-
-
                         customQsStatusbarClockColor -> {
                             StatusbarPremium.mQsStatusbarClockColor = value as Int
                             updateStatusbarIconColors(mContext)
@@ -437,15 +442,21 @@ class BroadcastUtils: BroadcastReceiver() {
 
                         hideCollapsedAlarmIcon -> {
                             mHideCollapsedAlarmEnabled = value as Boolean
-                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
+                            callMethod(
+                                Statusbar.collapsedStatusBarFragment, "updateBlockedIcons"
+                            )
                         }
                         hideCollapsedVolumeIcon -> {
                             mHideCollapsedVolumeEnabled = value as Boolean
-                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
+                            callMethod(
+                                Statusbar.collapsedStatusBarFragment, "updateBlockedIcons"
+                            )
                         }
                         hideCollapsedCallStrengthIcon -> {
                             mHideCollapsedCallStrengthEnabled = value as Boolean
-                            callMethod(Statusbar.collapsedStatusBarFragment, "updateBlockedIcons")
+                            callMethod(
+                                Statusbar.collapsedStatusBarFragment, "updateBlockedIcons"
+                            )
                         }
                         qsColumnsLandscape -> {
                             mQsColumnsConfigLandscape = value as Int
@@ -481,7 +492,6 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
-
                 }
             }
 
@@ -490,7 +500,8 @@ class BroadcastUtils: BroadcastReceiver() {
             if (DEBUG) log("$TAG: Registered '$key' receiver  in $registeredClass")
         }
 
-        //This sends the broadcast containing the keys and values
+        //This sends the broadcast containing the keys and values from the tweaks app to the hooked
+        // processes.
         fun <T> sendBroadcast(
             context: Context,
             key: String,
@@ -506,7 +517,12 @@ class BroadcastUtils: BroadcastReceiver() {
                 }
                 context.sendBroadcast(intent)
             }
-            if (DEBUG) Log.d(TAG, "broadcast sent, $key = $value")
+
+            LogManager.log(
+                "BroadcastUtils",
+                "Broadcast sent: " +
+                        "$key${value?.toString()?.takeIf { it.isNotEmpty() }?.let { " = $it" } ?: ""}"
+            )
         }
 
         fun updateQuicksettings(mContext: Context) {
@@ -584,7 +600,6 @@ class BroadcastUtils: BroadcastReceiver() {
             setBrightnessView(mQQsView, mQQsBrightnessView)
 
             animateBrightnessSlider(mQsAnimator)
-
         }
 
         fun updateStatusbarIconColors(mContext: Context) {
@@ -617,10 +632,9 @@ class BroadcastUtils: BroadcastReceiver() {
 
             updateCarrierLabelColor(ModernShadeCarrierGroupMobileView as View, mContext)
         }
-
     }
 
-// Sends keys and values when the device has booted
+    // Listens for boot completed action, then sends keys and values to the hooked processes
     override fun onReceive(context: Context, intent: Intent) {
         val bootCompleted: Boolean
         val action = intent.action
@@ -628,14 +642,7 @@ class BroadcastUtils: BroadcastReceiver() {
             TAG, "Received action: $action, user unlocked: " + UserManagerCompat
                 .isUserUnlocked(context)
         )
-        bootCompleted =
-            Intent.ACTION_LOCKED_BOOT_COMPLETED == action
 
-    if (!bootCompleted)
-        return
-
-        //Pause for 2 seconds before sending the boot broadcasts to allow things to init
-        //Thread.sleep(2000)
 
         //Send the preferences and their values via broadcast
         val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
@@ -643,10 +650,22 @@ class BroadcastUtils: BroadcastReceiver() {
             deviceProtectedStorageContext.getSharedPreferences(
                 PREFS, MODE_PRIVATE
             )
-        val allPrefs = sharedPreferences.all
-        for ((key, value) in allPrefs) {
+
+        LogManager.init(deviceProtectedStorageContext)
+
+        // Clear logs on boot to keep things tidy
+        LogManager.clearLogs()
+
+        // Exclude none tweak related keys
+        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY)
+
+        val bootPrefs = sharedPreferences.all.filterKeys { it !in keysToExclude }
+
+        for ((key, value) in bootPrefs) {
 
             sendBroadcast(deviceProtectedStorageContext, key, value)
         }
+
+        LogManager.log("BroadcastUtils", "Applied all settings at boot")
     }
 }

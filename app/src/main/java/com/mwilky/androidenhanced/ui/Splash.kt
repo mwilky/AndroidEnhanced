@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 
 import androidx.navigation.NavController
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
+import com.mwilky.androidenhanced.LogManager
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
@@ -29,6 +30,8 @@ fun SplashScreen(navController: NavController, deviceProtectedStorageContext: Co
         deviceProtectedStorageContext.getSharedPreferences(
             PREFS, MODE_PRIVATE
         )
+
+    LogManager.init(deviceProtectedStorageContext)
 
     //Save isDeviceSupported to SharedPreferences
     LaunchedEffect(Unit) {
@@ -50,6 +53,7 @@ fun SplashScreen(navController: NavController, deviceProtectedStorageContext: Co
             }
         }
     }
+
 }
 
 
@@ -74,7 +78,9 @@ private suspend fun isCurrentDeviceSupported(): Boolean {
 
             // Extract the device names and check if the current device is supported
             val supportedDevices = content.split(",").map { it.trim() }
-            if (DEBUG) Log.d(TAG, "Supported device from online repo are: $supportedDevices")
+
+            LogManager.log("Splash", "Officially supported device from online repo are: $supportedDevices")
+
             val isSupported = currentDeviceName in supportedDevices
 
             // Close resources
@@ -84,18 +90,22 @@ private suspend fun isCurrentDeviceSupported(): Boolean {
             // Log the result
             if (DEBUG) {
                 val resultMessage = if (isSupported) {
-                    "Your device (${currentDeviceName}) is supported."
+                    "Your device (${currentDeviceName}) is officially supported."
                 } else {
-                    "Your device (${currentDeviceName}) is not supported."
+                    "Your device (${currentDeviceName}) is not officially supported, although certain features still may work."
                 }
-                Log.d(TAG, resultMessage)
+
+                LogManager.log("Splash", resultMessage)
             }
 
             isSupported
+
         } catch (e: Exception) {
             // Handle any errors (e.g., network issues, parsing errors, etc.)
             e.printStackTrace()
             Log.e(TAG, "Error occurred while checking device support. " +
+                    "Do you have network connectivity?")
+            LogManager.log("Splash", "Error occurred while checking device support. " +
                     "Do you have network connectivity?")
             false
         }

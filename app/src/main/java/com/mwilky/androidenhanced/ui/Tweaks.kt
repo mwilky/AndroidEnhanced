@@ -1585,7 +1585,13 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         entries = deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsStyle),
                         0,
                         deviceProtectedStorageContext = deviceProtectedStorageContext,
-                        disabledIndex = 1
+                    )
+                }
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.rowCount
+                        )
                     )
                 }
                 item {
@@ -1603,6 +1609,25 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 item {
                     TweakSelectionRow(
                         label = stringResource(
+                            id = R.string.qsRowsTitle
+                        ),
+                        description = qsRowsEntries[rememberQsRows],
+                        key = qsRows,
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_rows_entries),
+                        2,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
+                    )
+                }
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.columnCount
+                        )
+                    )
+                }
+                item {
+                    TweakSelectionRow(
+                        label = stringResource(
                             id = R.string.qqsColumnsTitle
                         ),
                         description = qsColumnsEntries[rememberQQsColumns],
@@ -1615,36 +1640,31 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 item {
                     TweakSelectionRow(
                         label = stringResource(
-                            id = R.string.qqsColumnsLandscapeTitle
-                        ),
-                        description = qsColumnsEntries[rememberQQsColumnsLandscape],
-                        key = qqsColumnsLandscape,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
-                        2,
-                        deviceProtectedStorageContext = deviceProtectedStorageContext
-                    )
-                }
-                item {
-                    TweakSelectionRow(
-                        label = stringResource(
-                            id = R.string.qsRowsTitle
-                        ),
-                        description = qsRowsEntries[rememberQsRows],
-                        key = qsRows,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_rows_entries),
-                        2,
-                        deviceProtectedStorageContext = deviceProtectedStorageContext
-                    )
-                }
-                item {
-                    TweakSelectionRow(
-                        label = stringResource(
                             id = R.string.qsColumnsTitle
                         ),
                         description = qsColumnsEntries[rememberQsColumns],
                         key = qsColumns,
                         entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
                         0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext
+                    )
+                }
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.columnCountLandscape
+                        )
+                    )
+                }
+                item {
+                    TweakSelectionRow(
+                        label = stringResource(
+                            id = R.string.qqsColumnsLandscapeTitle
+                        ),
+                        description = qsColumnsEntries[rememberQQsColumnsLandscape],
+                        key = qqsColumnsLandscape,
+                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        2,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
                 }

@@ -153,7 +153,7 @@ fun SettingsScrollableContent(
             }
         }
         item{
-            BackupButtonsRow(context = deviceProtectedStorageContext)
+            BackupButtonsRow(deviceProtectedStorageContext = deviceProtectedStorageContext)
         }
 
     }
@@ -170,7 +170,7 @@ fun SettingsScrollableContent(
 }
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun BackupButtonsRow(context: Context) {
+fun BackupButtonsRow(deviceProtectedStorageContext: Context) {
     val mainActivity = (LocalContext.current as MainActivity)
     FlowRow(
         modifier = Modifier
@@ -191,7 +191,7 @@ fun BackupButtonsRow(context: Context) {
             elevation = CardDefaults.elevatedCardElevation()
         ) {
             Text(
-                text = context.resources.getString(R.string.backup),
+                text = deviceProtectedStorageContext.resources.getString(R.string.backup),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(vertical = 16.dp, horizontal = 32.dp),
@@ -213,7 +213,7 @@ fun BackupButtonsRow(context: Context) {
             elevation = CardDefaults.elevatedCardElevation()
         ) {
             Text(
-                text = context.resources.getString(R.string.restore),
+                text = deviceProtectedStorageContext.resources.getString(R.string.restore),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(vertical = 16.dp, horizontal = 32.dp),

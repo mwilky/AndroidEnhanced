@@ -22,8 +22,9 @@ import com.mwilky.androidenhanced.ui.Tweaks
 @Composable
 fun Navigation(context: Context) {
     val navController = rememberNavController()
-
     val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
+
+    LogManager.init(deviceProtectedStorageContext)
 
     NavHost(
         navController = navController,

@@ -2,15 +2,9 @@ package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.TextView
-import com.mwilky.androidenhanced.MainActivity
-import com.mwilky.androidenhanced.MainActivity.Companion.SECURITY_PATCH
 import com.mwilky.androidenhanced.Utils.Companion.isUnlocked
-import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.ShadeHeaderController
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.updateBatteryIconColors
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -26,7 +20,6 @@ import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 import de.robv.android.xposed.XposedHelpers.setIntField
 import de.robv.android.xposed.XposedHelpers.setObjectField
-import java.time.LocalDate
 
 
 class Lockscreen {
@@ -47,12 +40,7 @@ class Lockscreen {
             "com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder"
 
         //March 2024 renamed this class to QSImpl
-        private val QS_FRAGMENT_CLASS =
-            if (SECURITY_PATCH.isBefore(LocalDate.parse("2024-03-05"))) {
-                "com.android.systemui.qs.QSFragment"
-            } else {
-                "com.android.systemui.qs.QSImpl"
-            }
+        private val QS_IMPL_CLASS = "com.android.systemui.qs.QSImpl"
 
         private const val CENTRAL_SURFACES_COMMAND_QUEUE_CALLBACKS_CLASS =
             "com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks"
@@ -180,7 +168,7 @@ class Lockscreen {
 
             //Disable QS on lockscreen
             findAndHookMethod(
-                QS_FRAGMENT_CLASS,
+                QS_IMPL_CLASS,
                 classLoader,
                 "disable",
                 Int::class.javaPrimitiveType,
