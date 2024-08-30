@@ -528,7 +528,7 @@ class BroadcastUtils: BroadcastReceiver() {
         fun updateQuicksettings(mContext: Context) {
 
             callMethod(
-                QuicksettingsPremium.QSPanel,
+                Quicksettings.QSPanel,
                 "onConfigurationChanged",
                 mContext.resources.configuration
             )

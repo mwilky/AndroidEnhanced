@@ -354,11 +354,10 @@ class Quicksettings {
             }
         }
 
-        //Set the object and share with premiums mods
+        // Set the object
         private val onFinishInflateHookQSPanel: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 QSPanel = param.thisObject
-                QuicksettingsPremium.QSPanel = QSPanel
             }
         }
 
