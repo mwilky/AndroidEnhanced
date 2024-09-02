@@ -382,6 +382,26 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 false
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsIconContainerActiveShape,
+                                param.thisObject.toString(),
+                                0
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsIconContainerInactiveShape,
+                                param.thisObject.toString(),
+                                0
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.qsIconContainerUnavailableShape,
+                                param.thisObject.toString(),
+                                0
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.autoExpandFirstNotif,
+                                param.thisObject.toString(),
+                                true
+                            )
                         }
                     }
                 }

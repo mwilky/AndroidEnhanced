@@ -80,6 +80,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.mwilky.androidenhanced.Utils.Companion.autoExpandFirstNotif
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarAirplaneIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryPercentColor
@@ -134,6 +135,9 @@ import com.mwilky.androidenhanced.Utils.Companion.qqsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
+import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerActiveShape
+import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerInactiveShape
+import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerUnavailableShape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
@@ -264,6 +268,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsStyle)
     val qsBrightnessSliderPositionEntries =
         deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition)
+    val qsIconContainerShapeEntries =
+        deviceProtectedStorageContext.resources.getStringArray(R.array.qsIconContainerShape)
 
 
     // Create a Composable state variable that depends on the SharedPreferences value
@@ -424,6 +430,15 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
     var rememberLsStatusbarIconAccentColor by remember {
         mutableStateOf(sharedPreferences.getBoolean(lsStatusbarIconAccentColor, false))
     }
+    var rememberQsIconContainerActiveShape by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsIconContainerActiveShape, 0))
+    }
+    var rememberQsIconContainerInactiveShape by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsIconContainerInactiveShape, 0))
+    }
+    var rememberQsIconContainerUnavailableShape by remember {
+        mutableIntStateOf(sharedPreferences.getInt(qsIconContainerUnavailableShape, 0))
+    }
 
     // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener =
@@ -535,6 +550,13 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getBoolean(qsStatusbarIconAccentColor, false)
                 lsStatusbarIconAccentColor -> rememberLsStatusbarIconAccentColor =
                     sharedPreferences.getBoolean(lsStatusbarIconAccentColor, false)
+
+                qsIconContainerActiveShape -> rememberQsIconContainerActiveShape =
+                    sharedPreferences.getInt(qsIconContainerActiveShape, 0)
+                qsIconContainerInactiveShape -> rememberQsIconContainerInactiveShape =
+                    sharedPreferences.getInt(qsIconContainerInactiveShape, 0)
+                qsIconContainerUnavailableShape -> rememberQsIconContainerUnavailableShape =
+                    sharedPreferences.getInt(qsIconContainerUnavailableShape, 0)
             }
         }
 
@@ -1551,7 +1573,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = smartPulldownEntries[rememberSmartPulldown],
                         key = smartPulldown,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.smart_pulldown_entries),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.smart_pulldown_entries
+                        ),
                         0,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1563,7 +1588,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = quickPulldownEntries[rememberQuickPulldown],
                         key = quickPulldown,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.quick_pulldown_entries),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.quick_pulldown_entries
+                        ),
                         0,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1582,8 +1610,71 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsStyleEntries[rememberQsStyle],
                         key = qsStyle,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsStyle),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.quicksettingsStyle
+                        ),
                         0,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext,
+                    )
+                }
+                item {
+                    TweakSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsIconContainerActiveShapeTitle
+                        ),
+                        description = if (rememberQsStyle == 1)
+                            qsIconContainerShapeEntries[rememberQsIconContainerActiveShape]
+                        else stringResource(
+                            id = R.string.qsIconContainerShapeDisabledTitle
+                        ),
+                        key = qsIconContainerActiveShape,
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.qsIconContainerShape
+                        ),
+                        0,
+                        disabled = rememberQsStyle != 1,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext,
+                    )
+                }
+                item {
+                    TweakSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsIconContainerInactiveShapeTitle
+                        ),
+                        description = if (rememberQsStyle == 1)
+                            qsIconContainerShapeEntries[rememberQsIconContainerInactiveShape]
+                        else stringResource(
+                            id = R.string.qsIconContainerShapeDisabledTitle
+                        ),
+                        key = qsIconContainerInactiveShape,
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.qsIconContainerShape
+                        ),
+                        0,
+                        disabled = rememberQsStyle != 1,
+                        deviceProtectedStorageContext = deviceProtectedStorageContext,
+                    )
+                }
+                item {
+                    TweakSelectionRow(
+                        label = stringResource(
+                            id = R.string.qsIconContainerUnavailableShapeTitle
+                        ),
+                        description = if (rememberQsStyle == 1)
+                            qsIconContainerShapeEntries[rememberQsIconContainerUnavailableShape]
+                        else stringResource(
+                            id = R.string.qsIconContainerShapeDisabledTitle
+                        ),
+                        key = qsIconContainerUnavailableShape,
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.qsIconContainerShape
+                        ),
+                        0,
+                        disabled = rememberQsStyle != 1,
                         deviceProtectedStorageContext = deviceProtectedStorageContext,
                     )
                 }
@@ -1601,7 +1692,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qqsRowsEntries[rememberQqsRows],
                         key = qqsRows,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qqs_rows_entries),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.qqs_rows_entries
+                        ),
                         1,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1613,7 +1707,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsRowsEntries[rememberQsRows],
                         key = qsRows,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_rows_entries),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.qs_rows_entries
+                        ),
                         2,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1632,7 +1729,10 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQQsColumns],
                         key = qqsColumns,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.qs_columns
+                        ),
                         0,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1644,7 +1744,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQsColumns],
                         key = qsColumns,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
                         0,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1663,7 +1764,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQQsColumnsLandscape],
                         key = qqsColumnsLandscape,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
                         2,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1675,7 +1777,8 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         description = qsColumnsEntries[rememberQsColumnsLandscape],
                         key = qsColumnsLandscape,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
                         2,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1692,9 +1795,13 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         label = stringResource(
                             id = R.string.qsBrightnessSliderPositionTitle
                         ),
-                        description = qsBrightnessSliderPositionEntries[rememberQsBrightnessSliderPosition],
+                        description =
+                        qsBrightnessSliderPositionEntries[rememberQsBrightnessSliderPosition],
                         key = qsBrightnessSliderPosition,
-                        entries = deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition),
+                        entries =
+                        deviceProtectedStorageContext.resources.getStringArray(
+                            R.array.quicksettingsBrightnessSliderPosition
+                        ),
                         0,
                         deviceProtectedStorageContext = deviceProtectedStorageContext
                     )
@@ -1783,6 +1890,17 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     TweakSwitch(
                         deviceProtectedStorageContext,
                         stringResource(
+                            R.string.autoExpandedFirstTitle),
+                        stringResource(
+                            R.string.autoExpandedFirstSummary),
+                        autoExpandFirstNotif,
+                        true
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
                             R.string.expandedNotificationsTitle),
                         stringResource(
                             R.string.expandedNotificationsSummary),
@@ -1806,7 +1924,13 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
 }
 
 @Composable
-fun TweakSwitch(context: Context, label: String, description: String, key: String, defaultValue: Boolean = false) {
+fun TweakSwitch(
+    context: Context,
+    label: String,
+    description: String,
+    key: String,
+    defaultValue: Boolean = false
+) {
     var switchState by remember { mutableStateOf(readSwitchState(context, key, defaultValue)) }
 
     ElevatedCard(
@@ -2073,7 +2197,9 @@ fun TweakColor(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleLarge,
-                    color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
+                    color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    else
+                        MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(
                             start = 16.dp,
@@ -2086,7 +2212,9 @@ fun TweakColor(
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
+                            color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            else
+                                MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .padding(
                                     start = 16.dp,
@@ -2391,7 +2519,8 @@ fun TweakColorDialog(
     label: String
 ) {
     val colorPickerController = rememberColorPickerController()
-    var selectedColorInt by remember { mutableIntStateOf(sharedPreferences.getInt(key, android.graphics.Color.WHITE)) }
+    var selectedColorInt
+    by remember { mutableIntStateOf(sharedPreferences.getInt(key, android.graphics.Color.WHITE)) }
     var hexCode by remember { mutableStateOf("") }
 
     Dialog(
@@ -2461,7 +2590,10 @@ fun TweakColorDialog(
 
                             if (isValidHexCode(newHexCode)) {
                                 selectedColorInt = hexStringToColorInt(hexCode)
-                                colorPickerController.selectByColor(Color(android.graphics.Color.parseColor("#$hexCode")), false)
+                                colorPickerController.selectByColor(
+                                    Color(android.graphics.Color.parseColor("#$hexCode")),
+                                    false
+                                )
                             }
                         },
                         colors = TextFieldDefaults.colors(
@@ -2592,6 +2724,7 @@ fun TweakSelectionRow(
     entries: Array<String>,
     defaultIndex: Int,
     disabledIndex: Int? = null,
+    disabled: Boolean = false,
     deviceProtectedStorageContext: Context
 ) {
     // Create a state variable to track whether the dialog should be shown
@@ -2628,7 +2761,7 @@ fun TweakSelectionRow(
                     bottom = 16.dp
                 )
                 .clickable(
-                    enabled = true,
+                    enabled = !disabled,
                     onClick = {
                         // Show the dialog when the row is clicked
                         isDialogVisible = true
@@ -2645,7 +2778,9 @@ fun TweakSelectionRow(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    else
+                        MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .padding(
                             start = 16.dp,
@@ -2657,7 +2792,9 @@ fun TweakSelectionRow(
                     Text(
                         text = description,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else
+                            MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .padding(
                                 start = 16.dp,

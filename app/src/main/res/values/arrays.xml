@@ -48,4 +48,9 @@
         <item>Below tiles</item>
         <item>Hidden</item>
     </string-array>
+    <string-array name="qsIconContainerShape">
+        <item>Circle</item>
+        <item>Rounded square</item>
+        <item>Square</item>
+    </string-array>
 </resources>

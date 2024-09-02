@@ -117,9 +117,16 @@
     <string name="qsBrightnessSliderPositionTitle">Brightness slider position</string>
     <string name="qqsBrightnessSliderTitle">Quick quicksetting brightness slider</string>
     <string name="qqsBrightnessSliderSummary">Show the brightness slider in the quick quicksettings panel</string>
+    <string name="qsIconContainerActiveShapeTitle">Active tile background shape</string>
+    <string name="qsIconContainerInactiveShapeTitle">Inactive tile background shape</string>
+    <string name="qsIconContainerUnavailableShapeTitle">Unavailable tile background shape</string>
+    <string name="qsIconContainerShapeDisabledTitle">Only available with \"Icon with background\" quicksettings style</string>
+
 <!--    Notifications-->
     <string name="muteScreenOnNotificationsTitle">Silent screen on notifications</string>
     <string name="muteScreenOnNotificationsSummary">Mute notification sounds whilst the screen is turned on</string>
-    <string name="expandedNotificationsTitle">Expanded notifications</string>
+    <string name="expandedNotificationsTitle">Auto expand all notifications</string>
     <string name="expandedNotificationsSummary">Automatically expand all notifications</string>
+    <string name="autoExpandedFirstTitle">Auto expand first notification</string>
+    <string name="autoExpandedFirstSummary">Automatically expand the most recent notification</string>
 </resources>

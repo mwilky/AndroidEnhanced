@@ -19,6 +19,7 @@ import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
+import com.mwilky.androidenhanced.Utils.Companion.autoExpandFirstNotif
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarAirplaneIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarBatteryPercentColor
@@ -76,6 +77,9 @@ import com.mwilky.androidenhanced.Utils.Companion.qqsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
+import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerActiveShape
+import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerInactiveShape
+import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerUnavailableShape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
@@ -106,8 +110,11 @@ import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnab
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
+import com.mwilky.androidenhanced.xposed.Notifications
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mExpandedNotifications
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNotificationsEnabled
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mRowAppearanceCoordinatorAttach2
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateFirstNotificationExpansion
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationExpansion
 import com.mwilky.androidenhanced.xposed.Quicksettings
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.PagedTileLayout
@@ -116,8 +123,8 @@ import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mClickVibration
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mHideQSFooterBuildNumberEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsBrightnessSliderEnabled
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsRowsConfig
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQqsColumnsConfig
-import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQqsColumnsConfigLandscape
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsColumnsConfig
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQQsColumnsConfigLandscape
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsAnimator
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsBrightnessSliderPositionConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsColumnsConfig
@@ -437,9 +444,6 @@ class BroadcastUtils: BroadcastReceiver() {
                             StatusbarPremium.mLsStatusbarCarrierColor = value as Int
                             updateStatusbarIconColors(mContext)
                         }
-
-
-
                         hideCollapsedAlarmIcon -> {
                             mHideCollapsedAlarmEnabled = value as Boolean
                             callMethod(
@@ -463,11 +467,11 @@ class BroadcastUtils: BroadcastReceiver() {
                             updateQuicksettings(mContext)
                         }
                         qqsColumns -> {
-                            mQqsColumnsConfig = value as Int
+                            mQQsColumnsConfig = value as Int
                             updateQuicksettings(mContext)
                         }
                         qqsColumnsLandscape -> {
-                            mQqsColumnsConfigLandscape = value as Int
+                            mQQsColumnsConfigLandscape = value as Int
                             updateQuicksettings(mContext)
                         }
                         iconBlacklist -> {
@@ -489,6 +493,22 @@ class BroadcastUtils: BroadcastReceiver() {
                             mLsStatusbarIconUseAccentColor = value as Boolean
                             updateStatusbarIconColors(mContext)
 
+                        }
+                        qsIconContainerActiveShape -> {
+                            QuicksettingsPremium.mQsIconContainerActiveShapeConfig = value as Int
+                            updateQuicksettings(mContext)
+                        }
+                        qsIconContainerInactiveShape -> {
+                            QuicksettingsPremium.mQsIconContainerInactiveShapeConfig = value as Int
+                            updateQuicksettings(mContext)
+                        }
+                        qsIconContainerUnavailableShape -> {
+                            QuicksettingsPremium.mQsIconContainerUnavailableShapeConfig = value as Int
+                            updateQuicksettings(mContext)
+                        }
+                        autoExpandFirstNotif -> {
+                            Notifications.mAutoExpandFirstNotificationEnabled = value as Boolean
+                            mRowAppearanceCoordinatorAttach2?.let { updateFirstNotificationExpansion(it) }
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")

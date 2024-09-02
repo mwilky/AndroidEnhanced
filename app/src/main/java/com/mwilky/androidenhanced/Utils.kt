@@ -49,6 +49,9 @@ class Utils(context: Context, handler: Handler) {
         const val muteScreenOnNotifications = "bool_MuteScreenOnNotifications"
         const val expandAllNotifications = "bool_ExpandAllNotifications"
         const val qsStyle = "int_QsStyle"
+        const val qsIconContainerActiveShape = "int_QsIconContainerActiveShape"
+        const val qsIconContainerInactiveShape = "int_QsIconContainerInactiveShape"
+        const val qsIconContainerUnavailableShape = "int_QsIconContainerUnavailableShape"
         const val qqsRows = "int_QQsRows"
         const val qsRows = "int_QsRows"
         const val qsColumns = "int_QSColumns"
@@ -105,6 +108,8 @@ class Utils(context: Context, handler: Handler) {
         const val statusbarIconAccentColor = "bool_StatusbarIconAccentColor"
         const val qsStatusbarIconAccentColor = "bool_QsStatusbarIconAccentColor"
         const val lsStatusbarIconAccentColor = "bool_LsStatusbarIconAccentColor"
+
+        const val autoExpandFirstNotif = "bool_AutoExpandFirstNotif"
 
         var mIsInitialBoot = true
 

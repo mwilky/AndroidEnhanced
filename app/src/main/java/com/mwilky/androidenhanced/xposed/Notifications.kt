@@ -2,8 +2,6 @@ package com.mwilky.androidenhanced.xposed
 
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
-import de.robv.android.xposed.XposedBridge.log
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
@@ -25,13 +23,28 @@ class Notifications {
         private const val ROW_APPEARANCE_COORDINATOR_CLASS =
             "com.android.systemui.statusbar.notification.collection.coordinator.RowAppearanceCoordinator"
 
+        private const val ROW_APPEARANCE_COORDINATOR_CLASS_ATTACH_2_CLASS =
+            "com.android.systemui.statusbar.notification.collection.coordinator.RowAppearanceCoordinator\$attach\$2"
+
+        private const val NOTIFICATION_ENTRY_CLASS =
+            "com.android.systemui.statusbar.notification.collection.NotificationEntry"
+
+        private const val NOTIF_VIEW_CONTROLLER_CLASS =
+            "com.android.systemui.statusbar.notification.collection.render.NotifViewController"
+
         //Class Objects
         lateinit var mRowAppearanceCoordinator: Any
         lateinit var mNotifCollection: Any
 
+        var mRowAppearanceCoordinatorAttach2: Any? = null
+        lateinit var mNotifViewController: Any
+
+        lateinit var mNotifToExpand: Any
+
         //Tweak Variables
         var mMuteScreenOnNotificationsEnabled: Boolean = false
         var mExpandedNotifications: Boolean = false
+        var mAutoExpandFirstNotificationEnabled: Boolean = true
 
         fun initFramework(classLoader: ClassLoader?) {
 
@@ -71,6 +84,31 @@ class Notifications {
             )
             hookAllConstructors(notifCollection, NotifCollectionConstructorHook)
 
+
+            findAndHookMethod(
+                ROW_APPEARANCE_COORDINATOR_CLASS_ATTACH_2_CLASS,
+                classLoader,
+                "onAfterRenderEntry",
+                NOTIFICATION_ENTRY_CLASS,
+                NOTIF_VIEW_CONTROLLER_CLASS,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+
+                        // Objects to be used elsewhere
+                        mRowAppearanceCoordinatorAttach2 = param.thisObject
+                        mNotifViewController = param.args[1]
+
+                        val rowAppearController = getObjectField(param.thisObject, "\$tmp0")
+
+                        setBooleanField(
+                            rowAppearController,
+                            "mAutoExpandFirstNotification",
+                            mAutoExpandFirstNotificationEnabled
+                        )
+
+                    }
+                }
+            )
 
         }
 
@@ -134,6 +172,184 @@ class Notifications {
                         )
                     }
                 }
+            }
+        }
+
+        fun updateFirstNotificationExpansion(mRowAppearanceCoordinatorAttach2: Any) {
+
+            val rowAppearanceCoordinator =
+                getObjectField(mRowAppearanceCoordinatorAttach2, "\$tmp0")
+
+            val mAlwaysExpandNonGroupedNotification =
+                getBooleanField(rowAppearanceCoordinator, "mAlwaysExpandNonGroupedNotification")
+
+            val notificationEntries = getObjectField(
+                mNotifCollection,
+                "mReadOnlyNotificationSet"
+            ) as Collection<Any?>
+
+            val entryToExpand = getObjectField(rowAppearanceCoordinator, "entryToExpand")
+
+            for (notificationEntry in notificationEntries.toTypedArray()) {
+
+                if (notificationEntry == entryToExpand) {
+
+                    val expandableNotificationRowController =
+                        getObjectField(notificationEntry, "mRowController")
+
+                    if (expandableNotificationRowController != null) {
+
+                        val expandableNotificationRow =
+                            getObjectField(expandableNotificationRowController, "mView")
+
+                        if (expandableNotificationRow != null) {
+
+                            val isSystemExpanded =
+                                getBooleanField(expandableNotificationRow, "mIsSystemExpanded")
+
+                            val shouldWeExpand = (
+                                    mAlwaysExpandNonGroupedNotification
+                                        || (mAutoExpandFirstNotificationEnabled &&
+                                        notificationEntry == entryToExpand)
+                                    )
+
+                            // If there is a difference between if the notification is expanded
+                            // and whether it should be or not, then set the opposite
+                            if (shouldWeExpand != isSystemExpanded) {
+
+                                val isExpanded =
+                                    callMethod(
+                                        expandableNotificationRow,
+                                        "isExpanded",
+                                        false
+                                    )
+
+                                setBooleanField(
+                                    expandableNotificationRow ,
+                                    "mIsSystemExpanded",
+                                    shouldWeExpand
+                                )
+
+                                callMethod(
+                                    expandableNotificationRow,
+                                    "notifyHeightChanged",
+                                    false
+                                )
+
+                                callMethod(
+                                    expandableNotificationRow,
+                                    "onExpansionChanged",
+                                    false,
+                                    isExpanded
+                                )
+
+                                val mIsSummaryWithChildren = getBooleanField(expandableNotificationRow, "mIsSummaryWithChildren")
+                                if (mIsSummaryWithChildren) {
+
+                                    val mChildrenContainer =
+                                        getObjectField(expandableNotificationRow, "mChildrenContainer")
+
+                                    callMethod(mChildrenContainer, "updateGroupOverflow")
+                                    callMethod(mChildrenContainer, "updateExpansionStates")
+
+                                }
+                            }
+
+                            val mAssistantFeedbackController =
+                                getObjectField(rowAppearanceCoordinator, "mAssistantFeedbackController")
+
+                            val feedbackIcon = callMethod(
+                                getObjectField(mAssistantFeedbackController, "mIcons"),
+                                "get",
+                                callMethod(
+                                    mAssistantFeedbackController,
+                                    "getFeedbackStatus",
+                                    notificationEntry
+                                )
+                            )
+
+                            val mIsSummaryWithChildren =
+                                getBooleanField(expandableNotificationRow, "mIsSummaryWithChildren")
+
+                            if (mIsSummaryWithChildren) {
+                                val mChildrenContainer =
+                                    getObjectField(expandableNotificationRow, "mChildrenContainer")
+
+                                val mNotificationHeaderWrapper =
+                                    getObjectField(mChildrenContainer, "mNotificationHeaderWrapper")
+
+                                if (mNotificationHeaderWrapper != null)
+                                    callMethod(
+                                        mNotificationHeaderWrapper,
+                                        "setFeedbackIcon",
+                                        feedbackIcon
+                                    )
+
+                                val mNotificationHeaderWrapperLowPriority =
+                                    getObjectField(
+                                        mChildrenContainer,
+                                        "mNotificationHeaderWrapperLowPriority"
+                                    )
+
+                                if (mNotificationHeaderWrapperLowPriority != null)
+                                    callMethod(
+                                        mNotificationHeaderWrapperLowPriority,
+                                        "setFeedbackIcon",
+                                        feedbackIcon
+                                    )
+                            }
+
+                            val mPrivateLayout =
+                                getObjectField(expandableNotificationRow, "mPrivateLayout")
+
+                            if (getObjectField(mPrivateLayout, "mContractedChild") != null)
+                                callMethod(
+                                    getObjectField(mPrivateLayout, "mContractedWrapper"),
+                                    "setFeedbackIcon",
+                                    feedbackIcon
+                                )
+
+                            if (getObjectField(mPrivateLayout, "mExpandedChild") != null)
+                                callMethod(
+                                    getObjectField(mPrivateLayout, "mExpandedWrapper"),
+                                    "setFeedbackIcon",
+                                    feedbackIcon
+                                )
+
+                            if (getObjectField(mPrivateLayout, "mHeadsUpChild") != null)
+                                callMethod(
+                                    getObjectField(mPrivateLayout, "mHeadsUpWrapper"),
+                                    "setFeedbackIcon",
+                                    feedbackIcon
+                                )
+
+                            val mPublicLayout =
+                                getObjectField(expandableNotificationRow, "mPublicLayout")
+
+                            if (getObjectField(mPublicLayout, "mContractedChild") != null)
+                                callMethod(
+                                    getObjectField(mPublicLayout, "mContractedWrapper"),
+                                    "setFeedbackIcon",
+                                    feedbackIcon
+                                )
+
+                            if (getObjectField(mPublicLayout, "mExpandedChild") != null)
+                                callMethod(
+                                    getObjectField(mPublicLayout, "mExpandedWrapper"),
+                                    "setFeedbackIcon",
+                                    feedbackIcon
+                                )
+
+                            if (getObjectField(mPublicLayout, "mHeadsUpChild") != null)
+                                callMethod(
+                                    getObjectField(mPublicLayout, "mHeadsUpWrapper"),
+                                    "setFeedbackIcon",
+                                    feedbackIcon
+                                )
+                        }
+                    }
+                }
+
             }
         }
 
