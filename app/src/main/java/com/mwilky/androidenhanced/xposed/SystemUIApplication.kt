@@ -407,6 +407,11 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 true
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.gestureSleep,
+                                param.thisObject.toString(),
+                                false
+                            )
                         }
                     }
                 }

@@ -3,6 +3,7 @@
     <string-array name="xposed_scope">
         <item>com.android.systemui</item>
         <item>android</item>
+        <item>com.google.android.apps.nexuslauncher</item>
     </string-array>
     <string-array name="statusbar_clock_position_entries">
         <item>Default (left)</item>

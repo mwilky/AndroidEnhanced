@@ -122,6 +122,7 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarOtherIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
+import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
@@ -1344,6 +1345,25 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
             }
             buttons -> {
                 //Tweaks Items
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.launcher
+                        )
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.doubleTapToSleepTitle
+                        ),
+                        stringResource(
+                            id = R.string.doubleTapToSleepLauncherSummary
+                        ),
+                        doubleTapToSleepLauncher
+                    )
+                }
                 item {
                     TweakSectionHeader(
                         label = stringResource(

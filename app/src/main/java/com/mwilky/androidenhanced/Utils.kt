@@ -6,6 +6,8 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Handler
+import android.os.PowerManager
+import android.os.SystemClock
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.Settings
@@ -13,6 +15,7 @@ import android.util.Log
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers
+import de.robv.android.xposed.XposedHelpers.callMethod
 
 
 class Utils(context: Context, handler: Handler) {
@@ -27,6 +30,10 @@ class Utils(context: Context, handler: Handler) {
         const val LOGSKEY = "logs"
 
         //Tweak Values
+        //Gestures
+        const val gestureSleep = "gesture_Sleep"
+        //Launcher
+        const val doubleTapToSleepLauncher = "bool_DoubleTapToSleeplauncher"
         //Framework
         const val torchPowerScreenOff = "bool_LongPressPowerTorchScreenOff"
         const val torchAutoOffScreenOn = "bool_TorchAutoOffScreenOn"
@@ -110,6 +117,7 @@ class Utils(context: Context, handler: Handler) {
         const val lsStatusbarIconAccentColor = "bool_LsStatusbarIconAccentColor"
 
         const val autoExpandFirstNotif = "bool_AutoExpandFirstNotif"
+        const val notifSectionHeaders = "bool_NotifSectionHeaders"
 
         var mIsInitialBoot = true
 
@@ -183,6 +191,11 @@ class Utils(context: Context, handler: Handler) {
             Settings.Secure.putString(mContext.contentResolver, "icon_blacklist", if (mIsInitialBoot) iconBlacklist else updatedBlockedIcons)
         }
 
+        fun lockDevice(context: Context) {
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+            callMethod(powerManager, "goToSleep", SystemClock.uptimeMillis())
+        }
     }
 
     private val mContext: Context = context

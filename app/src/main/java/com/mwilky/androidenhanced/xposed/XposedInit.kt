@@ -15,6 +15,7 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
         //Package to hook
         const val SYSTEMUI_PACKAGE = "com.android.systemui"
         const val FRAMEWORK_PACKAGE = "android"
+        const val LAUNCHER_PACKAGE = "com.google.android.apps.nexuslauncher"
 
         private var MODULE_PATH: String? = null
 
@@ -48,6 +49,9 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
                 Quicksettings.init(lpparam.classLoader)
                 QuicksettingsPremium.init(lpparam.classLoader)
                 Notifications.initSystemUI(lpparam.classLoader)
+            }
+            LAUNCHER_PACKAGE -> {
+                Buttons.initLauncher(lpparam.classLoader)
             }
         }
     }

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.AudioPlaybackCaptureConfiguration
@@ -15,16 +16,22 @@ import android.media.session.MediaSessionManager
 import android.os.Build
 import android.os.Handler
 import android.os.Message
+import android.os.PowerManager
 import android.telecom.TelecomManager
 import android.util.Log
 import android.view.Display
+import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.ViewConfiguration
+import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastReceiver
 import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
+import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
+import com.mwilky.androidenhanced.Utils.Companion.gestureSleep
 import com.mwilky.androidenhanced.Utils.Companion.isTorchEnabled
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
@@ -32,6 +39,7 @@ import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
+import de.robv.android.xposed.XposedBridge.hookAllConstructors
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.callStaticMethod
@@ -64,6 +72,9 @@ class Buttons {
         private const val MediaSessionLegacyHelperClass =
             "android.media.session.MediaSessionLegacyHelper"
 
+        private const val WorkspaceTouchListener =
+            "com.android.launcher3.touch.WorkspaceTouchListener"
+
         lateinit var PhoneWindowManagerObject: Any
         lateinit var utils: Any
 
@@ -71,6 +82,8 @@ class Buttons {
         var mTorchPowerScreenOff: Boolean = false
         var mTorchAutoOff: Boolean = false
         var mVolKeyMedia = false
+
+        var mDoubleTapSleepLauncher = false
 
         //Torch
         private const val MSG_TOGGLE_TORCH = 100
@@ -81,6 +94,54 @@ class Buttons {
         private var mVolKeyLongPress = false
         private var MediaSessionLegacyHelper: Class<*>? = null
         private var PhoneWindowManagerClassReference: Class<*>? = null
+
+        fun initLauncher(classLoader: ClassLoader?) {
+
+            hookAllConstructors(
+                findClass(WorkspaceTouchListener, classLoader),
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+
+                        val mWorkspace = getObjectField(param.thisObject, "mWorkspace")
+                        val mContext = callMethod(mWorkspace, "getContext")
+                                as Context
+
+                        registerBroadcastReceiver(
+                            mContext,
+                            doubleTapToSleepLauncher,
+                            param.thisObject.toString(),
+                            false
+                        )
+
+                        val mGestureDetector =
+                            getObjectField(param.thisObject, "mGestureDetector")
+                                    as GestureDetector
+
+                        val onDoubleTapListener = object : GestureDetector.OnDoubleTapListener {
+                            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                                return false
+                            }
+
+                            override fun onDoubleTap(e: MotionEvent): Boolean {
+                                if (mDoubleTapSleepLauncher) {
+
+
+                                    sendDoubleTapBroadcast(mContext)
+
+                                    return true
+                                }
+                                return false
+                            }
+
+                            override fun onDoubleTapEvent(e: MotionEvent): Boolean {
+                                return false
+                            }
+                        }
+                        mGestureDetector.setOnDoubleTapListener(onDoubleTapListener)
+                    }
+                })
+
+        }
 
         fun init(classLoader: ClassLoader?) {
 
@@ -938,6 +999,13 @@ class Buttons {
                 msg,
                 ViewConfiguration.getLongPressTimeout().toLong()
             )
+        }
+
+        private fun sendDoubleTapBroadcast(context: Context) {
+            val intent = Intent()
+            intent.action = gestureSleep
+
+            context.sendBroadcast(intent)
         }
     }
 }

@@ -13,8 +13,9 @@
 <!--    Tweaks Categories-->
     <string name="general">General</string>
     <string name="iconColors">Icon colors</string>
-    <string name="powerButton">Power Button</string>
-    <string name="volumeButton">Volume Button</string>
+    <string name="launcher">Launcher</string>
+    <string name="powerButton">Power button</string>
+    <string name="volumeButton">Volume button</string>
     <string name="gestures">Gestures</string>
     <string name="clock">Clock</string>
     <string name="expansion">Expansion</string>
@@ -30,6 +31,7 @@
 <!--    Statusbar-->
     <string name="doubleTapToSleepTitle">Double tap to sleep</string>
     <string name="doubleTapToSleepSummary">Double tap on the statusbar to put the device to sleep</string>
+    <string name="doubleTapToSleepLauncherSummary">Double tap on the homescreen grid to put the device to sleep</string>
     <string name="statusbarBrightnessControlTitle">Brightness control</string>
     <string name="statusbarBrightnessControlSummary">Control the brightness of the device via sliding or long pressing on the statusbar</string>
     <string name="statusbarClockPositionTitle">Clock position</string>

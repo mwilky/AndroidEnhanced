@@ -60,13 +60,16 @@ import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
+import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
+import com.mwilky.androidenhanced.Utils.Companion.gestureSleep
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedAlarmIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedCallStrengthIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedVolumeIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideLockscreenStatusBar
 import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
+import com.mwilky.androidenhanced.Utils.Companion.lockDevice
 import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.mIsInitialBoot
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
@@ -99,6 +102,7 @@ import com.mwilky.androidenhanced.UtilsPremium.Companion.getIconColorForSlotName
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mLsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mQsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.xposed.Buttons.Companion.mDoubleTapSleepLauncher
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
@@ -518,6 +522,12 @@ class BroadcastUtils: BroadcastReceiver() {
                         notifSectionHeaders -> {
                             mNotificationSectionHeadersEnabled = value as Boolean
                             mKeyguardCoordinator?.let { updateNotificationSectionHeaders(it) }
+                        }
+                        gestureSleep -> {
+                            lockDevice(mContext)
+                        }
+                        doubleTapToSleepLauncher -> {
+                            mDoubleTapSleepLauncher = value as Boolean
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
