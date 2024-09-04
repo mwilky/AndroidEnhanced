@@ -1,8 +1,11 @@
 package com.mwilky.androidenhanced.xposed
 
+import android.content.Context
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
+import de.robv.android.xposed.XposedHelpers.findAndHookConstructor
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
 import de.robv.android.xposed.XposedHelpers.getBooleanField
@@ -32,6 +35,12 @@ class Notifications {
         private const val NOTIF_VIEW_CONTROLLER_CLASS =
             "com.android.systemui.statusbar.notification.collection.render.NotifViewController"
 
+        private const val KEYGUARD_COORDINATOR_ATTACH_1_CLASS =
+            "com.android.systemui.statusbar.notification.collection.coordinator.KeyguardCoordinator\$attach\$1"
+
+        private const val KEYGUARD_COORDINATOR_CLASS =
+            "com.android.systemui.statusbar.notification.collection.coordinator.KeyguardCoordinator"
+
         //Class Objects
         lateinit var mRowAppearanceCoordinator: Any
         lateinit var mNotifCollection: Any
@@ -39,12 +48,13 @@ class Notifications {
         var mRowAppearanceCoordinatorAttach2: Any? = null
         lateinit var mNotifViewController: Any
 
-        lateinit var mNotifToExpand: Any
+        var mKeyguardCoordinator: Any? = null
 
         //Tweak Variables
         var mMuteScreenOnNotificationsEnabled: Boolean = false
         var mExpandedNotifications: Boolean = false
         var mAutoExpandFirstNotificationEnabled: Boolean = true
+        var mNotificationSectionHeadersEnabled: Boolean = true
 
         fun initFramework(classLoader: ClassLoader?) {
 
@@ -110,6 +120,31 @@ class Notifications {
                 }
             )
 
+            findAndHookMethod(
+                KEYGUARD_COORDINATOR_ATTACH_1_CLASS,
+                classLoader,
+                "accept",
+                Object::class.java,
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+
+                        val classId = getObjectField(param.thisObject, "\$r8\$classId")
+
+                        if (classId == 0)
+                            mKeyguardCoordinator?.let { updateNotificationSectionHeaders(it) }
+
+                    }
+                }
+            )
+
+            hookAllConstructors(
+                findClass(KEYGUARD_COORDINATOR_CLASS, classLoader),
+                object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+
+                    mKeyguardCoordinator = param.thisObject
+                }
+            })
         }
 
         // Hooked functions
@@ -350,6 +385,38 @@ class Notifications {
                     }
                 }
 
+            }
+        }
+
+        fun updateNotificationSectionHeaders(mKeyguardCoordinator: Any) {
+
+            var state = callMethod(
+                getObjectField(mKeyguardCoordinator, "statusBarStateController"),
+                "getState"
+            )
+
+            // If in normal shade view then hide the headers if required
+            if (state == 0) {
+
+                val sectionHeaderVisibilityProvider = getObjectField(mKeyguardCoordinator, "sectionHeaderVisibilityProvider")
+                val neverShowSectionHeaders = getBooleanField(sectionHeaderVisibilityProvider, "neverShowSectionHeaders")
+
+                // If we arent always hiding headers then set according to tweak value
+                if (!neverShowSectionHeaders) {
+
+                    val areSectionHeadersVisible = getBooleanField(sectionHeaderVisibilityProvider, "sectionHeadersVisible")
+
+                    if (areSectionHeadersVisible != mNotificationSectionHeadersEnabled) {
+
+                        setBooleanField(sectionHeaderVisibilityProvider, "sectionHeadersVisible", mNotificationSectionHeadersEnabled)
+                        callMethod(
+                            getObjectField(mKeyguardCoordinator, "notifFilter"),
+                            "invalidateList",
+                            "onStatusBarStateChanged"
+                        )
+
+                    }
+                }
             }
         }
 

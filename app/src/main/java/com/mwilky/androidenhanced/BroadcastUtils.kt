@@ -70,6 +70,7 @@ import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
 import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.mIsInitialBoot
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
+import com.mwilky.androidenhanced.Utils.Companion.notifSectionHeaders
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumnsLandscape
@@ -112,10 +113,13 @@ import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshot
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Notifications
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mExpandedNotifications
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mKeyguardCoordinator
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNotificationsEnabled
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mNotificationSectionHeadersEnabled
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mRowAppearanceCoordinatorAttach2
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateFirstNotificationExpansion
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationExpansion
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.updateNotificationSectionHeaders
 import com.mwilky.androidenhanced.xposed.Quicksettings
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.PagedTileLayout
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.QSFooterView
@@ -509,6 +513,11 @@ class BroadcastUtils: BroadcastReceiver() {
                         autoExpandFirstNotif -> {
                             Notifications.mAutoExpandFirstNotificationEnabled = value as Boolean
                             mRowAppearanceCoordinatorAttach2?.let { updateFirstNotificationExpansion(it) }
+
+                        }
+                        notifSectionHeaders -> {
+                            mNotificationSectionHeadersEnabled = value as Boolean
+                            mKeyguardCoordinator?.let { updateNotificationSectionHeaders(it) }
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")

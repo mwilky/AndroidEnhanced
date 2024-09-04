@@ -402,6 +402,11 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 true
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.notifSectionHeaders,
+                                param.thisObject.toString(),
+                                true
+                            )
                         }
                     }
                 }

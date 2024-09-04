@@ -128,6 +128,7 @@ import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
 import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
+import com.mwilky.androidenhanced.Utils.Companion.notifSectionHeaders
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumnsLandscape
@@ -1882,7 +1883,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 item {
                     TweakSectionHeader(
                         label = stringResource(
-                            id = R.string.general
+                            id = R.string.expansion
                         )
                     )
                 }
@@ -1905,6 +1906,24 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.expandedNotificationsSummary),
                         expandAllNotifications
+                    )
+                }
+                item {
+                    TweakSectionHeader(
+                        label = stringResource(
+                            id = R.string.general
+                        )
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            R.string.notificationSectionHeadersTitle),
+                        stringResource(
+                            R.string.notificationSectionHeadersSummary),
+                        notifSectionHeaders,
+                        true
                     )
                 }
                 item {

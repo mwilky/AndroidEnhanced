@@ -129,4 +129,6 @@
     <string name="expandedNotificationsSummary">Automatically expand all notifications</string>
     <string name="autoExpandedFirstTitle">Auto expand first notification</string>
     <string name="autoExpandedFirstSummary">Automatically expand the most recent notification</string>
+    <string name="notificationSectionHeadersTitle">Notification section headers</string>
+    <string name="notificationSectionHeadersSummary">Enable or disable the notification section headers</string>
 </resources>
