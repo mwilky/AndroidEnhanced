@@ -102,8 +102,8 @@ class Quicksettings {
         var mQQsRowsConfig: Int = 2
         var mQsColumnsConfig: Int = 2
         var mQsColumnsConfigLandscape: Int = 4
-        var mQqsColumnsConfig: Int = 2
-        var mQqsColumnsConfigLandscape: Int = 4
+        var mQQsColumnsConfig: Int = 2
+        var mQQsColumnsConfigLandscape: Int = 4
         var mQsRowsConfig: Int = 4
         var mQsBrightnessSliderPositionConfig: Int = 0
         var mQQsBrightnessSliderEnabled: Boolean = false
@@ -265,7 +265,7 @@ class Quicksettings {
             // Tile Adapter CLASS
             val tileAdapter = findClass(TILE_ADAPTER_CLASS, classLoader)
 
-            // HOOK CONSTRUCTOR TO SET mReloadTiles
+            // HOOK CONSTRUCTOR
             hookAllConstructors(tileAdapter, ConstructorHookTileAdapter)
 
             val configuration = "android.content.res.Configuration"
@@ -501,51 +501,87 @@ class Quicksettings {
 
         private val onConfigurationChangedQuickQSPanelController: XC_MethodHook =
             object : XC_MethodReplacement() {
-            override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                val mView = getObjectField(param.thisObject, "mView") as View
-                val maxTiles  = getIntField(mView, "mMaxTiles")
-                val configuration = mView.context.resources.configuration
+                override fun replaceHookedMethod(param: MethodHookParam): Any? {
+                    val mView = getObjectField(param.thisObject, "mView") as View
+                    val maxTiles  = getIntField(mView, "mMaxTiles")
 
-                val mMediaHost = getObjectField(param.thisObject, "mMediaHost")
-
-                if (configuration.orientation == ORIENTATION_LANDSCAPE) {
+                    val mMediaHost = getObjectField(param.thisObject, "mMediaHost")
 
                     if (callMethod(mMediaHost, "getVisible") as Boolean) {
 
-                        setIntField(QuickQSPanelQQSSideLabelTileLayout, "mMaxAllowedRows", 2)
+                        // We need to hardcode 2 columns and 2 rows when landscape and media is playing
+                        if (mView.resources.configuration.orientation == ORIENTATION_LANDSCAPE) {
 
-                        setIntField(mView, "mMaxTiles", 4)
-                        callMethod(param.thisObject, "setTiles")
+                            setIntField(
+                                QuickQSPanelQQSSideLabelTileLayout,
+                                "mMaxAllowedRows",
+                                2
+                            )
 
+                            setIntField(mView, "mMaxTiles", 4)
+                            callMethod(param.thisObject, "setTiles")
 
+                        } else {
+
+                            setIntField(
+                                QuickQSPanelQQSSideLabelTileLayout,
+                                "mMaxAllowedRows",
+                                getQsRowCount(mView.context, "QQS")
+                            )
+
+                            val totalTiles =
+                                getQsRowCount(
+                                    mView.context,
+                                    "QQS"
+                                ) * getQsColumnCount(
+                                    mView.context,
+                                    "QQS"
+                                )
+
+                            if (maxTiles != totalTiles) {
+                                setIntField(mView, "mMaxTiles", totalTiles)
+                                callMethod(param.thisObject, "setTiles")
+                            }
+                        }
                     } else {
 
-                        setIntField(QuickQSPanelQQSSideLabelTileLayout, "mMaxAllowedRows", 1)
+                        setIntField(
+                            QuickQSPanelQQSSideLabelTileLayout,
+                            "mMaxAllowedRows",
+                            getQsRowCount(mView.context, "QQS")
+                        )
 
-                        setIntField(mView, "mMaxTiles", mQqsColumnsConfigLandscape)
-                        callMethod(param.thisObject, "setTiles")
+                        val totalTiles =
+                            getQsRowCount(
+                                mView.context,
+                                "QQS"
+                            ) * getQsColumnCount(
+                                mView.context,
+                                "QQS"
+                            )
 
+                        if (maxTiles != totalTiles) {
+                            setIntField(mView, "mMaxTiles", totalTiles)
+                            callMethod(param.thisObject, "setTiles")
+                        }
                     }
 
-                } else {
+                    callMethod(param.thisObject, "updateMediaExpansion")
 
-                    setIntField(QuickQSPanelQQSSideLabelTileLayout, "mMaxAllowedRows", mQQsRowsConfig)
-
-                    if (maxTiles != mQqsColumnsConfig * mQQsRowsConfig) {
-                        setIntField(mView, "mMaxTiles", mQqsColumnsConfig * mQQsRowsConfig)
-                        callMethod(param.thisObject, "setTiles")
-                    }
-
+                    return null
                 }
-
-                callMethod(param.thisObject, "updateMediaExpansion")
-                return null
             }
-        }
 
         private val ConstructorHookTileAdapter: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
-                setIntField(param.thisObject, "mNumColumns", mQsColumnsConfig)
+                val mContext = getObjectField(param.thisObject, "mContext")
+                        as Context
+
+                setIntField(
+                    param.thisObject,
+                    "mNumColumns",
+                    getQsColumnCount(mContext, "QS")
+                )
             }
         }
 
@@ -560,7 +596,8 @@ class Quicksettings {
                     val resources = sideLabelTileLayout.resources
 
                     val mIsSmallLandscapeLockscreenEnabled =
-                        getObjectField(sideLabelTileLayout, "mIsSmallLandscapeLockscreenEnabled") as Boolean
+                        getObjectField(sideLabelTileLayout, "mIsSmallLandscapeLockscreenEnabled")
+                                as Boolean
 
                     val mIsSmallLandscape =
                         resources.getBoolean(
@@ -581,15 +618,17 @@ class Quicksettings {
                                 )
                             )
                         else
-
-                            //Check for landscape
-                            mQqsColumnsConfig
+                            maxOf(
+                                getQsColumnCount(mContext, "QS"),
+                                getQsColumnCount(mContext, "QQS")
+                            )
 
                     setIntField(
                         param.thisObject, "mResourceColumns", 1.coerceAtLeast(columns)
                     )
 
-                    val mResourceCellHeightResId = getIntField(param.thisObject, "mResourceCellHeightResId")
+                    val mResourceCellHeightResId =
+                        getIntField(param.thisObject, "mResourceCellHeightResId")
 
                     val mResourceCellHeight =
                         resources.getDimensionPixelSize(mResourceCellHeightResId)
@@ -628,7 +667,7 @@ class Quicksettings {
                                 )
                             )
                         else
-                            mQsRowsConfig
+                            getQsRowCount(mContext, "QS")
 
                     setIntField(
                         param.thisObject, "mMaxAllowedRows", 1.coerceAtLeast(rows)
@@ -642,7 +681,9 @@ class Quicksettings {
                         val mMaxAllowedRows = getIntField(param.thisObject, "mMaxAllowedRows")
 
                         setIntField(
-                            param.thisObject, "mMaxAllowedRows", mMinRows.coerceAtLeast(mMaxAllowedRows - 1)
+                            param.thisObject,
+                            "mMaxAllowedRows",
+                            mMinRows.coerceAtLeast(mMaxAllowedRows - 1)
                         )
 
                     }
@@ -687,12 +728,12 @@ class Quicksettings {
 
         private val onConfigChangedHookQSCustomizerController3: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
-                setIntField(
-                    getObjectField(
-                        getSurroundingThis(param.thisObject), "mTileAdapter"
-                    ),
-                    "mNumColumns", mQsColumnsConfig
+                val tileAdapter = getObjectField(
+                    getSurroundingThis(param.thisObject), "mTileAdapter"
                 )
+                val mContext = getObjectField(tileAdapter, "mContext") as Context
+
+                setIntField(tileAdapter, "mNumColumns", getQsColumnCount(mContext, "QS"))
 
                 val mView =  getObjectField(
                     getSurroundingThis(param.thisObject), "mView"
@@ -782,7 +823,13 @@ class Quicksettings {
 
                 val mQQSSideLabelTileLayout = param.result
 
-                callMethod(mQQSSideLabelTileLayout, "setMaxColumns", mQqsColumnsConfig)
+                val mContext = getObjectField(param.thisObject, "mContext") as Context
+
+                callMethod(
+                    mQQSSideLabelTileLayout,
+                    "setMaxColumns",
+                    getQsColumnCount(mContext, "QQS")
+                )
             }
         }
 
@@ -800,30 +847,24 @@ class Quicksettings {
 
                 if (mView.javaClass.name.equals(QUICK_QS_PANEL_CLASS)) {
 
-                    if (mView.context.resources.configuration.orientation == ORIENTATION_PORTRAIT) {
-
-                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQqsColumnsConfig)
-
-                    } else {
-
-                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQqsColumnsConfigLandscape)
-
-                    }
+                    callMethod(
+                        mTileLayout,
+                        "setMaxColumns",
+                        if (horizontal) 2 else getQsColumnCount(mView.context, "QQS")
+                    )
 
                 } else if (mView.javaClass.name.equals(QS_PANEL_CLASS)) {
 
-                    if (mView.context.resources.configuration.orientation == ORIENTATION_PORTRAIT) {
-
-                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQsColumnsConfig)
-
-                    } else {
-
-                        callMethod(mTileLayout, "setMaxColumns", if (horizontal) 2 else mQsColumnsConfigLandscape)
-
-                    }
+                    callMethod(
+                        mTileLayout,
+                        "setMaxColumns",
+                        if (horizontal) 2 else getQsColumnCount(mView.context, "QS")
+                    )
                 }
 
-                val mUsingHorizontalLayoutChangedListener = getObjectField(param.thisObject, "mUsingHorizontalLayoutChangedListener") as Runnable?
+                val mUsingHorizontalLayoutChangedListener =
+                    getObjectField(param.thisObject, "mUsingHorizontalLayoutChangedListener")
+                            as Runnable?
 
                 mUsingHorizontalLayoutChangedListener?.run()
 
@@ -986,5 +1027,38 @@ class Quicksettings {
                 mBrightnessView.layoutParams = lp
             }
         }
+
+        fun getQsColumnCount(mContext: Context, mView: String): Int {
+
+            val configuration = mContext.resources.configuration
+
+            if (mView == "QS") {
+
+                return if (configuration.orientation == ORIENTATION_PORTRAIT) mQsColumnsConfig else mQsColumnsConfigLandscape
+
+            } else if (mView == "QQS") {
+
+                return if (configuration.orientation == ORIENTATION_PORTRAIT) mQQsColumnsConfig else mQQsColumnsConfigLandscape
+            }
+
+            return 2
+        }
+
+        fun getQsRowCount(mContext: Context, mView: String): Int {
+
+            val configuration = mContext.resources.configuration
+
+            if (mView == "QS") {
+
+                return if (configuration.orientation == ORIENTATION_PORTRAIT) mQsRowsConfig else 2
+
+            } else if (mView == "QQS") {
+
+                return if (configuration.orientation == ORIENTATION_PORTRAIT) mQQsRowsConfig else 1
+            }
+
+            return 4
+        }
+
     }
 }
