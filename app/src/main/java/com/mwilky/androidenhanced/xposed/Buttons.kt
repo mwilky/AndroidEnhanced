@@ -1,22 +1,12 @@
 package com.mwilky.androidenhanced.xposed
-import android.annotation.SuppressLint
 import android.app.NotificationManager
-import android.bluetooth.BluetoothA2dp
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.AudioPlaybackCaptureConfiguration
-import android.media.MediaRecorder
-import android.media.MediaRouter
 import android.media.session.MediaSessionManager
-import android.os.Build
 import android.os.Handler
 import android.os.Message
-import android.os.PowerManager
 import android.telecom.TelecomManager
 import android.util.Log
 import android.view.Display
@@ -25,9 +15,8 @@ import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.ViewConfiguration
-import com.mwilky.androidenhanced.BroadcastUtils
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastReceiver
-import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.Utils
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
@@ -51,7 +40,6 @@ import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 import de.robv.android.xposed.XposedHelpers.setIntField
-import java.time.LocalDate
 
 class Buttons {
 
@@ -83,7 +71,7 @@ class Buttons {
         var mTorchAutoOff: Boolean = false
         var mVolKeyMedia = false
 
-        var mDoubleTapSleepLauncher = false
+        var mDoubleTapSleepLauncherEnabled = false
 
         //Torch
         private const val MSG_TOGGLE_TORCH = 100
@@ -97,6 +85,7 @@ class Buttons {
 
         fun initLauncher(classLoader: ClassLoader?) {
 
+            // Double tap launcher to sleep
             hookAllConstructors(
                 findClass(WorkspaceTouchListener, classLoader),
                 object : XC_MethodHook() {
@@ -113,6 +102,12 @@ class Buttons {
                             false
                         )
 
+                        val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+
+                        mDoubleTapSleepLauncherEnabled = sharedPreferences.getBoolean(doubleTapToSleepLauncher, false)
+
+                        log("mwilky: mDoubleTapSleepLauncherEnabled = $mDoubleTapSleepLauncherEnabled")
+
                         val mGestureDetector =
                             getObjectField(param.thisObject, "mGestureDetector")
                                     as GestureDetector
@@ -123,11 +118,8 @@ class Buttons {
                             }
 
                             override fun onDoubleTap(e: MotionEvent): Boolean {
-                                if (mDoubleTapSleepLauncher) {
-
-
+                                if (mDoubleTapSleepLauncherEnabled) {
                                     sendDoubleTapBroadcast(mContext)
-
                                     return true
                                 }
                                 return false

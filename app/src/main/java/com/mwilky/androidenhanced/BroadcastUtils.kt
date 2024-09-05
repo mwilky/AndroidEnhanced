@@ -102,7 +102,7 @@ import com.mwilky.androidenhanced.UtilsPremium.Companion.getIconColorForSlotName
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mLsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mQsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mStatusbarIconUseAccentColor
-import com.mwilky.androidenhanced.xposed.Buttons.Companion.mDoubleTapSleepLauncher
+import com.mwilky.androidenhanced.xposed.Buttons.Companion.mDoubleTapSleepLauncherEnabled
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
@@ -527,7 +527,9 @@ class BroadcastUtils: BroadcastReceiver() {
                             lockDevice(mContext)
                         }
                         doubleTapToSleepLauncher -> {
-                            mDoubleTapSleepLauncher = value as Boolean
+                            val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+                            sharedPreferences.edit().putBoolean(key, value as Boolean).apply()
+                            mDoubleTapSleepLauncherEnabled = value as Boolean
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
