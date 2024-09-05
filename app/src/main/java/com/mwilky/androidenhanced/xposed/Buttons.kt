@@ -104,9 +104,8 @@ class Buttons {
 
                         val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
 
-                        mDoubleTapSleepLauncherEnabled = sharedPreferences.getBoolean(doubleTapToSleepLauncher, false)
-
-                        log("mwilky: mDoubleTapSleepLauncherEnabled = $mDoubleTapSleepLauncherEnabled")
+                        mDoubleTapSleepLauncherEnabled =
+                            sharedPreferences.getBoolean(doubleTapToSleepLauncher, false)
 
                         val mGestureDetector =
                             getObjectField(param.thisObject, "mGestureDetector")
