@@ -93,6 +93,7 @@ class Quicksettings {
         lateinit var BrightnessControllerClass: Class<*>
         lateinit var BrightnessControllerFactory: Any
         lateinit var PagedTileLayout: Any
+        lateinit var mQsCustomizerController3: Any
 
         //Tweak Variables
         var mClickVibrationEnabled: Boolean = false
@@ -267,6 +268,17 @@ class Quicksettings {
 
             // HOOK CONSTRUCTOR
             hookAllConstructors(tileAdapter, ConstructorHookTileAdapter)
+
+            val qsCustomizer3 = findClass(QS_CUSTOMIZER_CONTROLLER_3_CLASS, classLoader)
+
+            // HOOK CONSTRUCTOR
+            hookAllConstructors(qsCustomizer3, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+
+                    mQsCustomizerController3 = param.thisObject
+
+                }
+            })
 
             val configuration = "android.content.res.Configuration"
             findAndHookMethod(

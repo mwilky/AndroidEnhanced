@@ -139,6 +139,7 @@ import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsAnimator
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsBrightnessSliderPositionConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsColumnsConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsColumnsConfigLandscape
+import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsCustomizerController3
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQsRowsConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mQuickPulldownConfig
 import com.mwilky.androidenhanced.xposed.Quicksettings.Companion.mSmartPulldownConfig
@@ -608,6 +609,12 @@ class BroadcastUtils: BroadcastReceiver() {
             callMethod(
                 QSTileViewImpl,
                 "onConfigurationChanged",
+                mContext.resources.configuration
+            )
+
+            callMethod(
+                mQsCustomizerController3,
+                "onConfigChanged",
                 mContext.resources.configuration
             )
 
