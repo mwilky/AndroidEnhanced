@@ -2243,7 +2243,7 @@ fun TweakColor(
     previewColor: Int,
     sharedPreferences: SharedPreferences,
     disabled: Boolean = false,
-    description: String? = null,
+    description: String = "",
 ) {
 
     var isColorPickerVisible by remember { mutableStateOf(false) }
@@ -2295,24 +2295,23 @@ fun TweakColor(
                             start = 16.dp,
                             top = 8.dp,
                             end = 4.dp,
+                            bottom = if (description.isNotEmpty()) 0.dp else 8.dp,
                         )
                 )
-                if (description != "") {
-                    if (description != null) {
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            else
-                                MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .padding(
-                                    start = 16.dp,
-                                    bottom = 8.dp,
-                                    end = 4.dp
-                                )
-                        )
-                    }
+                if (description.isNotEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        else
+                            MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(
+                                start = 16.dp,
+                                bottom = 8.dp,
+                                end = 4.dp
+                            )
+                    )
                 }
             }
             Box(
