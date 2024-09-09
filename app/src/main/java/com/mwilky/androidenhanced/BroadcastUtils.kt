@@ -95,8 +95,10 @@ import com.mwilky.androidenhanced.Utils.Companion.statusBarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 import com.mwilky.androidenhanced.Utils.Companion.statusbarIconAccentColor
+import com.mwilky.androidenhanced.Utils.Companion.statusbarIconDarkColor
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
+import com.mwilky.androidenhanced.Utils.Companion.useDualStatusbarColors
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
 import com.mwilky.androidenhanced.UtilsPremium.Companion.getIconColorForSlotName
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mLsStatusbarIconUseAccentColor
@@ -530,6 +532,14 @@ class BroadcastUtils: BroadcastReceiver() {
                             val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
                             sharedPreferences.edit().putBoolean(key, value as Boolean).apply()
                             mDoubleTapSleepLauncherEnabled = value as Boolean
+                        }
+                        statusbarIconDarkColor -> {
+                            StatusbarPremium.mStatusbarDarkIconColor = value as Int
+                            updateStatusbarIconColors(mContext)
+                        }
+                        useDualStatusbarColors -> {
+                            StatusbarPremium.mDualStatusbarColorsEnabled = value as Boolean
+                            updateStatusbarIconColors(mContext)
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")

@@ -77,6 +77,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
@@ -149,6 +151,8 @@ import com.mwilky.androidenhanced.Utils.Companion.scrambleKeypad
 import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
 import com.mwilky.androidenhanced.Utils.Companion.statusBarClockSeconds
 import com.mwilky.androidenhanced.Utils.Companion.statusbarIconAccentColor
+import com.mwilky.androidenhanced.Utils.Companion.statusbarIconDarkColor
+import com.mwilky.androidenhanced.Utils.Companion.useDualStatusbarColors
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readIconSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeIconSwitchState
 
@@ -442,6 +446,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
         mutableIntStateOf(sharedPreferences.getInt(qsIconContainerUnavailableShape, 0))
     }
 
+    var rememberStatusbarIconDarkColor by remember {
+        mutableIntStateOf(sharedPreferences.getInt(statusbarIconDarkColor, -1728053248))
+    }
+
+    var rememberUseDualStatusbarColors by remember {
+        mutableStateOf(sharedPreferences.getBoolean(useDualStatusbarColors, true))
+    }
+
     // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -544,6 +556,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                 customLsStatusbarOtherIconColor -> rememberLsStatusbarIconOtherColor =
                     sharedPreferences.getInt(customLsStatusbarOtherIconColor, -1)
 
+                statusbarIconDarkColor -> rememberStatusbarIconDarkColor =
+                    sharedPreferences.getInt(statusbarIconDarkColor, -1728053248)
+
 
 
                 statusbarIconAccentColor -> rememberStatusbarIconAccentColor =
@@ -559,6 +574,9 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                     sharedPreferences.getInt(qsIconContainerInactiveShape, 0)
                 qsIconContainerUnavailableShape -> rememberQsIconContainerUnavailableShape =
                     sharedPreferences.getInt(qsIconContainerUnavailableShape, 0)
+
+                useDualStatusbarColors -> rememberUseDualStatusbarColors =
+                    sharedPreferences.getBoolean(useDualStatusbarColors, true)
             }
         }
 
@@ -697,13 +715,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         sharedPreferences,
                         statusbarIconAccentEnabled,
                         stringResource(
-                             id = if (statusbarIconAccentEnabled)
-                                 R.string.customStatusbarColorsSummaryDisabled
-                             else
-                                 R.string.customStatusbarGlobalIconColorSummary
+                            id = if (statusbarIconAccentEnabled)
+                                R.string.customStatusbarColorsSummaryDisabled
+                            else
+                                R.string.customStatusbarGlobalIconColorSummary
                         ),
                     )
                 }
+
                 item {
                     TweakRow(
                         context = deviceProtectedStorageContext,
@@ -719,6 +738,37 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         navController = navController,
                         sharedPreferences = sharedPreferences,
                         statusbarIconAccentEnabled || individualStatusbarColorsDisabled
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.useDualStatusbarColorsTitle
+                        ),
+                        stringResource(
+                            id = R.string.useDualStatusbarColorsSummary
+                        ),
+                        useDualStatusbarColors,
+                        true
+                    )
+                }
+                item {
+                    TweakColor(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            id = R.string.customStatusbarDarkIconColorTitle
+                        ),
+                        statusbarIconDarkColor,
+                        rememberStatusbarIconDarkColor,
+                        sharedPreferences,
+                        !rememberUseDualStatusbarColors,
+                        stringResource(
+                            if (rememberUseDualStatusbarColors)
+                                R.string.customStatusbarDarkIconColorSummary
+                            else
+                                R.string.customStatusbarDarkIconColorSummaryDisabled
+                        ),
                     )
                 }
                 item {
@@ -2206,6 +2256,7 @@ fun TweakColor(
             onDismissRequest = { isColorPickerVisible = false },
             onConfirmation = { isColorPickerVisible = false },
             key = key,
+            defaultColor = previewColor,
             context = deviceProtectedStorageContext,
             sharedPreferences = sharedPreferences,
             label = label
@@ -2290,15 +2341,15 @@ fun TweakColor(
 
 @Composable
 fun intToColor(intValue: Int): Color {
-    // Extract the red, green, and blue components from the intValue
+    // Extract the alpha, red, green, and blue components from the intValue
+    val alpha = (intValue shr 24) and 0xFF
     val red = (intValue shr 16) and 0xFF
     val green = (intValue shr 8) and 0xFF
     val blue = intValue and 0xFF
 
     // Create a Color object using the extracted components
-    return Color(red = red / 255f, green = green / 255f, blue = blue / 255f, alpha = 1f)
+    return Color(red = red / 255f, green = green / 255f, blue = blue / 255f, alpha = alpha / 255f)
 }
-
 
 @Composable
 fun TweakSectionHeader(label: String) {
@@ -2482,7 +2533,10 @@ fun TweakSelectionDialog(
                                         end = 24.dp
                                     ),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (isClickable) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                color = if (isClickable)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
                         }
                     }
@@ -2553,13 +2607,13 @@ fun TweakColorDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     key: String,
+    defaultColor: Int,
     context: Context,
     sharedPreferences: SharedPreferences,
     label: String
 ) {
     val colorPickerController = rememberColorPickerController()
-    var selectedColorInt
-    by remember { mutableIntStateOf(sharedPreferences.getInt(key, android.graphics.Color.WHITE)) }
+    var selectedColorInt by remember { mutableIntStateOf(defaultColor) }
     var hexCode by remember { mutableStateOf("") }
 
     Dialog(
@@ -2611,9 +2665,27 @@ fun TweakColorDialog(
                         selectedColorInt = colorEnvelope.color.toArgb()
                         hexCode = colorEnvelope.hexCode
                     },
-                    initialColor = intToColor(
-                        sharedPreferences.getInt(key, android.graphics.Color.WHITE)
-                    )
+                    initialColor = intToColor(defaultColor)
+                )
+                AlphaSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 12.dp)
+                        .height(20.dp),
+                    controller = colorPickerController,
+                    initialColor = intToColor(defaultColor),
+                    wheelRadius = 6.dp,
+                    wheelColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                )
+                BrightnessSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, end = 24.dp, top = 12.dp)
+                        .height(20.dp),
+                    controller = colorPickerController,
+                    initialColor = intToColor(defaultColor),
+                    wheelRadius = 6.dp,
+                    wheelColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 )
                 Row(
                     modifier = Modifier
@@ -2686,7 +2758,6 @@ fun TweakColorDialog(
                                         .apply()
                                     sendBroadcast(context, key, selectedColorInt)
                                 }
-
                         )
                     }
                     TextButton(
@@ -2844,6 +2915,5 @@ fun TweakSelectionRow(
                 }
             }
         }
-
     }
 }

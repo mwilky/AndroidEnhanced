@@ -13,7 +13,6 @@ import android.os.VibratorManager
 import android.provider.Settings
 import android.util.Log
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
-import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XposedHelpers.callMethod
 
@@ -115,6 +114,9 @@ class Utils(context: Context, handler: Handler) {
         const val statusbarIconAccentColor = "bool_StatusbarIconAccentColor"
         const val qsStatusbarIconAccentColor = "bool_QsStatusbarIconAccentColor"
         const val lsStatusbarIconAccentColor = "bool_LsStatusbarIconAccentColor"
+
+        const val statusbarIconDarkColor = "int_StatusbarIconDarkColor"
+        const val useDualStatusbarColors = "bool_DualStatusbarColors"
 
         const val autoExpandFirstNotif = "bool_AutoExpandFirstNotif"
         const val notifSectionHeaders = "bool_NotifSectionHeaders"

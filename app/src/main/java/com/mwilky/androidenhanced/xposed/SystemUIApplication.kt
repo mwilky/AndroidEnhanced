@@ -412,6 +412,16 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 false
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.statusbarIconDarkColor,
+                                param.thisObject.toString(),
+                                -1728053248
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.useDualStatusbarColors,
+                                param.thisObject.toString(),
+                                true
+                            )
                         }
                     }
                 }
