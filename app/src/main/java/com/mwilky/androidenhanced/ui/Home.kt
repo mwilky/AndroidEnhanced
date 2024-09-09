@@ -610,9 +610,7 @@ fun ScaffoldHomeCenteredAppBar(scrollBehavior: TopAppBarScrollBehavior
                     ) {
                         append("Enhanced")
                     }
-                }, lineHeight = 64.sp,
-                modifier = Modifier
-                    .padding(16.dp)
+                },
             )
         }
     )
