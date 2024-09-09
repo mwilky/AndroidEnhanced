@@ -39,6 +39,11 @@
     <string name="statusbarClockSecondsSummary">Display seconds in the statusbar clock</string>
     <string name="customStatusbarColorsTitle">Custom icon colors</string>
     <string name="customStatusbarColorsSummary">Set the colors of the statusbar icons</string>
+    <string name="useDualStatusbarColorsTitle">Use dual statusbar icon colors</string>
+    <string name="useDualStatusbarColorsSummary">Use a separate dark icon color for when displaying over a light colored app</string>
+    <string name="customStatusbarDarkIconColorTitle">Dark icon color</string>
+    <string name="customStatusbarDarkIconColorSummary">Set a color for all dark mode statusbar icons</string>
+    <string name="customStatusbarDarkIconColorSummaryDisabled">Enable \"use dual statusbar icon colors\" to use this feature</string>
     <string name="customStatusbarClockColorTitle">Clock</string>
     <string name="customStatusbarBatteryIconColorTitle">Battery icon</string>
     <string name="customStatusbarBatteryPercentColorTitle">Battery percent</string>
