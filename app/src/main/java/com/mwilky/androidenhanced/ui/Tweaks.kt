@@ -769,6 +769,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                             else
                                 R.string.customStatusbarDarkIconColorSummaryDisabled
                         ),
+                        -1728053248
                     )
                 }
                 item {
@@ -2244,6 +2245,7 @@ fun TweakColor(
     sharedPreferences: SharedPreferences,
     disabled: Boolean = false,
     description: String = "",
+    resetColor: Int = android.graphics.Color.WHITE
 ) {
 
     var isColorPickerVisible by remember { mutableStateOf(false) }
@@ -2259,7 +2261,8 @@ fun TweakColor(
             defaultColor = previewColor,
             context = deviceProtectedStorageContext,
             sharedPreferences = sharedPreferences,
-            label = label
+            label = label,
+            resetColor
         )
     }
     ElevatedCard(
@@ -2609,7 +2612,8 @@ fun TweakColorDialog(
     defaultColor: Int,
     context: Context,
     sharedPreferences: SharedPreferences,
-    label: String
+    label: String,
+    resetColor: Int = android.graphics.Color.WHITE
 ) {
     val colorPickerController = rememberColorPickerController()
     var selectedColorInt by remember { mutableIntStateOf(defaultColor) }
@@ -2746,9 +2750,9 @@ fun TweakColorDialog(
                             modifier = Modifier
                                 .padding(start = 24.dp, bottom = 8.dp, top = 4.dp)
                                 .clickable {
-                                    selectedColorInt = android.graphics.Color.WHITE
+                                    selectedColorInt = resetColor
                                     colorPickerController.selectByColor(
-                                        Color(android.graphics.Color.WHITE),
+                                        Color(resetColor),
                                         false
                                     )
                                     sharedPreferences
