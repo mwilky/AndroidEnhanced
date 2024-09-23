@@ -11,8 +11,8 @@ android {
         applicationId "com.mwilky.androidenhanced"
         minSdk 34
         targetSdk 34
-        versionCode 1117
-        versionName "1.1.17"
+        versionCode 1118
+        versionName "1.1.18"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -63,13 +63,13 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.11.0'
 
     implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.navigation:navigation-compose:2.8.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+    implementation 'androidx.navigation:navigation-compose:2.8.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation platform('org.jetbrains.kotlin:kotlin-bom:2.0.20')
     implementation 'androidx.activity:activity-compose:1.9.2'
-    implementation platform('androidx.compose:compose-bom:2024.09.00')
+    implementation platform('androidx.compose:compose-bom:2024.09.02')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
@@ -78,7 +78,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    androidTestImplementation platform('androidx.compose:compose-bom:2024.09.00')
+    androidTestImplementation platform('androidx.compose:compose-bom:2024.09.02')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
