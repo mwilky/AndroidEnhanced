@@ -1,21 +1,30 @@
 package com.mwilky.androidenhanced.xposed
 
+import android.R
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.VibrationEffect.EFFECT_CLICK
+import android.provider.Settings
+import android.provider.Settings.System.FONT_SCALE
 import android.util.ArraySet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.ImageView
 import android.widget.TextView
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.updateQuicksettings
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.updateStatusbarIconColors
 import com.mwilky.androidenhanced.Utils.Companion.initVibrator
+import com.mwilky.androidenhanced.Utils.Companion.isDarkMode
 import com.mwilky.androidenhanced.Utils.Companion.mVibrator
+import com.mwilky.androidenhanced.xposed.SystemUIApplication.Companion.getApplicationContext
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
@@ -27,9 +36,14 @@ import de.robv.android.xposed.XposedHelpers.getIntField
 import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
 import de.robv.android.xposed.XposedHelpers.newInstance
+import de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 import de.robv.android.xposed.XposedHelpers.setIntField
 import de.robv.android.xposed.XposedHelpers.setObjectField
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class Quicksettings {
@@ -66,18 +80,15 @@ class Quicksettings {
             "com.android.systemui.settings.brightness.BrightnessMirrorHandler"
         private const val BRIGHTNESS_CONTROLLER_CLASS =
             "com.android.systemui.settings.brightness.BrightnessController"
-        private val QS_IMPL_CLASS = "com.android.systemui.qs.QSImpl"
+        val QS_IMPL_CLASS = "com.android.systemui.qs.QSImpl"
         private const val QS_ANIMATOR_CLASS =
             "com.android.systemui.qs.QSAnimator"
         private const val PAGED_TILE_LAYOUT_CLASS =
             "com.android.systemui.qs.PagedTileLayout"
         private const val QUICK_QS_PANEL_CLASS =
             "com.android.systemui.qs.QuickQSPanel"
-
-
-
-
-
+        private const val SYSUI_COLOR_EXTRACTOR_CLASS =
+            "com.android.systemui.colorextraction.SysuiColorExtractor"
 
         //Class Objects
         lateinit var QuickQSPanelQQSSideLabelTileLayout: Any
@@ -109,6 +120,7 @@ class Quicksettings {
         var mQsBrightnessSliderPositionConfig: Int = 0
         var mQQsBrightnessSliderEnabled: Boolean = false
         var mQsStyleConfig: Int = 0
+        var mDualColorQsPanelEnabled = false
 
         //Qqs Brightness
         lateinit var mQQsBrightnessController: Any
@@ -185,12 +197,6 @@ class Quicksettings {
             )
 
             findAndHookMethod(
-                QS_PANEL_CLASS, classLoader,
-                "onFinishInflate",
-                onFinishInflateHookQSPanel
-            )
-
-            findAndHookMethod(
                 QUICK_QS_PANEL_CONTROLLER_CLASS, classLoader,
                 "onViewAttached",
                 onViewAttachedHookQuickQSPanelController
@@ -246,7 +252,7 @@ class Quicksettings {
                 SIDE_LABEL_TILE_LAYOUT_CLASS,
                 classLoader,
                 "updateResources",
-                updateResourceHookSidelabelTileLayout
+                updateResourcesHookSidelabelTileLayout
             )
 
             findAndHookMethod(
@@ -320,6 +326,23 @@ class Quicksettings {
                 Boolean::class.javaPrimitiveType,
                 switchTileLayoutHook
             )
+
+            findAndHookMethod(
+                SYSUI_COLOR_EXTRACTOR_CLASS,
+                classLoader,
+                "onUiModeChanged",
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+
+                        updateQuicksettings()
+
+                        // This forces composables to recompose
+                        toggleFontScale()
+
+                        updateStatusbarIconColors()
+                    }
+                }
+            )
         }
 
         // Hooked functions
@@ -362,6 +385,7 @@ class Quicksettings {
         private val onViewAttachedHookQSPanelController: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 QSPanelController = param.thisObject
+                QSPanel = getObjectField(QSPanelController, "mView")
                 QuicksettingsPremium.QSPanelController = QSPanelController
             }
         }
@@ -400,6 +424,8 @@ class Quicksettings {
                         mQQsBrightnessSliderController
                     )
 
+                setAdditionalInstanceField(param.thisObject, "mQQsBrightnessController", mQQsBrightnessController)
+
 
                 mQQsBrightnessMirrorHandler =
                     newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
@@ -407,8 +433,6 @@ class Quicksettings {
                 setBrightnessView(mView, mBrightnessView)
 
                 callMethod(mQQsBrightnessSliderController, "init$10")
-
-
 
                 val brightnessMirrorController =
                     getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
@@ -422,6 +446,8 @@ class Quicksettings {
 
                     mBrightnessMirrorListeners.add(listener)
                 }
+
+                setQQsPanelMaxTiles(param.thisObject)
             }
         }
 
@@ -478,14 +504,30 @@ class Quicksettings {
             }
         }
 
-        // HIDE THE VIEW
+        // HIDE THE VIEW + set the colors
         private val setBuildTextHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 QSFooterView = param.thisObject
-                if (mHideQSFooterBuildNumberEnabled) {
-                    val mBuildText = getObjectField(param.thisObject, "mBuildText")
-                            as TextView
+                val mContext = (param.thisObject as View).context
 
+                val mBuildText = getObjectField(param.thisObject, "mBuildText")
+                        as TextView
+                val mEditButton = getObjectField(param.thisObject, "mEditButton")
+                        as ImageView
+                val mPageIndicator = getObjectField(param.thisObject, "mPageIndicator")
+
+                val tintColor = mContext.getColor(
+                    if (mDualColorQsPanelEnabled && !isDarkMode(mContext))
+                        R.color.system_on_surface_light
+                    else R.color.system_on_surface_dark)
+
+
+                // This is for dual tone qs
+                mEditButton.imageTintList = ColorStateList.valueOf(tintColor)
+                mBuildText.setTextColor(tintColor)
+                setObjectField(mPageIndicator, "mTint", ColorStateList.valueOf(tintColor))
+
+                if (mHideQSFooterBuildNumberEnabled) {
                     mBuildText.text = null
                     setBooleanField(
                         param.thisObject,
@@ -514,71 +556,8 @@ class Quicksettings {
         private val onConfigurationChangedQuickQSPanelController: XC_MethodHook =
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                    val mView = getObjectField(param.thisObject, "mView") as View
-                    val maxTiles  = getIntField(mView, "mMaxTiles")
 
-                    val mMediaHost = getObjectField(param.thisObject, "mMediaHost")
-
-                    if (callMethod(mMediaHost, "getVisible") as Boolean) {
-
-                        // We need to hardcode 2 columns and 2 rows when landscape and media is playing
-                        if (mView.resources.configuration.orientation == ORIENTATION_LANDSCAPE) {
-
-                            setIntField(
-                                QuickQSPanelQQSSideLabelTileLayout,
-                                "mMaxAllowedRows",
-                                2
-                            )
-
-                            setIntField(mView, "mMaxTiles", 4)
-                            callMethod(param.thisObject, "setTiles")
-
-                        } else {
-
-                            setIntField(
-                                QuickQSPanelQQSSideLabelTileLayout,
-                                "mMaxAllowedRows",
-                                getQsRowCount(mView.context, "QQS")
-                            )
-
-                            val totalTiles =
-                                getQsRowCount(
-                                    mView.context,
-                                    "QQS"
-                                ) * getQsColumnCount(
-                                    mView.context,
-                                    "QQS"
-                                )
-
-                            if (maxTiles != totalTiles) {
-                                setIntField(mView, "mMaxTiles", totalTiles)
-                                callMethod(param.thisObject, "setTiles")
-                            }
-                        }
-                    } else {
-
-                        setIntField(
-                            QuickQSPanelQQSSideLabelTileLayout,
-                            "mMaxAllowedRows",
-                            getQsRowCount(mView.context, "QQS")
-                        )
-
-                        val totalTiles =
-                            getQsRowCount(
-                                mView.context,
-                                "QQS"
-                            ) * getQsColumnCount(
-                                mView.context,
-                                "QQS"
-                            )
-
-                        if (maxTiles != totalTiles) {
-                            setIntField(mView, "mMaxTiles", totalTiles)
-                            callMethod(param.thisObject, "setTiles")
-                        }
-                    }
-
-                    callMethod(param.thisObject, "updateMediaExpansion")
+                    setQQsPanelMaxTiles(param.thisObject)
 
                     return null
                 }
@@ -597,7 +576,7 @@ class Quicksettings {
             }
         }
 
-        private val updateResourceHookSidelabelTileLayout: XC_MethodHook =
+        private val updateResourcesHookSidelabelTileLayout: XC_MethodHook =
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam): Any {
 
@@ -608,8 +587,10 @@ class Quicksettings {
                     val resources = sideLabelTileLayout.resources
 
                     val mIsSmallLandscapeLockscreenEnabled =
-                        getObjectField(sideLabelTileLayout, "mIsSmallLandscapeLockscreenEnabled")
-                                as Boolean
+                        getObjectField(
+                            sideLabelTileLayout,
+                            "mIsSmallLandscapeLockscreenEnabled"
+                        ) as Boolean
 
                     val mIsSmallLandscape =
                         resources.getBoolean(
@@ -1070,6 +1051,90 @@ class Quicksettings {
             }
 
             return 4
+        }
+
+        fun setQQsPanelMaxTiles(QQsPanelController: Any) {
+            val mView = getObjectField(QQsPanelController, "mView") as View
+
+            val mMediaHost = getObjectField(QQsPanelController, "mMediaHost")
+
+            if (callMethod(mMediaHost, "getVisible") as Boolean) {
+
+                // We need to hardcode 2 columns and 2 rows when landscape and media is playing
+                if (mView.resources.configuration.orientation == ORIENTATION_LANDSCAPE) {
+
+                    setIntField(
+                        QuickQSPanelQQSSideLabelTileLayout,
+                        "mMaxAllowedRows",
+                        2
+                    )
+
+                    setIntField(mView, "mMaxTiles", 4)
+                    callMethod(QQsPanelController, "setTiles")
+
+                } else {
+
+                    setIntField(
+                        QuickQSPanelQQSSideLabelTileLayout,
+                        "mMaxAllowedRows",
+                        getQsRowCount(mView.context, "QQS")
+                    )
+
+                    val totalTiles =
+                        getQsRowCount(
+                            mView.context,
+                            "QQS"
+                        ) * getQsColumnCount(
+                            mView.context,
+                            "QQS"
+                        )
+
+                    val maxTiles  = getIntField(mView, "mMaxTiles")
+                    if (maxTiles != totalTiles) {
+                        setIntField(mView, "mMaxTiles", totalTiles)
+                        callMethod(QQsPanelController, "setTiles")
+                    }
+                }
+            } else {
+
+                setIntField(
+                    QuickQSPanelQQSSideLabelTileLayout,
+                    "mMaxAllowedRows",
+                    getQsRowCount(mView.context, "QQS")
+                )
+
+                val totalTiles =
+                    getQsRowCount(
+                        mView.context,
+                        "QQS"
+                    ) * getQsColumnCount(
+                        mView.context,
+                        "QQS"
+                    )
+
+                val maxTiles  = getIntField(mView, "mMaxTiles")
+                if (maxTiles != totalTiles) {
+                    setIntField(mView, "mMaxTiles", totalTiles)
+                    callMethod(QQsPanelController, "setTiles")
+                }
+            }
+
+            callMethod(QQsPanelController, "updateMediaExpansion")
+        }
+
+        fun toggleFontScale() {
+
+            CoroutineScope(Dispatchers.IO).launch {
+
+                val mContext = getApplicationContext() ?: return@launch
+                val fontScale = Settings.System.getFloat(mContext.contentResolver, FONT_SCALE)
+
+                Settings.System.putFloat(mContext.contentResolver, FONT_SCALE, fontScale + 0.01f)
+
+                delay(1000)
+
+                Settings.System.putFloat(mContext.contentResolver, FONT_SCALE, fontScale)
+            }
         }
 
     }

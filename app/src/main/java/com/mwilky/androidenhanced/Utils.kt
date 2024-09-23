@@ -27,6 +27,7 @@ class Utils(context: Context, handler: Handler) {
         const val ISONBOARDINGCOMPLETEDKEY = "isOnboardingComplete"
         const val LASTBACKUP = "lastBackupDate"
         const val LOGSKEY = "logs"
+        const val BOOTCOMPLETED = "bootCompleted"
 
         //Tweak Values
         //Gestures
@@ -120,6 +121,7 @@ class Utils(context: Context, handler: Handler) {
 
         const val autoExpandFirstNotif = "bool_AutoExpandFirstNotif"
         const val notifSectionHeaders = "bool_NotifSectionHeaders"
+        const val dualToneQsPanel = "bool_DualToneQsPanel"
 
         var mIsInitialBoot = true
 
@@ -133,6 +135,10 @@ class Utils(context: Context, handler: Handler) {
             }
         }
 
+        fun isDarkMode(mContext: Context): Boolean {
+            return mContext.resources.configuration.isNightModeActive
+        }
+
         // Function to check if phone is unlocked
         fun isUnlocked(mKeyguardStateController: Any): Boolean {
             val isShowing =
@@ -141,13 +147,6 @@ class Utils(context: Context, handler: Handler) {
                 XposedHelpers.getBooleanField(mKeyguardStateController, "mCanDismissLockScreen")
 
             return !(isShowing && !canDismissLockScreen)
-        }
-
-        fun getColorAttrDefaultColor(context: Context, i: Int): Int {
-            val obtainStyledAttributes = context.obtainStyledAttributes(intArrayOf(i))
-            val color = obtainStyledAttributes.getColor(0, 0)
-            obtainStyledAttributes.recycle()
-            return color
         }
 
         fun applyAlpha(f: Float, i: Int): Int {

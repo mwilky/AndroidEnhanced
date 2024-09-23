@@ -16,13 +16,17 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import com.mwilky.androidenhanced.xposed.SystemUIApplication.Companion.SYSTEM_UI_APPLICATION_CLASS
+import com.mwilky.androidenhanced.xposed.SystemUIApplication.Companion.getApplicationContext
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.callStaticMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
+import de.robv.android.xposed.XposedHelpers.getAdditionalStaticField
 import de.robv.android.xposed.XposedHelpers.getBooleanField
 import de.robv.android.xposed.XposedHelpers.getFloatField
 import de.robv.android.xposed.XposedHelpers.getIntField
@@ -770,8 +774,13 @@ class Statusbar {
 
         @SuppressLint("DiscouragedApi")
         fun setStatusbarClockPosition() {
-            val mContext = (collapsedStatusBarFragment as Fragment).context
-                    as Context
+
+            val mContext = getApplicationContext() ?: return
+
+            val sentAllBootPrefs = getAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs") as Boolean
+
+            if (!sentAllBootPrefs)
+                return
 
             val mStatusBar = getObjectField(collapsedStatusBarFragment, "mStatusBar")
                     as ViewGroup

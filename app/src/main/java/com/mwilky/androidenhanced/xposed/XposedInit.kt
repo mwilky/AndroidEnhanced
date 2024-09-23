@@ -1,11 +1,11 @@
 package com.mwilky.androidenhanced.xposed
+
 import android.content.res.XModuleResources
 import com.mwilky.androidenhanced.R
 import de.robv.android.xposed.IXposedHookInitPackageResources
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_InitPackageResources
-
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {

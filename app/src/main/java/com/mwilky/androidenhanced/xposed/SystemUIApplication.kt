@@ -4,15 +4,18 @@ import android.content.Context
 import android.graphics.Color
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils
-import java.lang.ref.WeakReference
+import com.mwilky.androidenhanced.UtilsPremium
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
+import de.robv.android.xposed.XposedHelpers.findClass
+import de.robv.android.xposed.XposedHelpers.setAdditionalStaticField
+import java.lang.ref.WeakReference
 
 class SystemUIApplication {
 
     companion object {
         // Hook Classes
-        private const val SYSTEM_UI_APPLICATION_CLASS =
+        const val SYSTEM_UI_APPLICATION_CLASS =
             "com.android.systemui.SystemUIApplication"
 
         // Use a weak reference to store the SystemUIApplication Context
@@ -31,9 +34,16 @@ class SystemUIApplication {
                         // If the 'this' context is not null, set it as the applicationContext
                         hookedContext?.let {
                             SystemUIApplicationContextRef = WeakReference(it.applicationContext)
+                            UtilsPremium.SystemUIApplicationContextRef  = SystemUIApplicationContextRef
                         }
 
                         if (hookedContext != null) {
+
+                            setAdditionalStaticField(
+                                findClass(SYSTEM_UI_APPLICATION_CLASS, hookedContext.classLoader),
+                                "mSentAllBootPrefs",
+                                false
+                            )
 
                             StatusbarPremium.mContext = hookedContext
 
@@ -421,6 +431,16 @@ class SystemUIApplication {
                                 hookedContext, Utils.useDualStatusbarColors,
                                 param.thisObject.toString(),
                                 true
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.dualToneQsPanel,
+                                param.thisObject.toString(),
+                                false
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext, Utils.BOOTCOMPLETED,
+                                param.thisObject.toString(),
+                                false
                             )
                         }
                     }

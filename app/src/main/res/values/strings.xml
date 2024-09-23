@@ -128,6 +128,8 @@
     <string name="qsIconContainerInactiveShapeTitle">Inactive tile background shape</string>
     <string name="qsIconContainerUnavailableShapeTitle">Unavailable tile background shape</string>
     <string name="qsIconContainerShapeDisabledTitle">Only available with \"Icon with background\" quicksettings style</string>
+    <string name="qsPanelDualColorTitle">Dual tone background</string>
+    <string name="qsPanelDualColorSummary">Enable material colors for the background panel. Also enables a light background if light theme is active.</string>
 
 <!--    Notifications-->
     <string name="muteScreenOnNotificationsTitle">Silent screen on notifications</string>
