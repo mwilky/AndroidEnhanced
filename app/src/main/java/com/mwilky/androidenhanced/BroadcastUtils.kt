@@ -57,6 +57,7 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarMobileIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarNotificationIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarOtherIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
+import com.mwilky.androidenhanced.Utils.Companion.disableCameraScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
@@ -106,6 +107,7 @@ import com.mwilky.androidenhanced.UtilsPremium.Companion.getIconColorForSlotName
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mLsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mQsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.UtilsPremium.Companion.mStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.xposed.Buttons.Companion.mBlockCameraGestureWhenLockedEnabled
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mDoubleTapSleepLauncherEnabled
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
@@ -562,6 +564,9 @@ class BroadcastUtils: BroadcastReceiver() {
                         BOOTCOMPLETED -> {
                             setAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs", true)
                             updateSystemUiTweaks()
+                        }
+                        disableCameraScreenOff -> {
+                            mBlockCameraGestureWhenLockedEnabled = value as Boolean
                         }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")

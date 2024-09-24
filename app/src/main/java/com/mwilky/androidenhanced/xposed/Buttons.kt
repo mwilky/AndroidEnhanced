@@ -18,6 +18,7 @@ import android.view.ViewConfiguration
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastReceiver
 import com.mwilky.androidenhanced.Utils
+import com.mwilky.androidenhanced.Utils.Companion.disableCameraScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
 import com.mwilky.androidenhanced.Utils.Companion.gestureSleep
@@ -59,9 +60,10 @@ class Buttons {
             "com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs"
         private const val MediaSessionLegacyHelperClass =
             "android.media.session.MediaSessionLegacyHelper"
-
         private const val WorkspaceTouchListener =
             "com.android.launcher3.touch.WorkspaceTouchListener"
+        private const val GESTURE_LAUNCHER_SERVICE_CLASS =
+            "com.android.server.GestureLauncherService"
 
         lateinit var PhoneWindowManagerObject: Any
         lateinit var utils: Any
@@ -72,6 +74,7 @@ class Buttons {
         var mVolKeyMedia = false
 
         var mDoubleTapSleepLauncherEnabled = false
+        var mBlockCameraGestureWhenLockedEnabled = false
 
         //Torch
         private const val MSG_TOGGLE_TORCH = 100
@@ -130,8 +133,8 @@ class Buttons {
                         }
                         mGestureDetector.setOnDoubleTapListener(onDoubleTapListener)
                     }
-                })
-
+                }
+            )
         }
 
         fun init(classLoader: ClassLoader?) {
@@ -248,6 +251,31 @@ class Buttons {
                     PHONE_WINDOW_MANAGER_CLASS, classLoader
                 )
 
+            findAndHookMethod(
+                GESTURE_LAUNCHER_SERVICE_CLASS,
+                classLoader,
+                "handleCameraGesture",
+                Boolean::class.javaPrimitiveType,
+                Int::class.javaPrimitiveType,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+
+                        val useWakeLock = param.args[0] as Boolean
+                        val source = param.args[1] as Int
+
+                        val mWindowManagerInternal =
+                            getObjectField(param.thisObject , "mWindowManagerInternal")
+                        val isKeyguardLocked =
+                            callMethod(mWindowManagerInternal, "isKeyguardLocked")
+                                    as Boolean
+
+                        if (!useWakeLock && source == 1 && mBlockCameraGestureWhenLockedEnabled && isKeyguardLocked) {
+
+                            param.result = false
+                        }
+                    }
+                }
+            )
         }
 
         //Hooked functions
@@ -277,6 +305,11 @@ class Buttons {
                 )
                 //Register this in this class
                 registerBroadcastReceiver(mContext, muteScreenOnNotifications,
+                    param.thisObject.toString(),
+                    false
+                )
+
+                registerBroadcastReceiver(mContext, disableCameraScreenOff,
                     param.thisObject.toString(),
                     false
                 )

@@ -40,6 +40,7 @@ class Utils(context: Context, handler: Handler) {
         const val volKeyMediaControl = "bool_VolKeyMediaControl"
         const val allowAllRotations = "bool_AllowAllRotations"
         const val disableSecureScreenshots = "bool_DisableSecureScreenshots"
+        const val disableCameraScreenOff = "bool_DisableCameraScreenOff"
         //SystemUI
         const val doubleTapToSleep = "bool_DoubleTapToSleep"
         const val statusBarBrightnessControl = "bool_StatusbarBrightnessControl"

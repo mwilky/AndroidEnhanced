@@ -122,6 +122,7 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarMobileIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarNotificationIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarOtherIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
+import com.mwilky.androidenhanced.Utils.Companion.disableCameraScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
@@ -1441,6 +1442,16 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         stringResource(
                             R.string.torchAutoOffScreenOnSummary),
                         torchAutoOffScreenOn
+                    )
+                }
+                item {
+                    TweakSwitch(
+                        deviceProtectedStorageContext,
+                        stringResource(
+                            R.string.disableDoublePressCameraScreenOffTitle),
+                        stringResource(
+                            R.string.disableDoublePressCameraScreenOffSummary),
+                        disableCameraScreenOff
                     )
                 }
                 item {

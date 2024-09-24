@@ -93,6 +93,8 @@
     <string name="torchAutoOffScreenOnSummary">Automatically turn the torch off when the screen is turned on</string>
     <string name="volKeyMediaControlTitle">Volume key media control</string>
     <string name="volKeyMediaControlSummary">Control media playback by long pressing volume keys whilst screen is off</string>
+    <string name="disableDoublePressCameraScreenOffTitle">Disable camera gesture when screen off/locked</string>
+    <string name="disableDoublePressCameraScreenOffSummary">Disable launching the camera when double-pressing the power button if the screen is off or the device is locked</string>
 <!--    Misc-->
     <string name="allowAllRotationsTitle">Allow all rotations</string>
     <string name="allowAllRotationsSummary">Allow rotating the device at a 180 degree angle</string>
