@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,6 +77,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.github.skydoves.colorpicker.compose.AlphaSlider
@@ -1697,7 +1700,14 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         )
                     )
                 }
+
                 item {
+                    val qsStyleImageResourceIds: List<Int> = listOf(
+                        if (!isSystemInDarkTheme()) R.drawable.qs_style_0_light else R.drawable.qs_style_0_dark,
+                        if (!isSystemInDarkTheme()) R.drawable.qs_style_1_light else R.drawable.qs_style_1_dark,
+                        if (!isSystemInDarkTheme()) R.drawable.qs_style_2_light else R.drawable.qs_style_2_dark,
+                    )
+
                     TweakSelectionRow(
                         label = stringResource(
                             id = R.string.qsStyleTitle
@@ -1710,6 +1720,7 @@ fun TweaksScrollableContent(topPadding: PaddingValues, screen : String, navContr
                         ),
                         0,
                         deviceProtectedStorageContext = deviceProtectedStorageContext,
+                        imageResourceIds = qsStyleImageResourceIds
                     )
                 }
                 item {
@@ -2400,7 +2411,8 @@ fun TweakSelectionDialog(
     entries: Array<String>,
     defaultIndex: Int,
     disabledIndex: Int?,
-    deviceProtectedStorageContext: Context
+    deviceProtectedStorageContext: Context,
+    imageResourceIds: List<Int>? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -2511,6 +2523,21 @@ fun TweakSelectionDialog(
                         .padding(horizontal = 16.dp),
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
+                if (imageResourceIds != null) {
+
+                    // Ensure selectedOption is within valid indices
+                    val safeSelectedOption = selectedOption.coerceIn(0, imageResourceIds.size - 1)
+
+                    Image(
+                        painter = painterResource(id = imageResourceIds[safeSelectedOption]), // Replace with your image resource
+                        contentDescription = "Descriptive text for the image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .height(100.dp)
+                    )
+
+                }
                 LazyColumn(
                     modifier = Modifier
                         .padding(
@@ -2860,7 +2887,8 @@ fun TweakSelectionRow(
     defaultIndex: Int,
     disabledIndex: Int? = null,
     disabled: Boolean = false,
-    deviceProtectedStorageContext: Context
+    deviceProtectedStorageContext: Context,
+    imageResourceIds: List<Int>? = null
 ) {
     // Create a state variable to track whether the dialog should be shown
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -2876,7 +2904,8 @@ fun TweakSelectionRow(
             entries = entries,
             defaultIndex = defaultIndex,
             disabledIndex = disabledIndex,
-            deviceProtectedStorageContext = deviceProtectedStorageContext
+            deviceProtectedStorageContext = deviceProtectedStorageContext,
+            imageResourceIds = imageResourceIds
         )
     }
 
