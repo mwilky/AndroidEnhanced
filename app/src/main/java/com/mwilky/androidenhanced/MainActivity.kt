@@ -3,7 +3,6 @@ package com.mwilky.androidenhanced
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -27,7 +26,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
@@ -48,7 +46,7 @@ class MainActivity : ComponentActivity() {
 
     private val createBackupLauncher: ActivityResultLauncher<String> = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
-    ) {  uri ->
+    ) { uri ->
         if (uri == null) return@registerForActivityResult
 
 
@@ -60,7 +58,8 @@ class MainActivity : ComponentActivity() {
             )
 
         // Exclude none tweak related keys
-        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY)
+        val keysToExclude =
+            setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY)
 
         val dataToBackup = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
@@ -92,16 +91,23 @@ class MainActivity : ComponentActivity() {
                 outputStream.close()
                 sharedPreferences.edit().putString(
                     LASTBACKUP,
-                    SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date()))
+                    SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                )
                     .apply()
                 Toast.makeText(applicationContext, R.string.backupSuccess, Toast.LENGTH_LONG).show()
-                LogManager.log("Settings", applicationContext.resources.getString(R.string.backupSuccess))
+                LogManager.log(
+                    "Settings",
+                    applicationContext.resources.getString(R.string.backupSuccess)
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(applicationContext, R.string.backupFailed, Toast.LENGTH_LONG).show()
             Log.e(TAG, ", ${R.string.backupFailed}: ${e.printStackTrace()}")
-            LogManager.log("Settings", "${applicationContext.resources.getString(R.string.backupFailed)}: ${e.printStackTrace()}")
+            LogManager.log(
+                "Settings",
+                "${applicationContext.resources.getString(R.string.backupFailed)}: ${e.printStackTrace()}"
+            )
         }
     }
 
@@ -117,7 +123,11 @@ class MainActivity : ComponentActivity() {
             // Prepare the content to write to the file
             val logContent = StringBuilder()
             logs.forEach { logEntry ->
-                val formattedLog = "${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(logEntry.timestamp))}  ${logEntry.title}: ${logEntry.summary}\n"
+                val formattedLog = "${
+                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+                        Date(logEntry.timestamp)
+                    )
+                }  ${logEntry.title}: ${logEntry.summary}\n"
                 logContent.append(formattedLog)
             }
 
@@ -136,8 +146,15 @@ class MainActivity : ComponentActivity() {
                     SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
                 ).apply()
 
-                Toast.makeText(applicationContext, applicationContext.resources.getString(R.string.backupSuccess), Toast.LENGTH_LONG).show()
-                LogManager.log("Logs", applicationContext.resources.getString(R.string.backupSuccess))
+                Toast.makeText(
+                    applicationContext,
+                    applicationContext.resources.getString(R.string.backupSuccess),
+                    Toast.LENGTH_LONG
+                ).show()
+                LogManager.log(
+                    "Logs",
+                    applicationContext.resources.getString(R.string.backupSuccess)
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -191,7 +208,8 @@ class MainActivity : ComponentActivity() {
                         applicationContext.createDeviceProtectedStorageContext()
                     val sharedPreferences =
                         deviceProtectedStorageContext.getSharedPreferences(
-                            BroadcastUtils.PREFS, MODE_PRIVATE).edit()
+                            BroadcastUtils.PREFS, MODE_PRIVATE
+                        ).edit()
 
                     for (i in 0 until sharedPreferencesData.length()) {
                         val entry = sharedPreferencesData.getJSONObject(i)
@@ -219,14 +237,21 @@ class MainActivity : ComponentActivity() {
                     // Handle additional data here, if required
                 }
 
-                Toast.makeText(applicationContext, R.string.restoreSuccess, Toast.LENGTH_LONG).show()
-                LogManager.log("Settings", applicationContext.resources.getString(R.string.restoreSuccess))
+                Toast.makeText(applicationContext, R.string.restoreSuccess, Toast.LENGTH_LONG)
+                    .show()
+                LogManager.log(
+                    "Settings",
+                    applicationContext.resources.getString(R.string.restoreSuccess)
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(applicationContext, R.string.restoreFailed, Toast.LENGTH_LONG).show()
             Log.e(TAG, "${R.string.restoreFailed}: ${e.printStackTrace()}")
-            LogManager.log("Settings", "${applicationContext.resources.getString(R.string.restoreFailed)}: ${e.printStackTrace()}")
+            LogManager.log(
+                "Settings",
+                "${applicationContext.resources.getString(R.string.restoreFailed)}: ${e.printStackTrace()}"
+            )
         }
     }
 
@@ -241,7 +266,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                   Navigation(this@MainActivity)
+                    Navigation(this@MainActivity)
                 }
             }
         }

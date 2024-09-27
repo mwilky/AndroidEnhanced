@@ -56,7 +56,6 @@ fun SplashScreen(navController: NavController, deviceProtectedStorageContext: Co
 
 }
 
-
 private suspend fun isCurrentDeviceSupported(): Boolean {
     val currentDeviceName = Build.MODEL
 
@@ -79,7 +78,10 @@ private suspend fun isCurrentDeviceSupported(): Boolean {
             // Extract the device names and check if the current device is supported
             val supportedDevices = content.split(",").map { it.trim() }
 
-            LogManager.log("Splash", "Officially supported device from online repo are: $supportedDevices")
+            LogManager.log(
+                "Splash",
+                "Officially supported device from online repo are: $supportedDevices"
+            )
 
             val isSupported = currentDeviceName in supportedDevices
 
@@ -103,10 +105,14 @@ private suspend fun isCurrentDeviceSupported(): Boolean {
         } catch (e: Exception) {
             // Handle any errors (e.g., network issues, parsing errors, etc.)
             e.printStackTrace()
-            Log.e(TAG, "Error occurred while checking device support. " +
-                    "Do you have network connectivity?")
-            LogManager.log("Splash", "Error occurred while checking device support. " +
-                    "Do you have network connectivity?")
+            Log.e(
+                TAG, "Error occurred while checking device support. " +
+                        "Do you have network connectivity?"
+            )
+            LogManager.log(
+                "Splash", "Error occurred while checking device support. " +
+                        "Do you have network connectivity?"
+            )
             false
         }
     }

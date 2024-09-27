@@ -134,21 +134,22 @@ class Notifications {
             hookAllConstructors(
                 findClass(KEYGUARD_COORDINATOR_CLASS, classLoader),
                 object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
+                    override fun afterHookedMethod(param: MethodHookParam) {
 
-                    mKeyguardCoordinator = param.thisObject
+                        mKeyguardCoordinator = param.thisObject
+                    }
                 }
-            }
             )
 
         }
 
         // Hooked functions
-        private val RowAppearanceCoordinatorConstructorHook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                mRowAppearanceCoordinator = param.thisObject
+        private val RowAppearanceCoordinatorConstructorHook: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    mRowAppearanceCoordinator = param.thisObject
+                }
             }
-        }
 
         private val NotifCollectionConstructorHook: XC_MethodHook = object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {

@@ -370,16 +370,18 @@ class Quicksettings {
                 BrightnessControllerFactory = param.args[11]
                 val mView = getObjectField(param.thisObject, "mView") as ViewGroup
                 val mBrightnessView = getObjectField(mView, "mBrightnessView") as View
-                mBrightnessMirrorHandler = getObjectField(param.thisObject, "mBrightnessMirrorHandler")
+                mBrightnessMirrorHandler =
+                    getObjectField(param.thisObject, "mBrightnessMirrorHandler")
                 setBrightnessView(mView, mBrightnessView)
             }
         }
 
-        private val ConstructorHookBrightnessMirrorHandler: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                BrightnessMirrorHandler = param.thisObject
+        private val ConstructorHookBrightnessMirrorHandler: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    BrightnessMirrorHandler = param.thisObject
+                }
             }
-        }
 
         //Set the object and share with premiums mods
         private val onViewAttachedHookQSPanelController: XC_MethodHook = object : XC_MethodHook() {
@@ -397,86 +399,93 @@ class Quicksettings {
             }
         }
 
-        private val onViewAttachedHookQuickQSPanelController: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                QuickQSPanelController = param.thisObject
-                QuicksettingsPremium.QuickQSPanelController = QuickQSPanelController
+        private val onViewAttachedHookQuickQSPanelController: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    QuickQSPanelController = param.thisObject
+                    QuicksettingsPremium.QuickQSPanelController = QuickQSPanelController
 
-                val mView = getObjectField(param.thisObject, "mView") as ViewGroup
-                val mContext = callMethod(mView, "getContext") as Context
+                    val mView = getObjectField(param.thisObject, "mView") as ViewGroup
+                    val mContext = callMethod(mView, "getContext") as Context
 
 
-                mQQsBrightnessSliderController =
-                    callMethod(
-                        BrightnessSliderControllerFactory,
-                        "create",
-                        mContext,
-                        mView
+                    mQQsBrightnessSliderController =
+                        callMethod(
+                            BrightnessSliderControllerFactory,
+                            "create",
+                            mContext,
+                            mView
+                        )
+
+                    val mBrightnessView =
+                        getObjectField(mQQsBrightnessSliderController, "mView") as View
+
+                    mQQsBrightnessController =
+                        callMethod(
+                            BrightnessControllerFactory,
+                            "create",
+                            mQQsBrightnessSliderController
+                        )
+
+                    setAdditionalInstanceField(
+                        param.thisObject,
+                        "mQQsBrightnessController",
+                        mQQsBrightnessController
                     )
 
-                val mBrightnessView =
-                    getObjectField(mQQsBrightnessSliderController, "mView") as View
 
-                mQQsBrightnessController =
-                    callMethod(
-                        BrightnessControllerFactory,
-                        "create",
-                        mQQsBrightnessSliderController
-                    )
+                    mQQsBrightnessMirrorHandler =
+                        newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
 
-                setAdditionalInstanceField(param.thisObject, "mQQsBrightnessController", mQQsBrightnessController)
+                    setBrightnessView(mView, mBrightnessView)
 
+                    callMethod(mQQsBrightnessSliderController, "init$10")
 
-                mQQsBrightnessMirrorHandler =
-                    newInstance(BrightnessMirrorHandlerClass, mQQsBrightnessController)
+                    val brightnessMirrorController =
+                        getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
 
-                setBrightnessView(mView, mBrightnessView)
+                    if (brightnessMirrorController != null) {
+                        val listener =
+                            getObjectField(mQQsBrightnessMirrorHandler, "brightnessMirrorListener")
+                        val mBrightnessMirrorListeners =
+                            getObjectField(brightnessMirrorController, "mBrightnessMirrorListeners")
+                                    as ArraySet<Any>
 
-                callMethod(mQQsBrightnessSliderController, "init$10")
+                        mBrightnessMirrorListeners.add(listener)
+                    }
 
-                val brightnessMirrorController =
-                    getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
-
-                if (brightnessMirrorController != null) {
-                    val listener =
-                        getObjectField(mQQsBrightnessMirrorHandler, "brightnessMirrorListener")
-                    val mBrightnessMirrorListeners =
-                        getObjectField(brightnessMirrorController, "mBrightnessMirrorListeners")
-                                as ArraySet<Any>
-
-                    mBrightnessMirrorListeners.add(listener)
-                }
-
-                setQQsPanelMaxTiles(param.thisObject)
-            }
-        }
-
-        private val onViewDetachedHookQuickQSPanelController: XC_MethodHook = object : XC_MethodHook() {
-            override fun beforeHookedMethod(param: MethodHookParam) {
-                QuickQSPanelController = param.thisObject
-                QuicksettingsPremium.QuickQSPanelController = QuickQSPanelController
-
-                val brightnessMirrorController =
-                    getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
-
-                if (brightnessMirrorController != null) {
-                    val listener =
-                        getObjectField(mQQsBrightnessMirrorHandler, "brightnessMirrorListener")
-                    val mBrightnessMirrorListeners =
-                        getObjectField(brightnessMirrorController, "mBrightnessMirrorListeners")
-                                as ArraySet<Any>
-
-                    mBrightnessMirrorListeners.remove(listener)
+                    setQQsPanelMaxTiles(param.thisObject)
                 }
             }
-        }
 
-        private val onViewAttachedHookQSPanelControllerBase: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                QSPanelControllerBase = param.thisObject
-                QuicksettingsPremium.QSPanelControllerBase = QSPanelControllerBase
+        private val onViewDetachedHookQuickQSPanelController: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    QuickQSPanelController = param.thisObject
+                    QuicksettingsPremium.QuickQSPanelController = QuickQSPanelController
+
+                    val brightnessMirrorController =
+                        getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
+
+                    if (brightnessMirrorController != null) {
+                        val listener =
+                            getObjectField(mQQsBrightnessMirrorHandler, "brightnessMirrorListener")
+                        val mBrightnessMirrorListeners =
+                            getObjectField(brightnessMirrorController, "mBrightnessMirrorListeners")
+                                    as ArraySet<Any>
+
+                        mBrightnessMirrorListeners.remove(listener)
+                    }
+                }
             }
-        }
+
+        private val onViewAttachedHookQSPanelControllerBase: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    QSPanelControllerBase = param.thisObject
+                    QuicksettingsPremium.QSPanelControllerBase = QSPanelControllerBase
+                }
+            }
 
         //vibrate on short press
         private val clickHook: XC_MethodHook = object : XC_MethodHook() {
@@ -519,7 +528,8 @@ class Quicksettings {
                 val tintColor = mContext.getColor(
                     if (mDualColorQsPanelEnabled && !isDarkMode(mContext))
                         R.color.system_on_surface_light
-                    else R.color.system_on_surface_dark)
+                    else R.color.system_on_surface_dark
+                )
 
 
                 // This is for dual tone qs
@@ -547,7 +557,7 @@ class Quicksettings {
 
                 if (shouldFullyExpandDueQuickPulldown(quickSettingsController, event) ||
                     shouldFullyExpandDueSmartPulldown(quickSettingsController)
-                    ) {
+                ) {
                     param.result = true
                 }
             }
@@ -719,34 +729,35 @@ class Quicksettings {
             }
         }
 
-        private val onConfigChangedHookQSCustomizerController3: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val tileAdapter = getObjectField(
-                    getSurroundingThis(param.thisObject), "mTileAdapter"
-                )
-                val mContext = getObjectField(tileAdapter, "mContext") as Context
-
-                setIntField(tileAdapter, "mNumColumns", getQsColumnCount(mContext, "QS"))
-
-                val mView =  getObjectField(
-                    getSurroundingThis(param.thisObject), "mView"
-                )
-
-                val mRecyclerView = getObjectField(mView, "mRecyclerView")
-
-                val layoutManager = callMethod(mRecyclerView, "getLayoutManager")
-
-                callMethod(
-                    layoutManager, "setSpanCount",
-                    getIntField(
-                        getObjectField(
-                            getSurroundingThis(param.thisObject), "mTileAdapter"
-                        ),
-                        "mNumColumns"
+        private val onConfigChangedHookQSCustomizerController3: XC_MethodHook =
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val tileAdapter = getObjectField(
+                        getSurroundingThis(param.thisObject), "mTileAdapter"
                     )
-                )
+                    val mContext = getObjectField(tileAdapter, "mContext") as Context
+
+                    setIntField(tileAdapter, "mNumColumns", getQsColumnCount(mContext, "QS"))
+
+                    val mView = getObjectField(
+                        getSurroundingThis(param.thisObject), "mView"
+                    )
+
+                    val mRecyclerView = getObjectField(mView, "mRecyclerView")
+
+                    val layoutManager = callMethod(mRecyclerView, "getLayoutManager")
+
+                    callMethod(
+                        layoutManager, "setSpanCount",
+                        getIntField(
+                            getObjectField(
+                                getSurroundingThis(param.thisObject), "mTileAdapter"
+                            ),
+                            "mNumColumns"
+                        )
+                    )
+                }
             }
-        }
 
         private val switchToParentHook: XC_MethodHook = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
@@ -890,7 +901,7 @@ class Quicksettings {
 
         //Smart/Quick pulldown
         //Evaluate smart pulldown
-        private fun shouldFullyExpandDueSmartPulldown(quickSettingsController: Any) : Boolean {
+        private fun shouldFullyExpandDueSmartPulldown(quickSettingsController: Any): Boolean {
 
             val notificationStackScrollLayoutController = getObjectField(
                 quickSettingsController,
@@ -944,6 +955,7 @@ class Quicksettings {
                 1 -> {
                     parentView.addView(view, 1)
                 }
+
                 2 -> {
                     parentView.removeView(view)
                     return
@@ -960,10 +972,10 @@ class Quicksettings {
                 val mBrightnessView = getObjectField(parentView, "mBrightnessView")
                         as View
                 if (!mQQsBrightnessSliderEnabled) {
-                    mBrightnessView.visibility=View.GONE
+                    mBrightnessView.visibility = View.GONE
 
                 } else {
-                    mBrightnessView.visibility=View.VISIBLE
+                    mBrightnessView.visibility = View.VISIBLE
                 }
                 callMethod(mQQsBrightnessMirrorHandler, "updateBrightnessMirror")
             } else {
@@ -999,9 +1011,10 @@ class Quicksettings {
                         //Slightly alter the padding for when using modified QS style so it sits more central
                         when (mQsStyleConfig) {
                             0 -> {
-                                lp.topMargin =  top
+                                lp.topMargin = top
                                 lp.bottomMargin = bottom
                             }
+
                             else -> {
                                 lp.topMargin =
                                     if (parentView.javaClass.name == "com.android.systemui.qs.QuickQSPanel")
@@ -1012,6 +1025,7 @@ class Quicksettings {
                             }
                         }
                     }
+
                     1 -> {
                         lp.topMargin = bottom
                         lp.bottomMargin = top
@@ -1089,7 +1103,7 @@ class Quicksettings {
                             "QQS"
                         )
 
-                    val maxTiles  = getIntField(mView, "mMaxTiles")
+                    val maxTiles = getIntField(mView, "mMaxTiles")
                     if (maxTiles != totalTiles) {
                         setIntField(mView, "mMaxTiles", totalTiles)
                         callMethod(QQsPanelController, "setTiles")
@@ -1112,7 +1126,7 @@ class Quicksettings {
                         "QQS"
                     )
 
-                val maxTiles  = getIntField(mView, "mMaxTiles")
+                val maxTiles = getIntField(mView, "mMaxTiles")
                 if (maxTiles != totalTiles) {
                     setIntField(mView, "mMaxTiles", totalTiles)
                     callMethod(QQsPanelController, "setTiles")
