@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.PaintDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,13 +54,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,9 +76,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.dataclasses.BottomNavigationItem
 import com.mwilky.androidenhanced.dataclasses.EnvironmentProp
 import com.mwilky.androidenhanced.dataclasses.TweaksCard
+import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -124,7 +132,7 @@ fun HomeScreenScrollableContent(
             }
         ) {
             Image(
-                imageVector = headerImage(),
+                painter = painterResource(id = R.drawable.header_logo),
                 contentDescription = "Image Description",
                 alignment = Alignment.Center,
                 modifier = Modifier
@@ -134,6 +142,7 @@ fun HomeScreenScrollableContent(
                         top = 16.dp,
                         bottom = 16.dp
                     ),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary, BlendMode.SrcIn),
             )
         }
 
@@ -280,6 +289,7 @@ fun WelcomeText(
             text = "$greetingMessage",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
+            fontFamily = caviarDreamsFamily
         )
     }
 }
@@ -370,7 +380,8 @@ fun TweaksItem(
                 text = card.label,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
-                    .padding(start = 4.dp, top = 8.dp)
+                    .padding(start = 4.dp, top = 8.dp),
+                fontFamily = caviarDreamsFamily
             )
             Row(
                 modifier = Modifier
@@ -489,7 +500,7 @@ fun ScaffoldHomeCenteredAppBar(
                             letterSpacing = (-1).sp
                         )
                     ) {
-                        append("Android ")
+                        append("Android")
                     }
                     withStyle(
                         style = SpanStyle(
@@ -502,6 +513,7 @@ fun ScaffoldHomeCenteredAppBar(
                         append("Enhanced")
                     }
                 },
+                fontFamily = caviarDreamsFamily
             )
         }
     )
@@ -541,7 +553,8 @@ fun ScaffoldTweaksAppBar(
         title = {
             Text(
                 text = pageText,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = caviarDreamsFamily
             )
         },
         navigationIcon = {

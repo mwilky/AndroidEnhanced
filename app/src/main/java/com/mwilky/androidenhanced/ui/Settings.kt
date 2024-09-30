@@ -34,6 +34,7 @@ import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
+import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -132,7 +133,8 @@ fun SettingsScrollableContent(
                             .fillMaxWidth(0.5f),
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = caviarDreamsFamily
                     )
                     if (formattedDate != null) {
                         Text(
@@ -146,7 +148,8 @@ fun SettingsScrollableContent(
                                 .fillMaxWidth(0.5f),
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            fontFamily = caviarDreamsFamily
                         )
                     }
                 }
@@ -196,7 +199,8 @@ fun BackupButtonsRow(deviceProtectedStorageContext: Context) {
                 modifier = Modifier
                     .padding(vertical = 16.dp, horizontal = 32.dp),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                fontFamily = caviarDreamsFamily
             )
         }
         ElevatedCard(
@@ -218,7 +222,8 @@ fun BackupButtonsRow(deviceProtectedStorageContext: Context) {
                 modifier = Modifier
                     .padding(vertical = 16.dp, horizontal = 32.dp),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                fontFamily = caviarDreamsFamily
             )
         }
     }

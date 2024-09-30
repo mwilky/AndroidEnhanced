@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.mwilky.androidenhanced.LogManager
 import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.dataclasses.LogEntry
+import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -93,17 +94,20 @@ fun LogItem(logEntry: LogEntry) {
             text = logEntry.title,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
+            fontFamily = caviarDreamsFamily
         )
         Text(
             text = logEntry.summary,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontFamily = caviarDreamsFamily
         )
         Text(
             text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(logEntry.timestamp)),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            modifier = Modifier
+            modifier = Modifier,
+            fontFamily = caviarDreamsFamily
         )
         HorizontalDivider(
             modifier = Modifier
@@ -127,6 +131,7 @@ fun LogsAppBar(
             Text(
                 text = "Logs",
                 style = MaterialTheme.typography.titleLarge,
+                fontFamily = caviarDreamsFamily
             )
         },
         actions = {

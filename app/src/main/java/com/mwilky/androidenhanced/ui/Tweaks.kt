@@ -160,6 +160,7 @@ import com.mwilky.androidenhanced.Utils.Companion.statusbarIconDarkColor
 import com.mwilky.androidenhanced.Utils.Companion.useDualStatusbarColors
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.readIconSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeIconSwitchState
+import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 
 
 class Tweaks {
@@ -2089,7 +2090,8 @@ fun TweakSwitch(
                             top = 8.dp,
                             bottom = if (description.isNotEmpty()) 0.dp else 8.dp,
                             end = 4.dp
-                        )
+                        ),
+                    fontFamily = caviarDreamsFamily
                 )
                 if (description.isNotEmpty()) {
                     Text(
@@ -2101,7 +2103,8 @@ fun TweakSwitch(
                                 start = 16.dp,
                                 bottom = 8.dp,
                                 end = 16.dp
-                            )
+                            ),
+                        fontFamily = caviarDreamsFamily
                     )
                 }
             }
@@ -2245,7 +2248,8 @@ fun TweakRow(
                             start = 16.dp,
                             top = 8.dp,
                             end = 4.dp
-                        )
+                        ),
+                    fontFamily = caviarDreamsFamily
                 )
                 if (description != "") {
                     Text(
@@ -2260,7 +2264,8 @@ fun TweakRow(
                                 start = 16.dp,
                                 bottom = 8.dp,
                                 end = 16.dp
-                            )
+                            ),
+                        fontFamily = caviarDreamsFamily
                     )
                 }
             }
@@ -2332,7 +2337,8 @@ fun TweakColor(
                             top = 8.dp,
                             end = 4.dp,
                             bottom = if (description.isNotEmpty()) 0.dp else 8.dp,
-                        )
+                        ),
+                    fontFamily = caviarDreamsFamily
                 )
                 if (description.isNotEmpty()) {
                     Text(
@@ -2346,7 +2352,8 @@ fun TweakColor(
                                 start = 16.dp,
                                 bottom = 8.dp,
                                 end = 4.dp
-                            )
+                            ),
+                        fontFamily = caviarDreamsFamily
                     )
                 }
             }
@@ -2399,6 +2406,7 @@ fun TweakSectionHeader(label: String) {
                 end = 32.dp,
                 top = 16.dp
             ),
+        fontFamily = caviarDreamsFamily
     )
 }
 
@@ -2516,7 +2524,8 @@ fun TweakSelectionDialog(
                             start = 16.dp,
                             end = 16.dp,
                             bottom = 16.dp
-                        )
+                        ),
+                    fontFamily = caviarDreamsFamily
                 )
                 HorizontalDivider(
                     modifier = Modifier
@@ -2587,7 +2596,8 @@ fun TweakSelectionDialog(
                                 color = if (isClickable)
                                     MaterialTheme.colorScheme.onSurfaceVariant
                                 else
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                fontFamily = caviarDreamsFamily
                             )
                         }
                     }
@@ -2612,7 +2622,8 @@ fun TweakSelectionDialog(
                             ),
                     ) {
                         Text(text = "Dismiss",
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
+                            fontFamily = caviarDreamsFamily
                         )
                     }
                     TextButton(
@@ -2638,7 +2649,8 @@ fun TweakSelectionDialog(
                             ),
                     ) {
                         Text(text = "Confirm",
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
+                            fontFamily = caviarDreamsFamily
                         )
                     }
                 }
@@ -2698,7 +2710,8 @@ fun TweakColorDialog(
                                 start = 16.dp,
                                 end = 16.dp,
                                 bottom = 16.dp
-                            )
+                            ),
+                        fontFamily = caviarDreamsFamily
                     )
                 }
                 HorizontalDivider(
@@ -2822,7 +2835,8 @@ fun TweakColorDialog(
                             ),
                     ) {
                         Text(text = "Dismiss",
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
+                            fontFamily = caviarDreamsFamily
                         )
                     }
                     TextButton(
@@ -2841,7 +2855,8 @@ fun TweakColorDialog(
                     ) {
                         Text(
                             text = "Confirm",
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
+                            fontFamily = caviarDreamsFamily
                         )
                     }
                 }
@@ -2950,7 +2965,8 @@ fun TweakSelectionRow(
                             start = 16.dp,
                             top = 8.dp,
                             end = 4.dp
-                        )
+                        ),
+                    fontFamily = caviarDreamsFamily
                 )
                 if (description != "") {
                     Text(
@@ -2964,7 +2980,8 @@ fun TweakSelectionRow(
                                 start = 16.dp,
                                 bottom = 8.dp,
                                 end = 16.dp
-                            )
+                            ),
+                        fontFamily = caviarDreamsFamily
                     )
                 }
             }

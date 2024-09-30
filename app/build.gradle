@@ -54,6 +54,8 @@ dependencies {
     // Splash API
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
+    implementation 'com.android.billingclient:billing:7.1.0'
+
     // Xposed Framework API dependencies
     compileOnly 'de.robv.android.xposed:api:82:sources'
     compileOnly 'de.robv.android.xposed:api:82'

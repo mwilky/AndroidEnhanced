@@ -259,6 +259,8 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         UtilsPremium.TAG = TAG
+
+
         setContent {
             AndroidEnhancedTheme {
                 // A surface container using the 'background' color from the theme
