@@ -2,6 +2,9 @@ package com.mwilky.androidenhanced.xposed
 
 import android.content.Context
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastReceiver
+import com.mwilky.androidenhanced.HookedClasses.Companion.DISPLAY_ROTATION_CLASS
+import com.mwilky.androidenhanced.HookedClasses.Companion.WINDOW_MANAGER_SERVICE_CLASS
+import com.mwilky.androidenhanced.HookedClasses.Companion.WINDOW_STATE_CLASS
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import de.robv.android.xposed.XC_MethodHook
@@ -14,13 +17,6 @@ import de.robv.android.xposed.XposedHelpers.setIntField
 class Misc {
 
     companion object {
-        //Hook Classes
-        private const val DisplayRotationClass =
-            "com.android.server.wm.DisplayRotation"
-        private const val WindowStateClass =
-            "com.android.server.wm.WindowState"
-        private const val WindowManagerServiceClass =
-            "com.android.server.wm.WindowManagerService"
 
         lateinit var DisplayRotationObject: Any
 
@@ -30,103 +26,77 @@ class Misc {
 
         fun init(classLoader: ClassLoader?) {
 
-            //Hook the constructors to register the receiver
+            // Class references
             val displayRotation = findClass(
-                DisplayRotationClass,
-                classLoader
+                DISPLAY_ROTATION_CLASS, classLoader
             )
-            hookAllConstructors(
-                displayRotation,
-                constructor_hook_DisplayRotation
+            val windowManagerService = findClass(
+                WINDOW_MANAGER_SERVICE_CLASS, classLoader
             )
 
-            //Allow all rotations function
-            findAndHookMethod(
-                DisplayRotationClass,
+            // Hook the constructors to register the receiver
+            hookAllConstructors(displayRotation, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+
+                    DisplayRotationObject = param.thisObject
+
+                    val mContext: Context = getObjectField(
+                        param.thisObject, "mContext"
+                    ) as Context
+
+                    //Register broadcast receiver to receive values
+                    registerBroadcastReceiver(
+                        mContext, allowAllRotations, param.thisObject.toString(), false
+                    )
+                }
+            })
+
+            // Hook the constructors to register the receiver
+            hookAllConstructors(windowManagerService, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+
+                    val mContext: Context = getObjectField(
+                        param.thisObject, "mContext"
+                    ) as Context
+
+                    //Register broadcast receiver to receive values
+                    registerBroadcastReceiver(
+                        mContext, disableSecureScreenshots, param.thisObject.toString(), false
+                    )
+                }
+            })
+
+            //Allow all rotations
+            findAndHookMethod(DISPLAY_ROTATION_CLASS,
                 classLoader,
                 "getAllowAllRotations",
-                getAllowAllRotations_hook
-            )
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val intResult: Int = if (mAllowAllRotations) 1 else 0
 
-            //Hook the constructors to register the receiver
-            val windowManagerService = findClass(
-                WindowManagerServiceClass,
-                classLoader
-            )
-            hookAllConstructors(
-                windowManagerService,
-                constructor_hook_WindowManagerService
-            )
+                        setIntField(param.thisObject, "mAllowAllRotations", intResult)
 
-            //Secure screenshot function
-            findAndHookMethod(
-                WindowStateClass,
+                        param.result = intResult
+                    }
+                })
+
+            //Secure screenshot
+            findAndHookMethod(WINDOW_STATE_CLASS,
                 classLoader,
                 "isSecureLocked",
-                isSecureLocked_hook)
-        }
-
-        //Constructor
-        private val constructor_hook_DisplayRotation: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-
-                DisplayRotationObject = param.thisObject
-
-                val mContext: Context = getObjectField(
-                    param.thisObject,
-                    "mContext"
-                ) as Context
-
-                //Register broadcast receiver to receive values
-                registerBroadcastReceiver(
-                    mContext, allowAllRotations,
-                    param.thisObject.toString(),
-                    false
-                )
-            }
-        }
-
-        //Constructor
-        private val constructor_hook_WindowManagerService: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-
-                val mContext: Context = getObjectField(
-                    param.thisObject,
-                    "mContext"
-                ) as Context
-
-                //Register broadcast receiver to receive values
-                registerBroadcastReceiver(
-                    mContext, disableSecureScreenshots,
-                    param.thisObject.toString(),
-                    false
-                )
-            }
-        }
-
-        //Sets the value to the field and also sets the functions return value
-        private val getAllowAllRotations_hook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val intResult: Int = if (mAllowAllRotations) 1 else 0
-
-                setIntField(param.thisObject, "mAllowAllRotations", intResult)
-
-                param.result = intResult
-            }
-        }
-
-        private val isSecureLocked_hook: XC_MethodHook = object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val result = param.result as Boolean
-                if (result) {
-                    if (mDisableSecureScreenshots) {
-                        param.result = false
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val result = param.result as Boolean
+                        if (result) {
+                            if (mDisableSecureScreenshots) {
+                                param.result = false
+                            }
+                        }
                     }
-                }
-            }
+                })
         }
 
-        //Additional functions (not hooks/replacements)
+        //Additional functions
         //Called when the broadcast is sent to set the values
         fun updateAllowAllRotations(value: Boolean) {
 

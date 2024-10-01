@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.os.UserManagerCompat
+import com.mwilky.androidenhanced.HookedClasses.Companion.SYSTEM_UI_APPLICATION_CLASS
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.BOOTCOMPLETED
@@ -103,27 +104,27 @@ import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.useDualStatusbarColors
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
-import com.mwilky.androidenhanced.UtilsPremium.Companion.getIconColorForSlotName
-import com.mwilky.androidenhanced.UtilsPremium.Companion.mLsStatusbarIconUseAccentColor
-import com.mwilky.androidenhanced.UtilsPremium.Companion.mQsStatusbarIconUseAccentColor
-import com.mwilky.androidenhanced.UtilsPremium.Companion.mStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.Utils.Companion.getIconColorForSlotName
+import com.mwilky.androidenhanced.Utils.Companion.mLsStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.Utils.Companion.mQsStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.Utils.Companion.mStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mBlockCameraGestureWhenLockedEnabled
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mDoubleTapSleepLauncherEnabled
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPressPowerWhenNonInteractive
-import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.hideLockscreenStatusbarEnabled
-import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.keyguardStatusBarView
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mHideLockscreenStatusbarEnabled
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.KeyguardStatusBarView
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenPowerMenuEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenQuicksettingsEnabled
-import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.scrambleKeypadEnabled
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mScrambleKeypadEnabled
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.xposed.Misc.Companion.updateAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Notifications
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mAutoExpandFirstNotificationEnabled
-import com.mwilky.androidenhanced.xposed.Notifications.Companion.mExpandedNotifications
+import com.mwilky.androidenhanced.xposed.Notifications.Companion.mExpandedNotificationsEnabled
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mKeyguardCoordinator
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mMuteScreenOnNotificationsEnabled
 import com.mwilky.androidenhanced.xposed.Notifications.Companion.mNotifCollection
@@ -173,7 +174,6 @@ import com.mwilky.androidenhanced.xposed.Statusbar.Companion.mStatusbarClockSeco
 import com.mwilky.androidenhanced.xposed.Statusbar.Companion.setStatusbarClockPosition
 import com.mwilky.androidenhanced.xposed.StatusbarPremium
 import com.mwilky.androidenhanced.xposed.StatusbarPremium.Companion.setBatteryIconColorsOnChange
-import com.mwilky.androidenhanced.xposed.SystemUIApplication.Companion.SYSTEM_UI_APPLICATION_CLASS
 import com.mwilky.androidenhanced.xposed.SystemUIApplication.Companion.getApplicationContext
 import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
@@ -250,12 +250,12 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                         //Hide lockscreen statusbar
                         hideLockscreenStatusBar -> {
-                            hideLockscreenStatusbarEnabled = value as Boolean
-                            callMethod(keyguardStatusBarView, "updateVisibilities")
+                            mHideLockscreenStatusbarEnabled = value as Boolean
+                            callMethod(KeyguardStatusBarView, "updateVisibilities")
                         }
                         //Scramble Keypad
                         scrambleKeypad-> {
-                            scrambleKeypadEnabled = value as Boolean
+                            mScrambleKeypadEnabled = value as Boolean
                         }
                         //Disable power menu on lockscreen
                         disableLockscreenPowerMenu-> {
@@ -288,7 +288,7 @@ class BroadcastUtils: BroadcastReceiver() {
                         }
                         //Expand all notifications
                         expandAllNotifications -> {
-                            mExpandedNotifications = value as Boolean
+                            mExpandedNotificationsEnabled = value as Boolean
                             updateNotificationExpansion()
                         }
                         //QS Style
@@ -543,8 +543,6 @@ class BroadcastUtils: BroadcastReceiver() {
                             lockDevice(mContext)
                         }
                         doubleTapToSleepLauncher -> {
-                            val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
-                            sharedPreferences.edit().putBoolean(key, value as Boolean).apply()
                             mDoubleTapSleepLauncherEnabled = value as Boolean
                         }
                         statusbarIconDarkColor -> {
@@ -631,7 +629,7 @@ class BroadcastUtils: BroadcastReceiver() {
             setBooleanField(
                 mRowAppearanceCoordinator,
                 "mAlwaysExpandNonGroupedNotification",
-                mExpandedNotifications
+                mExpandedNotificationsEnabled
             )
 
             val notificationEntries = getObjectField(
@@ -654,8 +652,8 @@ class BroadcastUtils: BroadcastReceiver() {
                         callMethod(
                             expandableNotifictionRow,
                             "setUserExpanded",
-                            mExpandedNotifications,
-                            mExpandedNotifications
+                            mExpandedNotificationsEnabled,
+                            mExpandedNotificationsEnabled
                         )
                     }
                 }
@@ -1002,10 +1000,10 @@ class BroadcastUtils: BroadcastReceiver() {
             StatusbarPremium.setStatusbarIconColorsOnBoot(mContext)
 
             // Lockscreen icons
-            callMethod(keyguardStatusBarView, "onThemeChanged", TintedIconManager)
-            callMethod(keyguardStatusBarView, "updateVisibilities")
+            callMethod(KeyguardStatusBarView, "onThemeChanged", TintedIconManager)
+            callMethod(KeyguardStatusBarView, "updateVisibilities")
 
-            val mCarrierLabel = getObjectField(keyguardStatusBarView, "mCarrierLabel") as TextView
+            val mCarrierLabel = getObjectField(KeyguardStatusBarView, "mCarrierLabel") as TextView
             mCarrierLabel.setTextColor(getIconColorForSlotName("carrier", mContext, "KEYGUARD"))
 
             setBatteryIconColorsOnChange()

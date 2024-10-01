@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.android.billingclient.api.BillingClient
 import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
@@ -28,6 +29,7 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 class MainActivity : ComponentActivity() {
 
@@ -258,7 +260,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        UtilsPremium.TAG = TAG
+        Utils.TAG = TAG
 
 
         setContent {
