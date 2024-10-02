@@ -25,9 +25,11 @@ class Notifications {
         //Class Objects
         lateinit var mRowAppearanceCoordinator: Any
         lateinit var mNotifCollection: Any
-        lateinit var mRowAppearanceCoordinatorAttach2: Any
+        // This is null sometimes we call it so we can't have as lateinit type
+        var mRowAppearanceCoordinatorAttach2: Any? = null
         lateinit var mNotifViewController: Any
-        lateinit var mKeyguardCoordinator: Any
+        // This is null sometimes we call it so we can't have as lateinit type
+        var mKeyguardCoordinator: Any? = null
 
         //Tweak Variables
         var mMuteScreenOnNotificationsEnabled: Boolean = false
@@ -126,7 +128,11 @@ class Notifications {
 
                         val classId = getObjectField(param.thisObject, "\$r8\$classId")
 
-                        if (classId == 0) updateNotificationSectionHeaders(mKeyguardCoordinator)
+                        if (classId == 0) mKeyguardCoordinator?.let {
+                            updateNotificationSectionHeaders(
+                                it
+                            )
+                        }
 
                     }
                 })
