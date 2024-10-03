@@ -14,3 +14,5 @@
 .cxx
 local.properties
 /premium
+/app/src/main/java/com/mwilky/androidenhanced/BillingManager.kt
+
