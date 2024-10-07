@@ -13,14 +13,34 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.PendingPurchasesParams
+import com.android.billingclient.api.ProductDetails
+import com.android.billingclient.api.PurchasesUpdatedListener
+import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.SkuDetailsParams
+import com.android.billingclient.api.queryProductDetails
 import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.ISPREMIUM
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -32,6 +52,8 @@ import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var billingManager: BillingManager
 
     companion object {
         const val TAG = "DEBUG: Android Enhanced"
@@ -61,7 +83,7 @@ class MainActivity : ComponentActivity() {
 
         // Exclude none tweak related keys
         val keysToExclude =
-            setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY)
+            setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM)
 
         val dataToBackup = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
@@ -262,17 +284,67 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Utils.TAG = TAG
 
+        val deviceProtectedStorageContext = applicationContext.createDeviceProtectedStorageContext()
+
+        LogManager.init(deviceProtectedStorageContext)
+
+        // Initialize BillingManager
+        billingManager = BillingManager(
+            context = applicationContext,
+            activity = this,
+            lifecycleScope = lifecycleScope
+        )
 
         setContent {
+            SubscriptionChecker(billingManager = billingManager)
+
             AndroidEnhancedTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Navigation(this@MainActivity)
+                    Navigation(this@MainActivity, billingManager)
                 }
             }
         }
     }
+
+    @Composable
+    fun SubscriptionChecker(billingManager: BillingManager) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    // Start checking subscription when the app is in the foreground
+                    billingManager.startCheckingSubscriptionStatus()
+                } else if (event == Lifecycle.Event.ON_PAUSE) {
+                    // Stop checking subscription when the app goes to the background
+                    billingManager.stopCheckingSubscriptionStatus()
+                }
+            }
+
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            // Continuous check every minute while the composable is active
+            while (true) {
+                billingManager.checkSubscriptionStatus()
+                delay(60000L) // Check every 1 minute
+            }
+        }
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        billingManager.endBillingConnection()
+    }
+
 }

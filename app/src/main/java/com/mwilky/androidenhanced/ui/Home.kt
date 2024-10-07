@@ -50,6 +50,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -76,6 +77,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.mwilky.androidenhanced.BillingManager
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.dataclasses.BottomNavigationItem
 import com.mwilky.androidenhanced.dataclasses.EnvironmentProp
@@ -89,7 +91,7 @@ import java.util.Calendar
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, deviceProtectedStorageContext: Context) {
+fun HomeScreen(navController: NavController, deviceProtectedStorageContext: Context, billingManager: BillingManager) {
 
     //Top App Bar
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -104,7 +106,7 @@ fun HomeScreen(navController: NavController, deviceProtectedStorageContext: Cont
             ScaffoldNavigationBar(navController = navController)
         },
         content = {
-            HomeScreenScrollableContent(topPadding = it, bottomPadding = it, navController)
+            HomeScreenScrollableContent(topPadding = it, bottomPadding = it, navController, billingManager = billingManager)
         }
     )
 }
@@ -113,8 +115,14 @@ fun HomeScreen(navController: NavController, deviceProtectedStorageContext: Cont
 fun HomeScreenScrollableContent(
     topPadding: PaddingValues,
     bottomPadding: PaddingValues,
-    navController: NavController
+    navController: NavController,
+    billingManager: BillingManager
 ) {
+    // Check current subscription status
+    LaunchedEffect(Unit) {
+        billingManager.checkSubscriptionStatus(true)
+    }
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
@@ -425,59 +433,6 @@ fun getGreetingMessage(): String {
         in 0..11 -> "Good morning!"
         in 12..16 -> "Good afternoon!"
         else -> "Good evening!"
-    }
-}
-
-@Composable
-fun headerImage(
-    defaultWidth: Dp = 135.dp,
-    defaultHeight: Dp = 120.dp,
-    viewportWidth: Float = 135f,
-    viewportHeight: Float = 120f,
-    primaryColor: Color = MaterialTheme.colorScheme.primary,
-    onSurfaceColor: Color = MaterialTheme.colorScheme.onSurface,
-): ImageVector {
-
-    return ImageVector.Builder(
-        defaultWidth = defaultWidth,
-        defaultHeight = defaultHeight,
-        viewportWidth = viewportWidth,
-        viewportHeight = viewportHeight,
-    ).run {
-        addPath(
-            pathData = addPathNodes("M57.625 59.0625L42.375 17.125L27.125 " +
-                    "59.0625H57.625ZM59.6875 64.6875H25.0625L6 119.5H0L42.375 0.6875L78.5 " +
-                    "103H73.625L59.6875 64.6875Z"),
-            fill = SolidColor(primaryColor)
-        )
-        addPath(
-            pathData = addPathNodes("M82.0625 70.5C87.3542 75.3333 93.6458 77.75 " +
-                    "100.938 77.75C108.771 77.75 115.458 74.9792 121 69.4375C121.708 68.7292 " +
-                    "122.375 68 123 67.25L128.938 69.375C127.854 70.875 126.625 72.3125 125.25 " +
-                    "73.6875C118.542 80.3958 110.438 83.75 100.938 83.75C91.4792 83.75 83.3958 " +
-                    "80.3958 76.6875 73.6875C69.9792 66.9792 66.625 58.875 66.625 49.375C66.625 " +
-                    "39.9167 69.9792 31.8333 76.6875 25.125C83.3958 18.4167 91.4792 15.0625 " +
-                    "100.938 15.0625C109.062 15.0625 116.167 17.5 122.25 22.375C123.25 23.2083 " +
-                    "124.25 24.125 125.25 25.125C125.625 25.5 125.979 25.875 126.312 " +
-                    "26.25L122.062 30.5L82.0625 70.5ZM117.938 26.6875C113.062 22.9375 107.396 " +
-                    "21.0625 100.938 21.0625C93.1458 21.0625 86.4792 23.8333 80.9375 " +
-                    "29.375C75.3958 34.875 72.625 41.5417 72.625 49.375C72.625 55.8333 74.5 " +
-                    "61.5 78.25 66.375L117.938 26.6875Z"),
-            fill = SolidColor(primaryColor)
-        )
-        addPath(
-            pathData = addPathNodes("M16 107H119L117.279 111H14.2789L16 107Z"),
-            fill = SolidColor(onSurfaceColor)
-        )
-        addPath(
-            pathData = addPathNodes("M18 8.5H37L38.4999 4.5H19.5L18 8.5Z"),
-            fill = SolidColor(onSurfaceColor)
-        )
-        addPath(
-            pathData = addPathNodes("M47.5 8.5H85.5L84 4.5H46L47.5 8.5Z"),
-            fill = SolidColor(onSurfaceColor)
-        )
-        build()
     }
 }
 

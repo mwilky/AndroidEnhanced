@@ -12,12 +12,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.os.UserManagerCompat
+import com.mwilky.androidenhanced.BillingManager.Companion.resetPremiumTweaks
 import com.mwilky.androidenhanced.HookedClasses.Companion.SYSTEM_UI_APPLICATION_CLASS
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.BOOTCOMPLETED
 import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.ISPREMIUM
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
@@ -1056,7 +1058,7 @@ class BroadcastUtils: BroadcastReceiver() {
         LogManager.clearLogs()
 
         // Exclude none tweak related keys
-        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY)
+        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM)
 
         val bootPrefs = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
@@ -1064,6 +1066,11 @@ class BroadcastUtils: BroadcastReceiver() {
 
             sendBroadcast(deviceProtectedStorageContext, key, value)
         }
+
+        // Reset premium tweaks if not subscribed
+        val isPremium = sharedPreferences.getBoolean(ISPREMIUM, false)
+        if (!isPremium)
+            resetPremiumTweaks(context)
 
         LogManager.log("BroadcastUtils", "Applied all settings at boot")
         // Send boot complete broadcast so we update SystemUI at once rather than per each key

@@ -20,11 +20,9 @@ import com.mwilky.androidenhanced.ui.Tweaks
 
 
 @Composable
-fun Navigation(context: Context) {
+fun Navigation(context: Context, billingManager: BillingManager) {
     val navController = rememberNavController()
     val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
-
-    LogManager.init(deviceProtectedStorageContext)
 
     NavHost(
         navController = navController,
@@ -45,7 +43,8 @@ fun Navigation(context: Context) {
         composable(route = Screens.Home.route) {
             HomeScreen(
                 navController = navController,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                deviceProtectedStorageContext = deviceProtectedStorageContext,
+                billingManager = billingManager
             )
         }
         composable(route = Screens.Logs.route) {
@@ -57,7 +56,8 @@ fun Navigation(context: Context) {
         composable(route = Screens.Settings.route) {
             Settings(
                 navController = navController,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                deviceProtectedStorageContext = deviceProtectedStorageContext,
+                billingManager = billingManager
             )
         }
         composable(
