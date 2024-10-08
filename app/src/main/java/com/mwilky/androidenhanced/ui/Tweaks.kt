@@ -2604,14 +2604,8 @@ fun TweakSelectionDialog(
                     text = label,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(
-                            top = 24.dp, start = 16.dp, end = 16.dp, bottom = 16.dp
-                        ),
+                    modifier = Modifier.padding(24.dp),
                     fontFamily = caviarDreamsFamily
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
                 )
                 if (imageResourceIds != null) {
 
@@ -2674,10 +2668,6 @@ fun TweakSelectionDialog(
                         }
                     }
                 }
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -2783,16 +2773,10 @@ fun TweakColorDialog(
                         text = label,
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.padding(
-                                top = 24.dp, start = 16.dp, end = 16.dp, bottom = 16.dp
-                            ),
+                        modifier = Modifier.padding(24.dp),
                         fontFamily = caviarDreamsFamily
                     )
                 }
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
                 colorPickerController.wheelColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 HsvColorPicker(
                     modifier = Modifier
@@ -2856,10 +2840,6 @@ fun TweakColorDialog(
                         )
                     )
                 }
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,

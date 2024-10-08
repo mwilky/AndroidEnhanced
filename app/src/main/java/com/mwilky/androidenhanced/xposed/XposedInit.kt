@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.xposed
 
 import android.content.res.XModuleResources
 import com.mwilky.androidenhanced.R
+import com.mwilky.androidenhanced.Utils.Companion.isDeviceSupported
 import de.robv.android.xposed.IXposedHookInitPackageResources
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
@@ -34,6 +35,10 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
+        // If running on not supported device don't hook methods
+        if (!isDeviceSupported())
+            return
+
         when(lpparam?.packageName) {
             FRAMEWORK_PACKAGE -> {
                 Buttons.init(lpparam.classLoader)

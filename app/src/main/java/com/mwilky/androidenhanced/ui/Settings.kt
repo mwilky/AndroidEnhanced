@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -27,6 +30,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,10 +50,15 @@ import com.android.billingclient.api.ProductDetails
 import com.mwilky.androidenhanced.BillingManager
 import com.mwilky.androidenhanced.BillingManager.Companion.isPremium
 import com.mwilky.androidenhanced.BroadcastUtils
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.sendBroadcast
 import com.mwilky.androidenhanced.LogManager
 import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
+import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEENABLED
+import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleep
+import com.mwilky.androidenhanced.ui.Tweaks.Companion.readSwitchState
+import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -141,11 +151,7 @@ fun SettingsScrollableContent(
             Text(
                 text = "Unlock advanced features and support the developer in continuing this project.",
                 modifier = Modifier
-                    .padding(
-                        top = 16.dp,
-                        start = 16.dp,
-                        end = 16.dp
-                    )
+                    .padding(16.dp)
                     .fillMaxWidth(),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -159,16 +165,12 @@ fun SettingsScrollableContent(
                 isPremium = isPremium
             )
         }
-
         item {
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 color = MaterialTheme.colorScheme.outlineVariant
             )
         }
-
-
-
         item {
             TweakSectionHeader(
                 label = stringResource(
@@ -221,7 +223,6 @@ fun SettingsScrollableContent(
         item{
             BackupButtonsRow(deviceProtectedStorageContext = deviceProtectedStorageContext)
         }
-
     }
 
     // Add the listener when this Composable is first composed
@@ -251,7 +252,7 @@ fun ProductDetailsItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 16.dp, bottom = 16.dp, end = 16.dp),
         ) {
             OutlinedButton(
                 onClick = { showDialog = true },
@@ -259,7 +260,8 @@ fun ProductDetailsItem(
             ) {
                 Text(
                     "Cancel",
-                    fontFamily = caviarDreamsFamily
+                    fontFamily = caviarDreamsFamily,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -273,7 +275,8 @@ fun ProductDetailsItem(
             ) {
                 Text(
                     "Subscribe",
-                    fontFamily = caviarDreamsFamily
+                    fontFamily = caviarDreamsFamily,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -356,7 +359,8 @@ fun BackupButtonsRow(deviceProtectedStorageContext: Context) {
     val mainActivity = (LocalContext.current as MainActivity)
     FlowRow(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(22.dp),
         horizontalArrangement = Arrangement.Center
     ) {
         ElevatedCard(

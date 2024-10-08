@@ -22,25 +22,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.android.billingclient.api.BillingClient
-import com.android.billingclient.api.BillingClientStateListener
-import com.android.billingclient.api.BillingResult
-import com.android.billingclient.api.PendingPurchasesParams
-import com.android.billingclient.api.ProductDetails
-import com.android.billingclient.api.PurchasesUpdatedListener
-import com.android.billingclient.api.QueryProductDetailsParams
-import com.android.billingclient.api.SkuDetailsParams
-import com.android.billingclient.api.queryProductDetails
-import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.BOOTTIME
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.ISPREMIUM
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
+import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -83,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
         // Exclude none tweak related keys
         val keysToExclude =
-            setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM)
+            setOf(LASTBACKUP, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM, UNSUPPORTEDDEVICEDIALOGSHOWN, BOOTTIME)
 
         val dataToBackup = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
@@ -280,7 +269,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        //installSplashScreen()
         super.onCreate(savedInstanceState)
         Utils.TAG = TAG
 

@@ -28,6 +28,7 @@
     <string name="subscription">Premium subscription</string>
     <string name="requires_subscription">This feature requires a premium subscription</string>
     <string name="iconManagement">Icon management</string>
+    <string name="unsupportedDeviceProtection">Unsupported device protection</string>
     <string name="collapsedStatusbarIcons">Hide icons in the collapsed statusbar only. Icons will still be visible in the notification shade and lockscreen statusbar</string>
     <string name="allStatusbarIcons">Hide icons in all statusbars.</string>
 <!--    Statusbar-->

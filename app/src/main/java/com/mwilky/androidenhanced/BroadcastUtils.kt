@@ -17,11 +17,13 @@ import com.mwilky.androidenhanced.HookedClasses.Companion.SYSTEM_UI_APPLICATION_
 import com.mwilky.androidenhanced.MainActivity.Companion.DEBUG
 import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.BOOTCOMPLETED
-import com.mwilky.androidenhanced.Utils.Companion.ISDEVICESUPPORTEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.BOOTTIME
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
 import com.mwilky.androidenhanced.Utils.Companion.ISPREMIUM
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
+import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
+import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEENABLED
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.autoExpandFirstNotif
 import com.mwilky.androidenhanced.Utils.Companion.customLsStatusbarAirplaneIconColor
@@ -568,6 +570,12 @@ class BroadcastUtils: BroadcastReceiver() {
                         disableCameraScreenOff -> {
                             mBlockCameraGestureWhenLockedEnabled = value as Boolean
                         }
+
+                        UNSUPPORTEDDEVICEENABLED -> {
+                            val sharedPrefs = mContext.createDeviceProtectedStorageContext().getSharedPreferences(PREFS, MODE_PRIVATE)
+                            sharedPrefs.edit().putBoolean(UNSUPPORTEDDEVICEENABLED, value as Boolean).apply()
+
+                        }
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
                 }
@@ -1058,7 +1066,7 @@ class BroadcastUtils: BroadcastReceiver() {
         LogManager.clearLogs()
 
         // Exclude none tweak related keys
-        val keysToExclude = setOf(LASTBACKUP, ISDEVICESUPPORTEDKEY, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM)
+        val keysToExclude = setOf(LASTBACKUP, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM, UNSUPPORTEDDEVICEDIALOGSHOWN, BOOTTIME)
 
         val bootPrefs = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
