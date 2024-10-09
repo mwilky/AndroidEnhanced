@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.xposed
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.media.AudioManager
 import android.media.session.MediaSessionManager
@@ -15,6 +16,7 @@ import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.registerBroadcastReceiver
 import com.mwilky.androidenhanced.HookedClasses.Companion.GESTURE_LAUNCHER_SERVICE_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.LAUNCHER_APPLICATION_CLASS
@@ -107,6 +109,9 @@ class Buttons {
 
                         val mGestureDetector =
                             getObjectField(param.thisObject, "mGestureDetector") as GestureDetector
+
+                        val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+                        mDoubleTapSleepLauncherEnabled = sharedPreferences.getBoolean(doubleTapToSleepLauncher, false)
 
                         val onDoubleTapListener = object : GestureDetector.OnDoubleTapListener {
                             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {

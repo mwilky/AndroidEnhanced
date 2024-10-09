@@ -547,6 +547,8 @@ class BroadcastUtils: BroadcastReceiver() {
                             lockDevice(mContext)
                         }
                         doubleTapToSleepLauncher -> {
+                            val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+                            sharedPreferences.edit().putBoolean(key, value as Boolean).apply()
                             mDoubleTapSleepLauncherEnabled = value as Boolean
                         }
                         statusbarIconDarkColor -> {
