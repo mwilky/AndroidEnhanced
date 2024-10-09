@@ -244,6 +244,7 @@ fun ProductDetailsItem(
 ) {
     val subscriptionOffer = productDetails.subscriptionOfferDetails?.firstOrNull()
     val context = LocalContext.current
+    val price = subscriptionOffer?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -253,6 +254,7 @@ fun ProductDetailsItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, bottom = 16.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedButton(
                 onClick = { showDialog = true },
@@ -279,15 +281,22 @@ fun ProductDetailsItem(
                     fontWeight = FontWeight.Bold
                 )
             }
+//            if (price != null) {
+//                Text(
+//                    text = "$price per month",
+//                    fontFamily = caviarDreamsFamily,
+//                    modifier = Modifier.padding(horizontal = 16.dp),
+//                    color = MaterialTheme.colorScheme.onSurface
+//                )
+//            }
         }
-        if (isPremium)
-            Text(
-                "Subscribed! Thank you for your support.",
-                fontFamily = caviarDreamsFamily,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-            )
+        Text(
+            if (isPremium) "Subscribed! Thank you for your support." else if (price != null) "$price per month" else "Error fetching price",
+            fontFamily = caviarDreamsFamily,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+        )
     }
 
     // Display the AlertDialog when showDialog is true

@@ -547,7 +547,7 @@ class BroadcastUtils: BroadcastReceiver() {
                             lockDevice(mContext)
                         }
                         doubleTapToSleepLauncher -> {
-                            val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+                            val sharedPreferences = mContext.createDeviceProtectedStorageContext().getSharedPreferences(PREFS, MODE_PRIVATE)
                             sharedPreferences.edit().putBoolean(key, value as Boolean).apply()
                             mDoubleTapSleepLauncherEnabled = value as Boolean
                         }
@@ -572,7 +572,6 @@ class BroadcastUtils: BroadcastReceiver() {
                         disableCameraScreenOff -> {
                             mBlockCameraGestureWhenLockedEnabled = value as Boolean
                         }
-
                         UNSUPPORTEDDEVICEENABLED -> {
                             val sharedPrefs = mContext.createDeviceProtectedStorageContext().getSharedPreferences(PREFS, MODE_PRIVATE)
                             sharedPrefs.edit().putBoolean(UNSUPPORTEDDEVICEENABLED, value as Boolean).apply()

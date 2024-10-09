@@ -110,7 +110,7 @@ class Buttons {
                         val mGestureDetector =
                             getObjectField(param.thisObject, "mGestureDetector") as GestureDetector
 
-                        val sharedPreferences = mContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+                        val sharedPreferences = mContext.createDeviceProtectedStorageContext().getSharedPreferences(PREFS, MODE_PRIVATE)
                         mDoubleTapSleepLauncherEnabled = sharedPreferences.getBoolean(doubleTapToSleepLauncher, false)
 
                         val onDoubleTapListener = object : GestureDetector.OnDoubleTapListener {
