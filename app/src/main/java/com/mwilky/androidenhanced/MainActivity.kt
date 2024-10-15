@@ -24,7 +24,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mwilky.androidenhanced.Utils.Companion.BOOTTIME
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.ISONETIMEPURCHASE
 import com.mwilky.androidenhanced.Utils.Companion.ISPREMIUM
+import com.mwilky.androidenhanced.Utils.Companion.ISSUBSCRIPTION
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
@@ -72,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
         // Exclude none tweak related keys
         val keysToExclude =
-            setOf(LASTBACKUP, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM, UNSUPPORTEDDEVICEDIALOGSHOWN, BOOTTIME)
+            setOf(LASTBACKUP, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM, UNSUPPORTEDDEVICEDIALOGSHOWN, BOOTTIME, ISSUBSCRIPTION, ISONETIMEPURCHASE)
 
         val dataToBackup = sharedPreferences.all.filterKeys { it !in keysToExclude }
 

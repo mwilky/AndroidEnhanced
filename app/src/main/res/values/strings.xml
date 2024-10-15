@@ -25,6 +25,7 @@
     <string name="columnCountLandscape">Column count (landscape)</string>
     <string name="brightnessSlider">Brightness Slider</string>
     <string name="backup_restore">Backup and restore</string>
+    <string name="premiumFeatures">Premium features</string>
     <string name="subscription">Premium subscription</string>
     <string name="requires_subscription">This feature requires a premium subscription</string>
     <string name="iconManagement">Icon management</string>

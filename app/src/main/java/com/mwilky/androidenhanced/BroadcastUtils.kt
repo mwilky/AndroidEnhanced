@@ -19,7 +19,9 @@ import com.mwilky.androidenhanced.MainActivity.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.BOOTCOMPLETED
 import com.mwilky.androidenhanced.Utils.Companion.BOOTTIME
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.ISONETIMEPURCHASE
 import com.mwilky.androidenhanced.Utils.Companion.ISPREMIUM
+import com.mwilky.androidenhanced.Utils.Companion.ISSUBSCRIPTION
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
@@ -1067,7 +1069,7 @@ class BroadcastUtils: BroadcastReceiver() {
         LogManager.clearLogs()
 
         // Exclude none tweak related keys
-        val keysToExclude = setOf(LASTBACKUP, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM, UNSUPPORTEDDEVICEDIALOGSHOWN, BOOTTIME)
+        val keysToExclude = setOf(LASTBACKUP, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM, UNSUPPORTEDDEVICEDIALOGSHOWN, BOOTTIME, ISONETIMEPURCHASE, ISSUBSCRIPTION)
 
         val bootPrefs = sharedPreferences.all.filterKeys { it !in keysToExclude }
 

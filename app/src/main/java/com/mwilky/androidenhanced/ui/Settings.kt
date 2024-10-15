@@ -46,9 +46,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
+import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.ProductDetails
+import com.android.billingclient.api.ProductDetails.SubscriptionOfferDetails
 import com.mwilky.androidenhanced.BillingManager
+import com.mwilky.androidenhanced.BillingManager.Companion.isOneTimePurchase
 import com.mwilky.androidenhanced.BillingManager.Companion.isPremium
+import com.mwilky.androidenhanced.BillingManager.Companion.isSubscription
 import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.sendBroadcast
 import com.mwilky.androidenhanced.LogManager
@@ -124,7 +128,9 @@ fun SettingsScrollableContent(
     val formattedDate = dateFromSharedPrefs?.let { convertDate(it, deviceProtectedStorageContext) }
 
     // Collect the product details from the StateFlow
-    val productDetailsList by billingManager.productDetailsFlow.collectAsState()
+    val subscriptionProductDetailsList by billingManager.subscriptionDetailsFlow.collectAsState()
+
+    val oneTimeProductDetailsList by billingManager.oneTimeDetailsFlow.collectAsState()
 
     LaunchedEffect(Unit) {
         // Check subscription status
@@ -143,7 +149,7 @@ fun SettingsScrollableContent(
         item {
             TweakSectionHeader(
                 label = stringResource(
-                    id = R.string.subscription
+                    id = R.string.premiumFeatures
                 )
             )
         }
@@ -151,18 +157,32 @@ fun SettingsScrollableContent(
             Text(
                 text = "Unlock advanced features and support the developer in continuing this project.",
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
                     .fillMaxWidth(),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontFamily = caviarDreamsFamily
             )
         }
-        items(productDetailsList) { productDetails ->
+
+        // Display One-Time Purchase Products
+        items(oneTimeProductDetailsList) { product ->
             ProductDetailsItem(
-                productDetails = productDetails,
+                productDetails = product,
                 billingManager = billingManager,
-                isPremium = isPremium
+                isPremium = isPremium,
+                isSubscription = isSubscription,
+                isOneTimePurchase = isOneTimePurchase
+            )
+        }
+        // Display Subscription Products
+        items(subscriptionProductDetailsList) { product ->
+            ProductDetailsItem(
+                productDetails = product,
+                billingManager = billingManager,
+                isPremium = isPremium,
+                isSubscription = isSubscription,
+                isOneTimePurchase = isOneTimePurchase
             )
         }
         item {
@@ -241,65 +261,186 @@ fun ProductDetailsItem(
     productDetails: ProductDetails,
     billingManager: BillingManager,
     isPremium: Boolean,
+    isSubscription: Boolean,
+    isOneTimePurchase: Boolean
 ) {
-    val subscriptionOffer = productDetails.subscriptionOfferDetails?.firstOrNull()
+    val productType = productDetails.productType
     val context = LocalContext.current
-    val price = subscriptionOffer?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
+
+    // For subscription
+    val subscriptionOffer = productDetails.subscriptionOfferDetails?.firstOrNull()
+    val freeTrialDuration = subscriptionOffer?.let { getFreeTrialDuration(it) }
+    val regularPrice = subscriptionOffer?.let { getRegularPrice(it) }
+
+    // For one-time purchase
+    val oneTimePrice = productDetails.oneTimePurchaseOfferDetails?.formattedPrice
 
     var showDialog by remember { mutableStateOf(false) }
 
-
     Column {
+        when (productType) {
+            BillingClient.ProductType.SUBS -> {
+                Text(
+                    text = "Subscription:",
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
+                        .fillMaxWidth(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = caviarDreamsFamily
+                )
+            }
+            BillingClient.ProductType.INAPP -> {
+                Text(
+                    text = "One time purchase:",
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
+                        .fillMaxWidth(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = caviarDreamsFamily
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, bottom = 16.dp, end = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedButton(
-                onClick = { showDialog = true },
-                enabled = isPremium
-            ) {
-                Text(
-                    "Cancel",
-                    fontFamily = caviarDreamsFamily,
-                    fontWeight = FontWeight.Bold
-                )
+            when (productType) {
+                BillingClient.ProductType.SUBS -> {
+                    OutlinedButton(
+                        onClick = { showDialog = true },
+                        enabled = isSubscription
+                    ) {
+                        Text(
+                            "Cancel",
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            billingManager.launchSubscriptionPurchaseFlow(productDetails)
+                        },
+                        enabled = !isSubscription,
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                    ) {
+                        Text(
+                            "Subscribe",
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                BillingClient.ProductType.INAPP -> {
+                    Button(
+                        onClick = {
+                            billingManager.launchOneTimePurchaseFlow(productDetails)
+                        },
+                        enabled = !isOneTimePurchase,
+                        modifier = Modifier
+                    ) {
+                        Text(
+                            "Purchase",
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                else -> {
+                    // Handle other product types if any
+                }
             }
-
-            Button(
-                onClick = {
-                    billingManager.launchPurchaseFlow(productDetails)
-                },
-                enabled = !isPremium,
-                modifier = Modifier
-                    .padding(start = 16.dp)
-            ) {
-                Text(
-                    "Subscribe",
-                    fontFamily = caviarDreamsFamily,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-//            if (price != null) {
-//                Text(
-//                    text = "$price per month",
-//                    fontFamily = caviarDreamsFamily,
-//                    modifier = Modifier.padding(horizontal = 16.dp),
-//                    color = MaterialTheme.colorScheme.onSurface
-//                )
-//            }
         }
-        Text(
-            if (isPremium) "Subscribed! Thank you for your support." else if (price != null) "$price per month" else "Error fetching price",
-            fontFamily = caviarDreamsFamily,
-            style = MaterialTheme.typography.titleMedium,
+
+        // Display product details based on type and premium status
+        Column(
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-        )
+        ) {
+            when (productType) {
+                BillingClient.ProductType.SUBS -> {
+                    if (isSubscription) {
+                        Text(
+                            text = "Subscribed! Thank you for your support.",
+                            fontFamily = caviarDreamsFamily,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    } else {
+                        if (freeTrialDuration != null) {
+                            Text(
+                                text = "$freeTrialDuration free trial available",
+                                fontFamily = caviarDreamsFamily,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            if (regularPrice != null) {
+                                Text(
+                                    text = "After trial: $regularPrice per month",
+                                    fontFamily = caviarDreamsFamily,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        } else {
+                            if (regularPrice != null) {
+                                Text(
+                                    text = "$regularPrice per month",
+                                    fontFamily = caviarDreamsFamily,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            } else {
+                                Text(
+                                    text = "Error fetching price",
+                                    fontFamily = caviarDreamsFamily,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+                }
+                BillingClient.ProductType.INAPP -> {
+                    if (isOneTimePurchase) {
+                        Text(
+                            text = "Premium unlocked! Thank you for your support.",
+                            fontFamily = caviarDreamsFamily,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    } else {
+                        if (oneTimePrice != null) {
+                            Text(
+                                text = "One-time purchase for $oneTimePrice",
+                                fontFamily = caviarDreamsFamily,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        } else {
+                            Text(
+                                text = "Error fetching price",
+                                fontFamily = caviarDreamsFamily,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    // Handle other product types if any
+                }
+            }
+        }
     }
 
-    // Display the AlertDialog when showDialog is true
+    // Display the AlertDialog when showDialog is true (only for subscriptions)
     if (showDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -327,7 +468,7 @@ fun ProductDetailsItem(
                             setPackage("com.android.vending")
                         }
                         try {
-                            startActivity(context, intent, null)
+                            context.startActivity(intent)
                         } catch (e: ActivityNotFoundException) {
                             // Handle exception if the Play Store is not installed
                             Toast.makeText(
@@ -353,7 +494,8 @@ fun ProductDetailsItem(
                         showDialog = false
                     }
                 ) {
-                    Text(text = "No",
+                    Text(
+                        text = "No",
                         fontFamily = caviarDreamsFamily
                     )
                 }
@@ -446,4 +588,66 @@ fun convertDate(dateFromSharedPrefs: String, context: Context) : String {
     } else {
         return context.resources.getString(R.string.never)
     }
+}
+
+// Helper function to parse ISO 8601 billing period to a readable format
+fun parseBillingPeriod(billingPeriod: String): String {
+    return when {
+        billingPeriod.startsWith("P") -> {
+            val period = billingPeriod.removePrefix("P")
+            when {
+                period.endsWith("D") -> {
+                    val days = period.removeSuffix("D")
+                    "$days day${if (days != "1") "s" else ""}"
+                }
+                period.endsWith("W") -> {
+                    val weeks = period.removeSuffix("W")
+                    "$weeks week${if (weeks != "1") "s" else ""}"
+                }
+                period.endsWith("M") -> {
+                    val months = period.removeSuffix("M")
+                    "$months month${if (months != "1") "s" else ""}"
+                }
+                period.endsWith("Y") -> {
+                    val years = period.removeSuffix("Y")
+                    "$years year${if (years != "1") "s" else ""}"
+                }
+                else -> billingPeriod // Fallback to original if format is unexpected
+            }
+        }
+        else -> billingPeriod // Fallback to original if format is unexpected
+    }
+}
+
+// Helper function to extract free trial duration
+fun getFreeTrialDuration(offer: SubscriptionOfferDetails): String? {
+    offer.pricingPhases.pricingPhaseList.forEach { phase ->
+        if (phase.priceAmountMicros == 0L) { // Identify free trial phase
+            val billingPeriod = phase.billingPeriod
+            return parseBillingPeriod(billingPeriod) // e.g., "7 days"
+        }
+    }
+    return null // No free trial available
+}
+
+// Helper function to extract regular price after the free trial
+fun getRegularPrice(offer: SubscriptionOfferDetails): String? {
+    offer.pricingPhases.pricingPhaseList.forEach { phase ->
+        if (phase.priceAmountMicros > 0L) { // Identify regular pricing phase
+            return phase.formattedPrice // e.g., "$4.99"
+        }
+    }
+    return null // Regular price not found
+}
+
+// Helper function to extract free trial information from SubscriptionOfferDetails
+fun getFreeTrialInfo(offer: SubscriptionOfferDetails): String? {
+    offer.pricingPhases.pricingPhaseList.forEach { phase ->
+        if (phase.priceAmountMicros == 0L) {
+            val billingPeriod = phase.billingPeriod
+            val readablePeriod = parseBillingPeriod(billingPeriod)
+            return "Free trial: $readablePeriod"
+        }
+    }
+    return null
 }
