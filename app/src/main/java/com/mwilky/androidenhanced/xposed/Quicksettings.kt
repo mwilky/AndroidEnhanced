@@ -233,6 +233,25 @@ class Quicksettings {
 
             findAndHookMethod(QS_PANEL_CONTROLLER_BASE_CLASS,
                 classLoader,
+                "onViewDetached",
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val brightnessMirrorController =
+                            getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
+                        if (brightnessMirrorController != null) {
+                            val listener = getObjectField(
+                                mQQsBrightnessMirrorHandler, "brightnessMirrorListener"
+                            )
+                            val mBrightnessMirrorListeners = getObjectField(
+                                brightnessMirrorController, "mBrightnessMirrorListeners"
+                            ) as ArraySet<Any>
+                            mBrightnessMirrorListeners.remove(listener)
+                        }
+                    }
+                })
+
+            findAndHookMethod(QS_PANEL_CONTROLLER_BASE_CLASS,
+                classLoader,
                 "onViewAttached",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
