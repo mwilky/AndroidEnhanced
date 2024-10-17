@@ -304,64 +304,10 @@ fun ProductDetailsItem(
                 )
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            when (productType) {
-                BillingClient.ProductType.SUBS -> {
-                    OutlinedButton(
-                        onClick = { showDialog = true },
-                        enabled = isSubscription
-                    ) {
-                        Text(
-                            "Cancel",
-                            fontFamily = caviarDreamsFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Button(
-                        onClick = {
-                            billingManager.launchSubscriptionPurchaseFlow(productDetails)
-                        },
-                        enabled = !isSubscription,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                    ) {
-                        Text(
-                            "Subscribe",
-                            fontFamily = caviarDreamsFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                BillingClient.ProductType.INAPP -> {
-                    Button(
-                        onClick = {
-                            billingManager.launchOneTimePurchaseFlow(productDetails)
-                        },
-                        enabled = !isOneTimePurchase,
-                        modifier = Modifier
-                    ) {
-                        Text(
-                            "Purchase",
-                            fontFamily = caviarDreamsFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                else -> {
-                    // Handle other product types if any
-                }
-            }
-        }
-
         // Display product details based on type and premium status
         Column(
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
         ) {
             when (productType) {
                 BillingClient.ProductType.SUBS -> {
@@ -410,7 +356,7 @@ fun ProductDetailsItem(
                 BillingClient.ProductType.INAPP -> {
                     if (isOneTimePurchase) {
                         Text(
-                            text = "Premium unlocked! Thank you for your support.",
+                            text = "Purchased! Thank you for your support.",
                             fontFamily = caviarDreamsFamily,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -418,7 +364,7 @@ fun ProductDetailsItem(
                     } else {
                         if (oneTimePrice != null) {
                             Text(
-                                text = "One-time purchase for $oneTimePrice",
+                                text = oneTimePrice,
                                 fontFamily = caviarDreamsFamily,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -431,6 +377,59 @@ fun ProductDetailsItem(
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
+                    }
+                }
+                else -> {
+                    // Handle other product types if any
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            when (productType) {
+                BillingClient.ProductType.SUBS -> {
+                    OutlinedButton(
+                        onClick = { showDialog = true },
+                        enabled = isSubscription
+                    ) {
+                        Text(
+                            "Cancel",
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            billingManager.launchSubscriptionPurchaseFlow(productDetails)
+                        },
+                        enabled = !isSubscription,
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                    ) {
+                        Text(
+                            "Subscribe",
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                BillingClient.ProductType.INAPP -> {
+                    Button(
+                        onClick = {
+                            billingManager.launchOneTimePurchaseFlow(productDetails)
+                        },
+                        enabled = !isOneTimePurchase,
+                        modifier = Modifier
+                    ) {
+                        Text(
+                            "Purchase",
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
                 else -> {

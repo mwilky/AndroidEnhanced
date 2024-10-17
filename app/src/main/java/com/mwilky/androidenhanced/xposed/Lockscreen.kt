@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.view.View
 import android.widget.FrameLayout
 import com.mwilky.androidenhanced.HookedClasses.Companion.CENTRAL_SURFACES_COMMAND_QUEUE_CALLBACKS_CLASS
@@ -138,17 +139,6 @@ class Lockscreen {
                 "com.android.systemui.qs.QSFooterView$\$ExternalSyntheticLambda0", classLoader
             )
 
-            //Disable power menu lockscreen
-            val iconButtonViewHolder = findClass(
-                "com.android.systemui.qs.footer.ui.binder.IconButtonViewHolder", classLoader
-            )
-
-            //Disable power menu lockscreen
-            val footerActionsButtonViewModel = findClass(
-                "com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel",
-                classLoader
-            )
-
             //Scramble Keypad
             hookAllConstructors(numPadKeyClass, object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
@@ -202,6 +192,7 @@ class Lockscreen {
                 })
 
             //Disable power menu lockscreen
+            //TODO: this hasnt worked for a while, need to fix
             findAndHookMethod(CENTRAL_SURFACES_IMPL_CLASS,
                 classLoader,
                 "updateIsKeyguard",
@@ -222,29 +213,6 @@ class Lockscreen {
                                 (PowerMenuButton as View).visibility = View.GONE
                             }
                         }
-                    }
-                })
-
-            //Disable power menu lockscreen
-            findAndHookMethod(FOOTER_ACTIONS_VIEW_BINDER_CLASS,
-                classLoader,
-                "bindButton",
-                iconButtonViewHolder,
-                footerActionsButtonViewModel,
-                object : XC_MethodHook() {
-                    @SuppressLint("DiscouragedApi")
-                    override fun afterHookedMethod(param: MethodHookParam) {
-
-                        val view = getObjectField(param.args[0], "view") as View
-                        val context = view.context
-
-                        //Get the power menu button ID
-                        val pmLite = context.resources.getIdentifier(
-                            "pm_lite", "id", "com.android.systemui"
-                        )
-                        //Set power Menu Button so we can toggle the visibility in setKeyguardShowingHook
-                        if (view.id == pmLite) PowerMenuButton = view
-
                     }
                 })
 
@@ -331,12 +299,18 @@ class Lockscreen {
                         val mRemoteInputQuickSettingsDisabler =
                             getObjectField(param.thisObject, "mRemoteInputQuickSettingsDisabler")
                         val mCentralSurfaces = getObjectField(param.thisObject, "mCentralSurfaces")
+
+
+                        val mShadeHeaderController =
+                            if (Build.VERSION.SDK_INT >= 35) {
+                                getObjectField(param.thisObject, "mShadeHeaderController")
+                            } else {
+                                val mShadeViewController = getObjectField(param.thisObject, "mShadeViewController")
+                                getObjectField(mShadeViewController, "mShadeHeaderController")
+                            }
+
                         val mShadeController = getObjectField(param.thisObject, "mShadeController")
                         val mHeadsUpManager = getObjectField(param.thisObject, "mHeadsUpManager")
-                        val mShadeViewController =
-                            getObjectField(param.thisObject, "mShadeViewController")
-                        val mShadeHeaderController =
-                            getObjectField(mShadeViewController, "mShadeHeaderController")
                         val mKeyguardStateController =
                             getObjectField(param.thisObject, "mKeyguardStateController")
 

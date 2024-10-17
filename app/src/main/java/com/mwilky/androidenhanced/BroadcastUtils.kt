@@ -73,6 +73,7 @@ import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
 import com.mwilky.androidenhanced.Utils.Companion.dualToneQsPanel
 import com.mwilky.androidenhanced.Utils.Companion.expandAllNotifications
 import com.mwilky.androidenhanced.Utils.Companion.gestureSleep
+import com.mwilky.androidenhanced.Utils.Companion.getIconColorForSlotName
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedAlarmIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedCallStrengthIcon
 import com.mwilky.androidenhanced.Utils.Companion.hideCollapsedVolumeIcon
@@ -82,6 +83,9 @@ import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
 import com.mwilky.androidenhanced.Utils.Companion.lockDevice
 import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.mIsInitialBoot
+import com.mwilky.androidenhanced.Utils.Companion.mLsStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.Utils.Companion.mQsStatusbarIconUseAccentColor
+import com.mwilky.androidenhanced.Utils.Companion.mStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.notifSectionHeaders
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
@@ -110,20 +114,16 @@ import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.useDualStatusbarColors
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
-import com.mwilky.androidenhanced.Utils.Companion.getIconColorForSlotName
-import com.mwilky.androidenhanced.Utils.Companion.mLsStatusbarIconUseAccentColor
-import com.mwilky.androidenhanced.Utils.Companion.mQsStatusbarIconUseAccentColor
-import com.mwilky.androidenhanced.Utils.Companion.mStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mBlockCameraGestureWhenLockedEnabled
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mDoubleTapSleepLauncherEnabled
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mTorchPowerScreenOff
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.mVolKeyMedia
 import com.mwilky.androidenhanced.xposed.Buttons.Companion.updateSupportLongPressPowerWhenNonInteractive
-import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mHideLockscreenStatusbarEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.KeyguardStatusBarView
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenPowerMenuEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mDisableLockscreenQuicksettingsEnabled
+import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mHideLockscreenStatusbarEnabled
 import com.mwilky.androidenhanced.xposed.Lockscreen.Companion.mScrambleKeypadEnabled
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mAllowAllRotations
 import com.mwilky.androidenhanced.xposed.Misc.Companion.mDisableSecureScreenshots
@@ -190,7 +190,7 @@ import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.setAdditionalStaticField
 import de.robv.android.xposed.XposedHelpers.setBooleanField
 
-class BroadcastUtils: BroadcastReceiver() {
+class BroadcastUtils : BroadcastReceiver() {
     companion object {
 
         const val PREFS = "prefs"
@@ -250,8 +250,7 @@ class BroadcastUtils: BroadcastReceiver() {
                             mStatusbarClockSecondsEnabled = value as Boolean
                             callMethod(clock, "updateShowSeconds")
                             callMethod(
-                                getObjectField(ShadeHeaderController, "clock"),
-                                "updateShowSeconds"
+                                getObjectField(ShadeHeaderController, "clock"), "updateShowSeconds"
                             )
                         }
                         //Hide lockscreen statusbar
@@ -260,23 +259,23 @@ class BroadcastUtils: BroadcastReceiver() {
                             callMethod(KeyguardStatusBarView, "updateVisibilities")
                         }
                         //Scramble Keypad
-                        scrambleKeypad-> {
+                        scrambleKeypad -> {
                             mScrambleKeypadEnabled = value as Boolean
                         }
                         //Disable power menu on lockscreen
-                        disableLockscreenPowerMenu-> {
+                        disableLockscreenPowerMenu -> {
                             mDisableLockscreenPowerMenuEnabled = value as Boolean
                         }
                         //Qs tile click vibration
-                        qsTileVibration-> {
+                        qsTileVibration -> {
                             mClickVibrationEnabled = value as Boolean
                         }
                         //Disable QS on lockscreen
-                        disableQsLockscreen-> {
+                        disableQsLockscreen -> {
                             mDisableLockscreenQuicksettingsEnabled = value as Boolean
                         }
                         //Hide QS footer build number
-                        hideQsFooterBuildNumber-> {
+                        hideQsFooterBuildNumber -> {
                             mHideQSFooterBuildNumberEnabled = value as Boolean
                             callMethod(QSFooterView, "setBuildText")
                         }
@@ -303,280 +302,356 @@ class BroadcastUtils: BroadcastReceiver() {
                             Quicksettings.mQsStyleConfig = value
                             updateQuicksettings()
                         }
+
                         qsColumns -> {
-                            mQsColumnsConfig= value as Int
+                            mQsColumnsConfig = value as Int
                             updateQuicksettings()
                         }
+
                         qsRows -> {
-                            mQsRowsConfig= value as Int
+                            mQsRowsConfig = value as Int
                             updateQuicksettings()
                         }
+
                         qqsRows -> {
-                            mQQsRowsConfig= value as Int
+                            mQQsRowsConfig = value as Int
                             updateQuicksettings()
                         }
+
                         qsBrightnessSliderPosition -> {
                             mQsBrightnessSliderPositionConfig = value as Int
                             QuicksettingsPremium.mQsBrightnessSliderPositionConfig = value
                             updateQuicksettings()
 
                         }
+
                         qqsBrightnessSlider -> {
-                            mQQsBrightnessSliderEnabled= value as Boolean
-                            QuicksettingsPremium.mQQsBrightnessSliderEnabled= value
+                            mQQsBrightnessSliderEnabled = value as Boolean
+                            QuicksettingsPremium.mQQsBrightnessSliderEnabled = value
                             updateQuicksettings()
                         }
+
                         customStatusbarClockColor -> {
                             StatusbarPremium.mStatusbarClockColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarBatteryIconColor -> {
                             StatusbarPremium.mStatusbarBatteryIconColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarBatteryPercentColor -> {
                             StatusbarPremium.mStatusbarBatteryPercentColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarWifiIconColor -> {
                             StatusbarPremium.mStatusbarWifiColor = value as Int
                             updateStatusbarIconColors()
 
                         }
+
                         customStatusbarMobileIconColor -> {
                             StatusbarPremium.mStatusbarMobileColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarNotificationIconColor -> {
                             StatusbarPremium.mStatusbarNotificationColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarOtherIconColor -> {
                             StatusbarPremium.mStatusbarIconColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarDndIconColor -> {
                             StatusbarPremium.mStatusbarDndColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarAirplaneIconColor -> {
                             StatusbarPremium.mStatusbarAirplaneColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarHotspotIconColor -> {
                             StatusbarPremium.mStatusbarHotspotColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarBluetoothIconColor -> {
                             StatusbarPremium.mStatusbarBluetoothColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customStatusbarGlobalIconColor -> {
                             StatusbarPremium.mStatusbarGlobalColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarGlobalIconColor -> {
                             StatusbarPremium.mQsStatusbarGlobalColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarGlobalIconColor -> {
                             StatusbarPremium.mLsStatusbarGlobalColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarClockColor -> {
                             StatusbarPremium.mQsStatusbarClockColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarBatteryIconColor -> {
                             StatusbarPremium.mQsStatusbarBatteryIconColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarBatteryPercentColor -> {
                             StatusbarPremium.mQsStatusbarBatteryPercentColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarWifiIconColor -> {
                             StatusbarPremium.mQsStatusbarWifiColor = value as Int
                             updateStatusbarIconColors()
 
                         }
+
                         customQsStatusbarCarrierColor -> {
                             StatusbarPremium.mQsStatusbarCarrierColor = value as Int
                             updateStatusbarIconColors()
 
                         }
+
                         customQsStatusbarDateColor -> {
                             StatusbarPremium.mQsStatusbarDateColor = value as Int
                             updateStatusbarIconColors()
 
                         }
+
                         customQsStatusbarMobileIconColor -> {
                             StatusbarPremium.mQsStatusbarMobileColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarOtherIconColor -> {
                             StatusbarPremium.mQsStatusbarIconColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarDndIconColor -> {
                             StatusbarPremium.mQsStatusbarDndColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarAirplaneIconColor -> {
                             StatusbarPremium.mQsStatusbarAirplaneColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarHotspotIconColor -> {
                             StatusbarPremium.mQsStatusbarHotspotColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customQsStatusbarBluetoothIconColor -> {
                             StatusbarPremium.mQsStatusbarBluetoothColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarBatteryIconColor -> {
                             StatusbarPremium.mLsStatusbarBatteryIconColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarBatteryPercentColor -> {
                             StatusbarPremium.mLsStatusbarBatteryPercentColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarWifiIconColor -> {
                             StatusbarPremium.mLsStatusbarWifiColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarMobileIconColor -> {
                             StatusbarPremium.mLsStatusbarMobileColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarOtherIconColor -> {
                             StatusbarPremium.mLsStatusbarIconColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarDndIconColor -> {
                             StatusbarPremium.mLsStatusbarDndColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarAirplaneIconColor -> {
                             StatusbarPremium.mLsStatusbarAirplaneColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarHotspotIconColor -> {
                             StatusbarPremium.mLsStatusbarHotspotColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarBluetoothIconColor -> {
                             StatusbarPremium.mLsStatusbarBluetoothColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         customLsStatusbarCarrierColor -> {
                             StatusbarPremium.mLsStatusbarCarrierColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         hideCollapsedAlarmIcon -> {
                             mHideCollapsedAlarmEnabled = value as Boolean
                             callMethod(
                                 Statusbar.collapsedStatusBarFragment, "updateBlockedIcons"
                             )
                         }
+
                         hideCollapsedVolumeIcon -> {
                             mHideCollapsedVolumeEnabled = value as Boolean
                             callMethod(
                                 Statusbar.collapsedStatusBarFragment, "updateBlockedIcons"
                             )
                         }
+
                         hideCollapsedCallStrengthIcon -> {
                             mHideCollapsedCallStrengthEnabled = value as Boolean
                             callMethod(
                                 Statusbar.collapsedStatusBarFragment, "updateBlockedIcons"
                             )
                         }
+
                         qsColumnsLandscape -> {
                             mQsColumnsConfigLandscape = value as Int
                             updateQuicksettings()
                         }
+
                         qqsColumns -> {
                             mQQsColumnsConfig = value as Int
                             updateQuicksettings()
                         }
+
                         qqsColumnsLandscape -> {
                             mQQsColumnsConfigLandscape = value as Int
                             updateQuicksettings()
                         }
+
                         iconBlacklist -> {
                             Utils.setIconBlacklist(mContext, value as String)
                             mIsInitialBoot = false
 
                         }
+
                         statusbarIconAccentColor -> {
                             mStatusbarIconUseAccentColor = value as Boolean
                             updateStatusbarIconColors()
 
                         }
+
                         qsStatusbarIconAccentColor -> {
                             mQsStatusbarIconUseAccentColor = value as Boolean
                             updateStatusbarIconColors()
 
                         }
+
                         lsStatusbarIconAccentColor -> {
                             mLsStatusbarIconUseAccentColor = value as Boolean
                             updateStatusbarIconColors()
 
                         }
+
                         qsIconContainerActiveShape -> {
                             QuicksettingsPremium.mQsIconContainerActiveShapeConfig = value as Int
                             updateQuicksettings()
                         }
+
                         qsIconContainerInactiveShape -> {
                             QuicksettingsPremium.mQsIconContainerInactiveShapeConfig = value as Int
                             updateQuicksettings()
                         }
+
                         qsIconContainerUnavailableShape -> {
-                            QuicksettingsPremium.mQsIconContainerUnavailableShapeConfig = value as Int
+                            QuicksettingsPremium.mQsIconContainerUnavailableShapeConfig =
+                                value as Int
                             updateQuicksettings()
                         }
+
                         autoExpandFirstNotif -> {
                             Notifications.mAutoExpandFirstNotificationEnabled = value as Boolean
-                            mRowAppearanceCoordinatorAttach2?.let { updateFirstNotificationExpansion(it) }
+                            mRowAppearanceCoordinatorAttach2?.let {
+                                updateFirstNotificationExpansion(
+                                    it
+                                )
+                            }
 
                         }
+
                         notifSectionHeaders -> {
                             mNotificationSectionHeadersEnabled = value as Boolean
                             mKeyguardCoordinator?.let { updateNotificationSectionHeaders(it) }
                         }
+
                         gestureSleep -> {
                             lockDevice(mContext)
                         }
+
                         doubleTapToSleepLauncher -> {
-                            val sharedPreferences = mContext.createDeviceProtectedStorageContext().getSharedPreferences(PREFS, MODE_PRIVATE)
+                            val sharedPreferences = mContext.createDeviceProtectedStorageContext()
+                                .getSharedPreferences(PREFS, MODE_PRIVATE)
                             sharedPreferences.edit().putBoolean(key, value as Boolean).apply()
                             mDoubleTapSleepLauncherEnabled = value as Boolean
                         }
+
                         statusbarIconDarkColor -> {
                             StatusbarPremium.mStatusbarDarkIconColor = value as Int
                             updateStatusbarIconColors()
                         }
+
                         useDualStatusbarColors -> {
                             StatusbarPremium.mDualStatusbarColorsEnabled = value as Boolean
                             updateStatusbarIconColors()
                         }
+
                         dualToneQsPanel -> {
                             mDualColorQsPanelEnabled = value as Boolean
                             Quicksettings.mDualColorQsPanelEnabled = value as Boolean
                             updateQuicksettings()
                             toggleFontScale()
                         }
+
                         BOOTCOMPLETED -> {
-                            setAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs", true)
+                            setAdditionalStaticField(
+                                findClass(
+                                    SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader
+                                ), "mSentAllBootPrefs", true
+                            )
                             updateSystemUiTweaks()
                         }
+
                         disableCameraScreenOff -> {
                             mBlockCameraGestureWhenLockedEnabled = value as Boolean
                         }
+
                         UNSUPPORTEDDEVICEENABLED -> {
-                            val sharedPrefs = mContext.createDeviceProtectedStorageContext().getSharedPreferences(PREFS, MODE_PRIVATE)
-                            sharedPrefs.edit().putBoolean(UNSUPPORTEDDEVICEENABLED, value as Boolean).apply()
+                            val sharedPrefs = mContext.createDeviceProtectedStorageContext()
+                                .getSharedPreferences(PREFS, MODE_PRIVATE)
+                            sharedPrefs.edit()
+                                .putBoolean(UNSUPPORTEDDEVICEENABLED, value as Boolean).apply()
 
                         }
                     }
@@ -592,9 +667,7 @@ class BroadcastUtils: BroadcastReceiver() {
         //This sends the broadcast containing the keys and values from the tweaks app to the hooked
         // processes.
         fun <T> sendBroadcast(
-            context: Context,
-            key: String,
-            value: T
+            context: Context, key: String, value: T
         ) {
             Intent().also { intent ->
                 intent.action = key
@@ -607,11 +680,9 @@ class BroadcastUtils: BroadcastReceiver() {
                 context.sendBroadcast(intent)
             }
 
-            LogManager.log(
-                "BroadcastUtils",
-                "Broadcast sent: " +
-                        "$key${value?.toString()?.takeIf { it.isNotEmpty() }?.let { " = $it" } ?: ""}"
-            )
+            LogManager.log("BroadcastUtils", "Broadcast sent: " + "$key${
+                value?.toString()?.takeIf { it.isNotEmpty() }?.let { " = $it" } ?: ""
+            }")
         }
 
         fun updateSystemUiTweaks() {
@@ -634,10 +705,13 @@ class BroadcastUtils: BroadcastReceiver() {
 
             val mContext = getApplicationContext() ?: return
 
-            val sentAllBootPrefs = getAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs") as Boolean
+            val sentAllBootPrefs = getAdditionalStaticField(
+                findClass(
+                    SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader
+                ), "mSentAllBootPrefs"
+            ) as Boolean
 
-            if (!sentAllBootPrefs)
-                return
+            if (!sentAllBootPrefs) return
 
             setBooleanField(
                 mRowAppearanceCoordinator,
@@ -646,20 +720,16 @@ class BroadcastUtils: BroadcastReceiver() {
             )
 
             val notificationEntries = getObjectField(
-                mNotifCollection,
-                "mReadOnlyNotificationSet"
+                mNotifCollection, "mReadOnlyNotificationSet"
             ) as Collection<Any?>
 
             for (notificationEntry in notificationEntries.toTypedArray()) {
-                val expandableNotifictionRowController =
-                    getObjectField(
-                        notificationEntry,
-                        "mRowController"
-                    )
+                val expandableNotifictionRowController = getObjectField(
+                    notificationEntry, "mRowController"
+                )
                 if (expandableNotifictionRowController != null) {
                     val expandableNotifictionRow = getObjectField(
-                        expandableNotifictionRowController,
-                        "mView"
+                        expandableNotifictionRowController, "mView"
                     )
                     if (expandableNotifictionRow != null) {
                         callMethod(
@@ -677,10 +747,13 @@ class BroadcastUtils: BroadcastReceiver() {
 
             val mContext = getApplicationContext() ?: return
 
-            val sentAllBootPrefs = getAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs") as Boolean
+            val sentAllBootPrefs = getAdditionalStaticField(
+                findClass(
+                    SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader
+                ), "mSentAllBootPrefs"
+            ) as Boolean
 
-            if (!sentAllBootPrefs)
-                return
+            if (!sentAllBootPrefs) return
 
             val rowAppearanceCoordinator =
                 getObjectField(mRowAppearanceCoordinatorAttach2, "\$tmp0")
@@ -689,8 +762,7 @@ class BroadcastUtils: BroadcastReceiver() {
                 getBooleanField(rowAppearanceCoordinator, "mAlwaysExpandNonGroupedNotification")
 
             val notificationEntries = getObjectField(
-                mNotifCollection,
-                "mReadOnlyNotificationSet"
+                mNotifCollection, "mReadOnlyNotificationSet"
             ) as Collection<Any?>
 
             val entryToExpand = getObjectField(rowAppearanceCoordinator, "entryToExpand")
@@ -712,33 +784,23 @@ class BroadcastUtils: BroadcastReceiver() {
                             val isSystemExpanded =
                                 getBooleanField(expandableNotificationRow, "mIsSystemExpanded")
 
-                            val shouldWeExpand = (
-                                    mAlwaysExpandNonGroupedNotification
-                                            || (mAutoExpandFirstNotificationEnabled &&
-                                            notificationEntry == entryToExpand)
-                                    )
+                            val shouldWeExpand =
+                                (mAlwaysExpandNonGroupedNotification || (mAutoExpandFirstNotificationEnabled && notificationEntry == entryToExpand))
 
                             // If there is a difference between if the notification is expanded
                             // and whether it should be or not, then set the opposite
                             if (shouldWeExpand != isSystemExpanded) {
 
-                                val isExpanded =
-                                    callMethod(
-                                        expandableNotificationRow,
-                                        "isExpanded",
-                                        false
-                                    )
+                                val isExpanded = callMethod(
+                                    expandableNotificationRow, "isExpanded", false
+                                )
 
                                 setBooleanField(
-                                    expandableNotificationRow ,
-                                    "mIsSystemExpanded",
-                                    shouldWeExpand
+                                    expandableNotificationRow, "mIsSystemExpanded", shouldWeExpand
                                 )
 
                                 callMethod(
-                                    expandableNotificationRow,
-                                    "notifyHeightChanged",
-                                    false
+                                    expandableNotificationRow, "notifyHeightChanged", false
                                 )
 
                                 callMethod(
@@ -748,19 +810,15 @@ class BroadcastUtils: BroadcastReceiver() {
                                     isExpanded
                                 )
 
-                                val mIsSummaryWithChildren =
-                                    getBooleanField(
-                                        expandableNotificationRow,
-                                        "mIsSummaryWithChildren"
-                                    )
+                                val mIsSummaryWithChildren = getBooleanField(
+                                    expandableNotificationRow, "mIsSummaryWithChildren"
+                                )
 
                                 if (mIsSummaryWithChildren) {
 
-                                    val mChildrenContainer =
-                                        getObjectField(
-                                            expandableNotificationRow,
-                                            "mChildrenContainer"
-                                        )
+                                    val mChildrenContainer = getObjectField(
+                                        expandableNotificationRow, "mChildrenContainer"
+                                    )
 
                                     callMethod(mChildrenContainer, "updateGroupOverflow")
                                     callMethod(mChildrenContainer, "updateExpansionStates")
@@ -768,8 +826,9 @@ class BroadcastUtils: BroadcastReceiver() {
                                 }
                             }
 
-                            val mAssistantFeedbackController =
-                                getObjectField(rowAppearanceCoordinator, "mAssistantFeedbackController")
+                            val mAssistantFeedbackController = getObjectField(
+                                rowAppearanceCoordinator, "mAssistantFeedbackController"
+                            )
 
                             val feedbackIcon = callMethod(
                                 getObjectField(mAssistantFeedbackController, "mIcons"),
@@ -788,77 +847,75 @@ class BroadcastUtils: BroadcastReceiver() {
                                 val mChildrenContainer =
                                     getObjectField(expandableNotificationRow, "mChildrenContainer")
 
-                                val mNotificationHeaderWrapper =
-                                    getObjectField(mChildrenContainer, "mNotificationHeaderWrapper")
+                                val mGroupHeaderWrapper =
+                                    getObjectField(mChildrenContainer, "mGroupHeaderWrapper")
 
-                                if (mNotificationHeaderWrapper != null)
-                                    callMethod(
-                                        mNotificationHeaderWrapper,
-                                        "setFeedbackIcon",
-                                        feedbackIcon
-                                    )
+                                if (mGroupHeaderWrapper != null) callMethod(
+                                    mGroupHeaderWrapper, "setFeedbackIcon", feedbackIcon
+                                )
 
-                                val mNotificationHeaderWrapperLowPriority =
-                                    getObjectField(
-                                        mChildrenContainer,
-                                        "mNotificationHeaderWrapperLowPriority"
-                                    )
+                                val mMinimizedGroupHeaderWrapper = getObjectField(
+                                    mChildrenContainer, "mMinimizedGroupHeaderWrapper"
+                                )
 
-                                if (mNotificationHeaderWrapperLowPriority != null)
-                                    callMethod(
-                                        mNotificationHeaderWrapperLowPriority,
-                                        "setFeedbackIcon",
-                                        feedbackIcon
-                                    )
+                                if (mMinimizedGroupHeaderWrapper != null) callMethod(
+                                    mMinimizedGroupHeaderWrapper, "setFeedbackIcon", feedbackIcon
+                                )
                             }
 
                             val mPrivateLayout =
                                 getObjectField(expandableNotificationRow, "mPrivateLayout")
 
-                            if (getObjectField(mPrivateLayout, "mContractedChild") != null)
-                                callMethod(
-                                    getObjectField(mPrivateLayout, "mContractedWrapper"),
-                                    "setFeedbackIcon",
-                                    feedbackIcon
-                                )
+                            if (getObjectField(
+                                    mPrivateLayout,
+                                    "mContractedChild"
+                                ) != null
+                            ) callMethod(
+                                getObjectField(mPrivateLayout, "mContractedWrapper"),
+                                "setFeedbackIcon",
+                                feedbackIcon
+                            )
 
-                            if (getObjectField(mPrivateLayout, "mExpandedChild") != null)
-                                callMethod(
-                                    getObjectField(mPrivateLayout, "mExpandedWrapper"),
-                                    "setFeedbackIcon",
-                                    feedbackIcon
-                                )
+                            if (getObjectField(
+                                    mPrivateLayout,
+                                    "mExpandedChild"
+                                ) != null
+                            ) callMethod(
+                                getObjectField(mPrivateLayout, "mExpandedWrapper"),
+                                "setFeedbackIcon",
+                                feedbackIcon
+                            )
 
-                            if (getObjectField(mPrivateLayout, "mHeadsUpChild") != null)
-                                callMethod(
-                                    getObjectField(mPrivateLayout, "mHeadsUpWrapper"),
-                                    "setFeedbackIcon",
-                                    feedbackIcon
-                                )
+                            if (getObjectField(mPrivateLayout, "mHeadsUpChild") != null) callMethod(
+                                getObjectField(mPrivateLayout, "mHeadsUpWrapper"),
+                                "setFeedbackIcon",
+                                feedbackIcon
+                            )
 
                             val mPublicLayout =
                                 getObjectField(expandableNotificationRow, "mPublicLayout")
 
-                            if (getObjectField(mPublicLayout, "mContractedChild") != null)
-                                callMethod(
-                                    getObjectField(mPublicLayout, "mContractedWrapper"),
-                                    "setFeedbackIcon",
-                                    feedbackIcon
-                                )
+                            if (getObjectField(
+                                    mPublicLayout,
+                                    "mContractedChild"
+                                ) != null
+                            ) callMethod(
+                                getObjectField(mPublicLayout, "mContractedWrapper"),
+                                "setFeedbackIcon",
+                                feedbackIcon
+                            )
 
-                            if (getObjectField(mPublicLayout, "mExpandedChild") != null)
-                                callMethod(
-                                    getObjectField(mPublicLayout, "mExpandedWrapper"),
-                                    "setFeedbackIcon",
-                                    feedbackIcon
-                                )
+                            if (getObjectField(mPublicLayout, "mExpandedChild") != null) callMethod(
+                                getObjectField(mPublicLayout, "mExpandedWrapper"),
+                                "setFeedbackIcon",
+                                feedbackIcon
+                            )
 
-                            if (getObjectField(mPublicLayout, "mHeadsUpChild") != null)
-                                callMethod(
-                                    getObjectField(mPublicLayout, "mHeadsUpWrapper"),
-                                    "setFeedbackIcon",
-                                    feedbackIcon
-                                )
+                            if (getObjectField(mPublicLayout, "mHeadsUpChild") != null) callMethod(
+                                getObjectField(mPublicLayout, "mHeadsUpWrapper"),
+                                "setFeedbackIcon",
+                                feedbackIcon
+                            )
                         }
                     }
                 }
@@ -870,30 +927,39 @@ class BroadcastUtils: BroadcastReceiver() {
 
             val mContext = getApplicationContext() ?: return
 
-            val sentAllBootPrefs = getAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs") as Boolean
+            val sentAllBootPrefs = getAdditionalStaticField(
+                findClass(
+                    SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader
+                ), "mSentAllBootPrefs"
+            ) as Boolean
 
-            if (!sentAllBootPrefs)
-                return
+            if (!sentAllBootPrefs) return
 
             var state = callMethod(
-                getObjectField(mKeyguardCoordinator, "statusBarStateController"),
-                "getState"
+                getObjectField(mKeyguardCoordinator, "statusBarStateController"), "getState"
             )
 
             // If in normal shade view then hide the headers if required
             if (state == 0) {
 
-                val sectionHeaderVisibilityProvider = getObjectField(mKeyguardCoordinator, "sectionHeaderVisibilityProvider")
-                val neverShowSectionHeaders = getBooleanField(sectionHeaderVisibilityProvider, "neverShowSectionHeaders")
+                val sectionHeaderVisibilityProvider =
+                    getObjectField(mKeyguardCoordinator, "sectionHeaderVisibilityProvider")
+                val neverShowSectionHeaders =
+                    getBooleanField(sectionHeaderVisibilityProvider, "neverShowSectionHeaders")
 
                 // If we arent always hiding headers then set according to tweak value
                 if (!neverShowSectionHeaders) {
 
-                    val areSectionHeadersVisible = getBooleanField(sectionHeaderVisibilityProvider, "sectionHeadersVisible")
+                    val areSectionHeadersVisible =
+                        getBooleanField(sectionHeaderVisibilityProvider, "sectionHeadersVisible")
 
                     if (areSectionHeadersVisible != mNotificationSectionHeadersEnabled) {
 
-                        setBooleanField(sectionHeaderVisibilityProvider, "sectionHeadersVisible", mNotificationSectionHeadersEnabled)
+                        setBooleanField(
+                            sectionHeaderVisibilityProvider,
+                            "sectionHeadersVisible",
+                            mNotificationSectionHeadersEnabled
+                        )
                         callMethod(
                             getObjectField(mKeyguardCoordinator, "notifFilter"),
                             "invalidateList",
@@ -909,56 +975,49 @@ class BroadcastUtils: BroadcastReceiver() {
 
             val mContext = getApplicationContext() ?: return
 
-            val sentAllBootPrefs = getAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs") as Boolean
+            val sentAllBootPrefs = getAdditionalStaticField(
+                findClass(
+                    SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader
+                ), "mSentAllBootPrefs"
+            ) as Boolean
 
-            if (!sentAllBootPrefs)
-                return
+            if (!sentAllBootPrefs) return
 
             // Sets color of the qs build text in light and dark mode
             callMethod(QSFooterView, "setBuildText")
 
             callMethod(
-                Quicksettings.QSPanel,
-                "onConfigurationChanged",
+                Quicksettings.QSPanel, "onConfigurationChanged", mContext.resources.configuration
+            )
+
+            callMethod(
+                QuicksettingsPremium.QSPanelController, "onConfigurationChanged"
+            )
+
+            callMethod(
+                QuicksettingsPremium.QuickQSPanelController, "onConfigurationChanged"
+            )
+
+            callMethod(
+                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout,
+                "" + "onConfigurationChanged",
                 mContext.resources.configuration
             )
 
             callMethod(
-                QuicksettingsPremium.QSPanelController,
-                "onConfigurationChanged"
+                QuicksettingsPremium.QSPanelControllerBase, "onConfigurationChanged"
             )
 
             callMethod(
-                QuicksettingsPremium.QuickQSPanelController,
-                "onConfigurationChanged"
+                QSTileViewImpl, "onConfigurationChanged", mContext.resources.configuration
             )
 
             callMethod(
-                QuicksettingsPremium.QuickQSPanelQQSSideLabelTileLayout, "" +
-                        "onConfigurationChanged",
-                mContext.resources.configuration
+                mQsCustomizerController3, "onConfigChanged", mContext.resources.configuration
             )
 
             callMethod(
-                QuicksettingsPremium.QSPanelControllerBase,
-                "onConfigurationChanged"
-            )
-
-            callMethod(
-                QSTileViewImpl,
-                "onConfigurationChanged",
-                mContext.resources.configuration
-            )
-
-            callMethod(
-                mQsCustomizerController3,
-                "onConfigChanged",
-                mContext.resources.configuration
-            )
-
-            callMethod(
-                QuicksettingsPremium.QSPanelController,
-                "refreshAllTiles"
+                QuicksettingsPremium.QSPanelController, "refreshAllTiles"
             )
 
             val firstTile = tileList.first()
@@ -967,9 +1026,9 @@ class BroadcastUtils: BroadcastReceiver() {
 
             callMethod(CurrentTilesInteractorImpl, "removeTiles", listOf(lastTile, firstTile))
 
-            callMethod(CurrentTilesInteractorImpl, "addTile",Integer.MAX_VALUE, lastTile)
+            callMethod(CurrentTilesInteractorImpl, "addTile", Integer.MAX_VALUE, lastTile)
 
-            callMethod(CurrentTilesInteractorImpl, "addTile",0, firstTile)
+            callMethod(CurrentTilesInteractorImpl, "addTile", 0, firstTile)
 
             callMethod(Quicksettings.QuickQSPanelController, "switchTileLayout", true)
 
@@ -979,19 +1038,14 @@ class BroadcastUtils: BroadcastReceiver() {
 
             callMethod(PagedTileLayout, "requestLayout")
 
-            val mView =
-                getObjectField(Quicksettings.QSPanelController, "mView")
-                        as ViewGroup
-            val mBrightnessView = getObjectField(mView, "mBrightnessView")
-                    as View
+            val mView = getObjectField(Quicksettings.QSPanelController, "mView") as ViewGroup
+            val mBrightnessView = getObjectField(mView, "mBrightnessView") as View
 
             setBrightnessView(mView, mBrightnessView)
 
             val mQQsView =
-                getObjectField(Quicksettings.QuickQSPanelController, "mView")
-                        as ViewGroup
-            val mQQsBrightnessView = getObjectField(mQQsView, "mBrightnessView")
-                    as View
+                getObjectField(Quicksettings.QuickQSPanelController, "mView") as ViewGroup
+            val mQQsBrightnessView = getObjectField(mQQsView, "mBrightnessView") as View
 
             setBrightnessView(mQQsView, mQQsBrightnessView)
 
@@ -1004,10 +1058,13 @@ class BroadcastUtils: BroadcastReceiver() {
 
             val mContext = getApplicationContext() ?: return
 
-            val sentAllBootPrefs = getAdditionalStaticField(findClass(SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader), "mSentAllBootPrefs") as Boolean
+            val sentAllBootPrefs = getAdditionalStaticField(
+                findClass(
+                    SYSTEM_UI_APPLICATION_CLASS, mContext.classLoader
+                ), "mSentAllBootPrefs"
+            ) as Boolean
 
-            if (!sentAllBootPrefs)
-                return
+            if (!sentAllBootPrefs) return
 
             // Home icons
             StatusbarPremium.setStatusbarIconColorsOnBoot(mContext)
@@ -1023,10 +1080,7 @@ class BroadcastUtils: BroadcastReceiver() {
 
             // QS icons
             callMethod(
-                getObjectField(ShadeHeaderController, "iconManager"),
-                "setTint",
-                -1,
-                -1
+                getObjectField(ShadeHeaderController, "iconManager"), "setTint", -1, -1
             )
 
             updateBatteryIconColors(getObjectField(ShadeHeaderController, "batteryIcon"), "QS")
@@ -1046,15 +1100,13 @@ class BroadcastUtils: BroadcastReceiver() {
         val bootCompleted: Boolean
         val action = intent.action
         Log.i(
-            TAG, "Received action: $action, user unlocked: " + UserManagerCompat
-                .isUserUnlocked(context)
+            TAG,
+            "Received action: $action, user unlocked: " + UserManagerCompat.isUserUnlocked(context)
         )
 
-        bootCompleted =
-            Intent.ACTION_LOCKED_BOOT_COMPLETED == action
+        bootCompleted = Intent.ACTION_LOCKED_BOOT_COMPLETED == action
 
-        if (!bootCompleted)
-            return
+        if (!bootCompleted) return
 
         //Send the preferences and their values via broadcast
         val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
@@ -1069,7 +1121,16 @@ class BroadcastUtils: BroadcastReceiver() {
         LogManager.clearLogs()
 
         // Exclude none tweak related keys
-        val keysToExclude = setOf(LASTBACKUP, ISONBOARDINGCOMPLETEDKEY, LOGSKEY, ISPREMIUM, UNSUPPORTEDDEVICEDIALOGSHOWN, BOOTTIME, ISONETIMEPURCHASE, ISSUBSCRIPTION)
+        val keysToExclude = setOf(
+            LASTBACKUP,
+            ISONBOARDINGCOMPLETEDKEY,
+            LOGSKEY,
+            ISPREMIUM,
+            UNSUPPORTEDDEVICEDIALOGSHOWN,
+            BOOTTIME,
+            ISONETIMEPURCHASE,
+            ISSUBSCRIPTION
+        )
 
         val bootPrefs = sharedPreferences.all.filterKeys { it !in keysToExclude }
 
@@ -1080,8 +1141,7 @@ class BroadcastUtils: BroadcastReceiver() {
 
         // Reset premium tweaks if not subscribed
         val isPremium = sharedPreferences.getBoolean(ISPREMIUM, false)
-        if (!isPremium)
-            resetPremiumTweaks(context)
+        if (!isPremium) resetPremiumTweaks(context)
 
         LogManager.log("BroadcastUtils", "Applied all settings at boot")
         // Send boot complete broadcast so we update SystemUI at once rather than per each key

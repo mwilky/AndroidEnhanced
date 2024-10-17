@@ -7,7 +7,9 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.os.Build
 import android.os.Handler
+import android.os.Message
 import android.os.VibrationEffect
 import android.os.VibrationEffect.EFFECT_CLICK
 import android.provider.Settings
@@ -27,6 +29,7 @@ import com.mwilky.androidenhanced.HookedClasses.Companion.BRIGHTNESS_MIRROR_HAND
 import com.mwilky.androidenhanced.HookedClasses.Companion.PAGED_TILE_LAYOUT_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_ANIMATOR_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_CUSTOMIZER_CONTROLLER_3_CLASS
+import com.mwilky.androidenhanced.HookedClasses.Companion.QS_CUSTOMIZER_CONTROLLER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_FOOTER_VIEW_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_IMPL_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_PANEL_CLASS
@@ -34,10 +37,12 @@ import com.mwilky.androidenhanced.HookedClasses.Companion.QS_PANEL_CONTROLLER_BA
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_PANEL_CONTROLLER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_TILE_HOST_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_TILE_IMPL_CLASS
+import com.mwilky.androidenhanced.HookedClasses.Companion.QS_TILE_IMPL_H_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QUICK_QS_PANEL_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QUICK_QS_PANEL_CONTROLLER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QUICK_QS_PANEL_QQS_SIDE_LABEL_TILE_LAYOUT_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QUICK_SETTINGS_CONTROLLER_CLASS
+import com.mwilky.androidenhanced.HookedClasses.Companion.QUICK_SETTINGS_CONTROLLER_IMPL_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.SIDE_LABEL_TILE_LAYOUT_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.SYSUI_COLOR_EXTRACTOR_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.TILE_ADAPTER_CLASS
@@ -119,8 +124,6 @@ class Quicksettings {
 
             val tileAdapter = findClass(TILE_ADAPTER_CLASS, classLoader)
 
-            val qsCustomizer3 = findClass(QS_CUSTOMIZER_CONTROLLER_3_CLASS, classLoader)
-
             BrightnessMirrorHandlerClass = brightnessMirrorHandler
 
             // Constructor hooks
@@ -155,14 +158,6 @@ class Quicksettings {
                 }
             })
 
-            hookAllConstructors(qsCustomizer3, object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
-
-                    mQsCustomizerController3 = param.thisObject
-
-                }
-            })
-
             findAndHookMethod(QS_PANEL_CONTROLLER_CLASS,
                 classLoader,
                 "onViewAttached",
@@ -185,7 +180,7 @@ class Quicksettings {
 
             findAndHookMethod(QUICK_QS_PANEL_CONTROLLER_CLASS,
                 classLoader,
-                "onViewAttached",
+                "onInit",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         QuickQSPanelController = param.thisObject
@@ -236,30 +231,6 @@ class Quicksettings {
                     }
                 })
 
-            findAndHookMethod(QUICK_QS_PANEL_CONTROLLER_CLASS,
-                classLoader,
-                "onViewDetached",
-                object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        QuickQSPanelController = param.thisObject
-                        QuicksettingsPremium.QuickQSPanelController = QuickQSPanelController
-
-                        val brightnessMirrorController =
-                            getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
-
-                        if (brightnessMirrorController != null) {
-                            val listener = getObjectField(
-                                mQQsBrightnessMirrorHandler, "brightnessMirrorListener"
-                            )
-                            val mBrightnessMirrorListeners = getObjectField(
-                                brightnessMirrorController, "mBrightnessMirrorListeners"
-                            ) as ArraySet<Any>
-
-                            mBrightnessMirrorListeners.remove(listener)
-                        }
-                    }
-                })
-
             findAndHookMethod(QS_PANEL_CONTROLLER_BASE_CLASS,
                 classLoader,
                 "onViewAttached",
@@ -271,36 +242,74 @@ class Quicksettings {
                 })
 
             // QS tile click vibration
-            findAndHookMethod(QS_TILE_IMPL_CLASS,
-                classLoader,
-                "click",
-                View::class.java,
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        if (mClickVibrationEnabled) {
-                            val mContext = getObjectField(param.thisObject, "mContext") as Context
-                            initVibrator(mContext)
-                            val vibrationEffect = VibrationEffect.createPredefined(EFFECT_CLICK)
-                            mVibrator.vibrate(vibrationEffect)
+            if (Build.VERSION.SDK_INT >= 35) {
+                findAndHookMethod(QS_TILE_IMPL_H_CLASS,
+                    classLoader,
+                    "handleMessage",
+                    Message::class.java,
+                    object : XC_MethodHook() {
+                        override fun beforeHookedMethod(param: MethodHookParam) {
+                            if (mClickVibrationEnabled) {
+                                if (getIntField(param.args[0], "what") == 2) {
+                                    val mState = getObjectField(getSurroundingThis(param.thisObject), "mState")
+                                    if (!getBooleanField(mState, "disabledByPolicy")) {
+                                        val mContext = getObjectField(getSurroundingThis(param.thisObject), "mContext") as Context
+                                        initVibrator(mContext)
+                                        val vibrationEffect = VibrationEffect.createPredefined(EFFECT_CLICK)
+                                        mVibrator.vibrate(vibrationEffect)
+                                    }
+                                }
+                            }
                         }
-                    }
-                })
+                    })
 
-            // QS tile click vibration
-            findAndHookMethod(QS_TILE_IMPL_CLASS,
-                classLoader,
-                "longClick",
-                View::class.java,
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        if (mClickVibrationEnabled) {
-                            val mContext = getObjectField(param.thisObject, "mContext") as Context
-                            initVibrator(mContext)
-                            val vibrationEffect = VibrationEffect.createPredefined(EFFECT_CLICK)
-                            mVibrator.vibrate(vibrationEffect)
+                // QS tile click vibration
+                findAndHookMethod(QS_TILE_IMPL_CLASS,
+                    classLoader,
+                    "handleLongClick",
+                    "com.android.systemui.animation.Expandable",
+                    object : XC_MethodHook() {
+                        override fun afterHookedMethod(param: MethodHookParam) {
+                            if (mClickVibrationEnabled) {
+                                val mContext = getObjectField(param.thisObject, "mContext") as Context
+                                initVibrator(mContext)
+                                val vibrationEffect = VibrationEffect.createPredefined(EFFECT_CLICK)
+                                mVibrator.vibrate(vibrationEffect)
+                            }
                         }
-                    }
-                })
+                    })
+            } else {
+                findAndHookMethod(QS_TILE_IMPL_CLASS,
+                    classLoader,
+                    "click",
+                    View::class.java,
+                    object : XC_MethodHook() {
+                        override fun afterHookedMethod(param: MethodHookParam) {
+                            if (mClickVibrationEnabled) {
+                                val mContext = getObjectField(param.thisObject, "mContext") as Context
+                                initVibrator(mContext)
+                                val vibrationEffect = VibrationEffect.createPredefined(EFFECT_CLICK)
+                                mVibrator.vibrate(vibrationEffect)
+                            }
+                        }
+                    })
+
+                // QS tile click vibration
+                findAndHookMethod(QS_TILE_IMPL_CLASS,
+                    classLoader,
+                    "longClick",
+                    View::class.java,
+                    object : XC_MethodHook() {
+                        override fun afterHookedMethod(param: MethodHookParam) {
+                            if (mClickVibrationEnabled) {
+                                val mContext = getObjectField(param.thisObject, "mContext") as Context
+                                initVibrator(mContext)
+                                val vibrationEffect = VibrationEffect.createPredefined(EFFECT_CLICK)
+                                mVibrator.vibrate(vibrationEffect)
+                            }
+                        }
+                    })
+            }
 
             // Hide QS footer build number
             findAndHookMethod(QS_FOOTER_VIEW_CLASS,
@@ -337,24 +346,46 @@ class Quicksettings {
                 })
 
             // Quick/Smart pulldown
-            findAndHookMethod(QUICK_SETTINGS_CONTROLLER_CLASS,
-                classLoader,
-                "isOpenQsEvent",
-                MotionEvent::class.java,
-                object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        val quickSettingsController = param.thisObject
-                        val event = param.args[0] as MotionEvent
+            if (Build.VERSION.SDK_INT >= 35) {
+                findAndHookMethod(QUICK_SETTINGS_CONTROLLER_IMPL_CLASS,
+                    classLoader,
+                    "isOpenQsEvent",
+                    MotionEvent::class.java,
+                    object : XC_MethodHook() {
+                        override fun beforeHookedMethod(param: MethodHookParam) {
+                            val quickSettingsController = param.thisObject
+                            val event = param.args[0] as MotionEvent
 
-                        if (shouldFullyExpandDueQuickPulldown(
-                                quickSettingsController,
-                                event
-                            ) || shouldFullyExpandDueSmartPulldown(quickSettingsController)
-                        ) {
-                            param.result = true
+                            if (shouldFullyExpandDueQuickPulldown(
+                                    quickSettingsController,
+                                    event
+                                ) || shouldFullyExpandDueSmartPulldown(quickSettingsController)
+                            ) {
+                                param.result = true
+                            }
                         }
-                    }
-                })
+                    })
+            } else {
+                findAndHookMethod(QUICK_SETTINGS_CONTROLLER_CLASS,
+                    classLoader,
+                    "isOpenQsEvent",
+                    MotionEvent::class.java,
+                    object : XC_MethodHook() {
+                        override fun beforeHookedMethod(param: MethodHookParam) {
+                            val quickSettingsController = param.thisObject
+                            val event = param.args[0] as MotionEvent
+
+                            if (shouldFullyExpandDueQuickPulldown(
+                                    quickSettingsController,
+                                    event
+                                ) || shouldFullyExpandDueSmartPulldown(quickSettingsController)
+                            ) {
+                                param.result = true
+                            }
+                        }
+                    })
+            }
+
 
             findAndHookMethod(SIDE_LABEL_TILE_LAYOUT_CLASS,
                 classLoader,
@@ -675,6 +706,15 @@ class Quicksettings {
                         toggleFontScale()
 
                         updateStatusbarIconColors()
+                    }
+                })
+
+            findAndHookMethod(QS_CUSTOMIZER_CONTROLLER_CLASS,
+                classLoader,
+                "onViewAttached",
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        mQsCustomizerController3 = getObjectField(param.thisObject, "mConfigurationListener")
                     }
                 })
         }
