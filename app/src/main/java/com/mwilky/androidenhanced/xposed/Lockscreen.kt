@@ -354,7 +354,7 @@ class Lockscreen {
 
                         if (disabled != mShadeHeaderControllerQsDisabled) {
                             setBooleanField(mShadeHeaderController, "qsDisabled", disabled)
-                            callMethod(mShadeHeaderController, "updateVisibility$3")
+                            callMethod(mShadeHeaderController, "updateVisibility$2")
                         }
 
                         return null
