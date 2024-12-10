@@ -246,7 +246,6 @@ class Buttons {
                                     getSurroundingThis(param.thisObject),
                                     "performHapticFeedback",
                                     0,
-                                    false,
                                     "Power - Long Press - Torch"
                                 )
                                 return null
@@ -299,7 +298,6 @@ class Buttons {
                                 getSurroundingThis(param.thisObject),
                                 "performHapticFeedback",
                                 0,
-                                false,
                                 "Volume - Long Press - Media Control"
                             )
                         }
@@ -735,7 +733,6 @@ class Buttons {
                                     param.thisObject,
                                     "performHapticFeedback",
                                     HapticFeedbackConstants.VIRTUAL_KEY,
-                                    false,
                                     "Virtual Key - Press"
                                 )
                             }

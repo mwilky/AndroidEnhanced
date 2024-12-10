@@ -331,7 +331,7 @@ class Lockscreen {
 
                         if (diff1 and DISABLE_EXPAND != 0) {
                             if (state1 and DISABLE_EXPAND != 0) {
-                                callMethod(mShadeController, "animateCollapseShade", 0)
+                                callMethod(mShadeController, "animateCollapseShade", 0, false, false, 1.0f)
                             }
                         }
 
@@ -343,7 +343,7 @@ class Lockscreen {
 
                         if (diff2 and DISABLE2_NOTIFICATION_SHADE != 0) {
                             if (state2 and DISABLE2_NOTIFICATION_SHADE != 0) {
-                                callMethod(mShadeController, "animateCollapseShade", 0)
+                                callMethod(mShadeController, "animateCollapseShade", 0, false, false, 1.0f)
                             }
                         }
 

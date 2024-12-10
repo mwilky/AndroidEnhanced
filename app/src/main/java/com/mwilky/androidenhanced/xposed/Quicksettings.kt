@@ -24,8 +24,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.updateQuicksettings
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.updateStatusbarIconColors
+import com.mwilky.androidenhanced.HookedClasses.Companion.ACTIVE_NOTIFICATIONS_INTERACTOR_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.BRIGHTNESS_CONTROLLER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.BRIGHTNESS_MIRROR_HANDLER_CLASS
+import com.mwilky.androidenhanced.HookedClasses.Companion.NOTIF_STATS_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.PAGED_TILE_LAYOUT_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_ANIMATOR_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.QS_CUSTOMIZER_CONTROLLER_3_CLASS
@@ -53,6 +55,7 @@ import com.mwilky.androidenhanced.xposed.SystemUIApplication.Companion.getApplic
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
+import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
@@ -94,6 +97,7 @@ class Quicksettings {
         lateinit var mQQsBrightnessMirrorHandler: Any
         lateinit var mQsAnimator: Any
         lateinit var mBrightnessMirrorHandler: Any
+        lateinit var mNotifStats: Any
 
         //Tweak Variables
         var mClickVibrationEnabled: Boolean = false
@@ -211,7 +215,7 @@ class Quicksettings {
 
                         setBrightnessView(mView, mBrightnessView)
 
-                        callMethod(mQQsBrightnessSliderController, "init$10")
+                        callMethod(mQQsBrightnessSliderController, "init$9")
 
                         val brightnessMirrorController =
                             getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
@@ -736,6 +740,22 @@ class Quicksettings {
                         mQsCustomizerController3 = getObjectField(param.thisObject, "mConfigurationListener")
                     }
                 })
+
+            // We need to hook and set the mNotifStats object for December + bases
+            findAndHookMethod(ACTIVE_NOTIFICATIONS_INTERACTOR_CLASS,
+                classLoader,
+                "emit",
+                Object::class.java,
+                "kotlin.coroutines.Continuation",
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val notifStats = param.args[0]
+
+                        if (notifStats.javaClass.name == NOTIF_STATS_CLASS) {
+                            mNotifStats = notifStats
+                        }
+                    }
+                })
         }
 
         //Additional functions
@@ -744,6 +764,7 @@ class Quicksettings {
         private fun shouldFullyExpandDueQuickPulldown(
             quickSettingsController: Any, event: MotionEvent
         ): Boolean {
+
             val mQs = getObjectField(quickSettingsController, "mQs")
             val mView = callMethod(mQs, "getView") as View
             val isLayoutRtl = callMethod(mView, "isLayoutRtl") as Boolean
@@ -770,19 +791,13 @@ class Quicksettings {
             )
 
             val numActiveNotifs = getIntField(
-                getObjectField(
-                    notificationStackScrollLayoutController, "mNotifStats"
-                ), "numActiveNotifs"
+                mNotifStats, "numActiveNotifs"
             )
             val hasNonClearableAlertingNotifs = getBooleanField(
-                getObjectField(
-                    notificationStackScrollLayoutController, "mNotifStats"
-                ), "hasNonClearableAlertingNotifs"
+                mNotifStats, "hasNonClearableAlertingNotifs"
             )
             val hasClearableAlertingNotifs = getBooleanField(
-                getObjectField(
-                    notificationStackScrollLayoutController, "mNotifStats"
-                ), "hasClearableAlertingNotifs"
+                mNotifStats, "hasClearableAlertingNotifs"
             )
 
             return when (mSmartPulldownConfig) {

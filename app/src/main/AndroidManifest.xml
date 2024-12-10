@@ -42,7 +42,7 @@
             android:resource="@array/xposed_scope" />
 
         <receiver android:name=".BroadcastUtils"
-            android:exported="false"
+            android:exported="true"
             android:directBootAware="true">
             <!-- Listening the BOOT_COMPLETED action for legacy pre-N devices -->
             <intent-filter>

@@ -37,7 +37,7 @@ val Typography = Typography(
 )
 
 val caviarDreamsFamily = FontFamily(
-    Font(com.mwilky.androidenhanced.R.font.caviar_dreams, FontWeight.Normal),
-    Font(com.mwilky.androidenhanced.R.font.caviar_dreams_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(com.mwilky.androidenhanced.R.font.caviar_dreams_bold_italic, FontWeight.Bold, FontStyle.Italic)
+    Font(R.font.caviar_dreams, FontWeight.Normal),
+    Font(R.font.caviar_dreams_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.caviar_dreams_bold_italic, FontWeight.Bold, FontStyle.Italic)
 )

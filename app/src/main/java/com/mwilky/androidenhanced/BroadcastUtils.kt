@@ -1091,7 +1091,9 @@ class BroadcastUtils : BroadcastReceiver() {
             val date = getObjectField(ShadeHeaderController, "date") as TextView
             date.setTextColor(getIconColorForSlotName("date", mContext, "QS"))
 
-            updateCarrierLabelColor(ModernShadeCarrierGroupMobileView as View, mContext)
+            if (ModernShadeCarrierGroupMobileView != null)
+                updateCarrierLabelColor(ModernShadeCarrierGroupMobileView as View, mContext)
+
         }
     }
 

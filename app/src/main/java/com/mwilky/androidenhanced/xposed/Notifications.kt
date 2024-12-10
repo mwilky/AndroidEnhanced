@@ -126,9 +126,7 @@ class Notifications {
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
 
-                        val classId = getObjectField(param.thisObject, "\$r8\$classId")
-
-                        if (classId == 0) mKeyguardCoordinator?.let {
+                        mKeyguardCoordinator?.let {
                             updateNotificationSectionHeaders(
                                 it
                             )
