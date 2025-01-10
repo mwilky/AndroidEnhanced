@@ -84,7 +84,6 @@ class Lockscreen {
                                     getSurroundingThis(param.thisObject),
                                     "performHapticFeedback",
                                     10003,
-                                    false,
                                     "Power + Volume Up - Global Actions Suppressed"
                                 )
                                 param.result = null
