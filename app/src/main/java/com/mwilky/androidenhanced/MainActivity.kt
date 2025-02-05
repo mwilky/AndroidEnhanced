@@ -291,7 +291,7 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            //SubscriptionChecker(billingManager = billingManager)
+            SubscriptionChecker(billingManager = billingManager)
 
             AndroidEnhancedTheme {
                 // A surface container using the 'background' color from the theme
