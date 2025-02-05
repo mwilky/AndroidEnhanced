@@ -95,8 +95,7 @@ import java.util.Calendar
 @Composable
 fun HomeScreen(
     navController: NavController,
-    deviceProtectedStorageContext: Context,
-    billingManager: BillingManager
+    deviceProtectedStorageContext: Context
 ) {
 
     //Top App Bar
@@ -108,7 +107,7 @@ fun HomeScreen(
         ScaffoldNavigationBar(navController = navController)
     }, content = {
         HomeScreenScrollableContent(
-            topPadding = it, bottomPadding = it, navController, billingManager = billingManager, deviceProtectedStorageContext = deviceProtectedStorageContext
+            topPadding = it, bottomPadding = it, navController, deviceProtectedStorageContext = deviceProtectedStorageContext
         )
     })
 }
@@ -118,7 +117,6 @@ fun HomeScreenScrollableContent(
     topPadding: PaddingValues,
     bottomPadding: PaddingValues,
     navController: NavController,
-    billingManager: BillingManager,
     deviceProtectedStorageContext: Context
 ) {
 

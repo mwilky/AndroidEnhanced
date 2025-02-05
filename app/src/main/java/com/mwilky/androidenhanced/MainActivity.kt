@@ -16,6 +16,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
@@ -30,6 +32,7 @@ import com.mwilky.androidenhanced.Utils.Companion.ISSUBSCRIPTION
 import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
+import com.mwilky.androidenhanced.dataclasses.LogEntry
 import com.mwilky.androidenhanced.ui.theme.AndroidEnhancedTheme
 import kotlinx.coroutines.delay
 import org.json.JSONArray
@@ -131,9 +134,10 @@ class MainActivity : ComponentActivity() {
     ) { uri ->
         if (uri == null) return@registerForActivityResult
 
+        // Retrieve the logs
+        val logs = LogManager.logsFlow.value
+
         try {
-            // Retrieve the logs from logsState
-            val logs = LogManager.logsState.value.toMutableList()
 
             // Prepare the content to write to the file
             val logContent = StringBuilder()
@@ -287,7 +291,7 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            SubscriptionChecker(billingManager = billingManager)
+            //SubscriptionChecker(billingManager = billingManager)
 
             AndroidEnhancedTheme {
                 // A surface container using the 'background' color from the theme
@@ -295,7 +299,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Navigation(this@MainActivity, billingManager)
+                    Navigation(deviceProtectedStorageContext, billingManager)
                 }
             }
         }

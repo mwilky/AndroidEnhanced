@@ -22,7 +22,6 @@ import com.mwilky.androidenhanced.ui.Tweaks
 @Composable
 fun Navigation(context: Context, billingManager: BillingManager) {
     val navController = rememberNavController()
-    val deviceProtectedStorageContext = context.createDeviceProtectedStorageContext()
 
     NavHost(
         navController = navController,
@@ -31,32 +30,31 @@ fun Navigation(context: Context, billingManager: BillingManager) {
         composable(route = Screens.Splash.route) {
             SplashScreen(
                 navController = navController,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                deviceProtectedStorageContext = context
             )
         }
         composable(route = Screens.Onboarding.route) {
             OnboardingScreen(
                 navController = navController,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                deviceProtectedStorageContext = context
             )
         }
         composable(route = Screens.Home.route) {
             HomeScreen(
                 navController = navController,
-                deviceProtectedStorageContext = deviceProtectedStorageContext,
-                billingManager = billingManager
+                deviceProtectedStorageContext = context
             )
         }
         composable(route = Screens.Logs.route) {
             Logs(
                 navController = navController,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                deviceProtectedStorageContext = context
             )
         }
         composable(route = Screens.Settings.route) {
             Settings(
                 navController = navController,
-                deviceProtectedStorageContext = deviceProtectedStorageContext,
+                deviceProtectedStorageContext = context,
                 billingManager = billingManager
             )
         }
@@ -71,7 +69,7 @@ fun Navigation(context: Context, billingManager: BillingManager) {
             entry.arguments?.getString("screen")?.let {
                 Tweaks(
                     navController = navController,
-                    deviceProtectedStorageContext = deviceProtectedStorageContext,
+                    deviceProtectedStorageContext = context,
                     screen = it
                 )
             }

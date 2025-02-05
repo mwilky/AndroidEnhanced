@@ -61,8 +61,7 @@ fun LogsScrollableContent(
     topPadding: PaddingValues,
     bottomPadding: PaddingValues,
 ) {
-    // Observe logsState directly
-    val logs by LogManager.logsState
+    val logs: List<LogEntry> by LogManager.logsFlow.collectAsState()
 
     Column(
         modifier = Modifier
