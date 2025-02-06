@@ -87,6 +87,7 @@ import com.mwilky.androidenhanced.Utils.Companion.mLsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.mQsStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.mStatusbarIconUseAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
+import com.mwilky.androidenhanced.Utils.Companion.notifScrimAlpha
 import com.mwilky.androidenhanced.Utils.Companion.notifSectionHeaders
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
@@ -99,6 +100,7 @@ import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerActiveShape
 import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerInactiveShape
 import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerUnavailableShape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsScrimAlpha
 import com.mwilky.androidenhanced.Utils.Companion.qsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
@@ -164,6 +166,8 @@ import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.ShadeHea
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.TintedIconManager
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.animateBrightnessSlider
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.mDualColorQsPanelEnabled
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.mNotifScrimAlpha
+import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.mQsScrimAlpha
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.tileList
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.updateBatteryIconColors
 import com.mwilky.androidenhanced.xposed.QuicksettingsPremium.Companion.updateBrightnessSliderColors
@@ -205,6 +209,7 @@ class BroadcastUtils : BroadcastReceiver() {
                         is Boolean -> intent.getBooleanExtra(key, defaultValue as Boolean)
                         is Int -> intent.getIntExtra(key, defaultValue as Int)
                         is String -> intent.getStringExtra(key)
+                        is Float -> intent.getFloatExtra(key, defaultValue as Float)
                         else -> false // Default value if the type is not boolean or integer
                     }
 
@@ -654,6 +659,16 @@ class BroadcastUtils : BroadcastReceiver() {
                                 .putBoolean(UNSUPPORTEDDEVICEENABLED, value as Boolean).apply()
 
                         }
+
+                        // Qs Scrim Alpha
+                        qsScrimAlpha -> {
+                            mQsScrimAlpha = value as Float
+                        }
+                        // Notif Scrim Alpha
+                        notifScrimAlpha -> {
+                            mNotifScrimAlpha = value as Float
+                        }
+
                     }
                     if (DEBUG) log("$TAG: broadcast received, $key = $value")
                 }
@@ -675,6 +690,7 @@ class BroadcastUtils : BroadcastReceiver() {
                     is Boolean -> intent.putExtra(key, value)
                     is Int -> intent.putExtra(key, value)
                     is String -> intent.putExtra(key, value)
+                    is Float -> intent.putExtra(key, value)
                     else -> throw IllegalArgumentException("Unsupported type for value")
                 }
                 context.sendBroadcast(intent)

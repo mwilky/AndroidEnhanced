@@ -80,7 +80,7 @@ class Statusbar {
         private var brightnessUtilsClass: Class<*>? = null
         private var viewClippingUtil: Class<*>? = null
         private var `headsUpAppearanceController$$ExternalSyntheticLambda0`: Class<*>? = null
-        private var `headsUpAppearanceController$$ExternalSyntheticLambda4`: Class<*>? = null
+        private var updateParentClipping: Class<*>? = null
         private var `carrierTextManager$$ExternalSyntheticLambda1`: Class<*>? = null
 
 
@@ -119,10 +119,21 @@ class Statusbar {
                 classLoader
             )
 
-            `headsUpAppearanceController$$ExternalSyntheticLambda4` = findClass(
-                "com.android.systemui.statusbar.phone." + "HeadsUpAppearanceController$\$ExternalSyntheticLambda4",
-                classLoader
-            )
+            updateParentClipping = try {
+                findClass(
+                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda4",
+                    classLoader
+                )
+            } catch (e: ClassNotFoundException) {
+                try {
+                    findClass(
+                        "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$xternalSyntheticLambda2",
+                        classLoader
+                    )
+                } catch (e: ClassNotFoundException) {
+                    null // Handle the case where neither class is found
+                }
+            }
 
             val notificationPanelViewControllerClass =
                 findClass(NOTIFICATION_PANEL_VIEW_CONTROLLER_CLASS, classLoader)
@@ -374,7 +385,7 @@ class Statusbar {
                                 )
                                 callMethod(
                                     param.thisObject, "hide", mView, 8, newInstance(
-                                        `headsUpAppearanceController$$ExternalSyntheticLambda4`,
+                                        updateParentClipping,
                                         param.thisObject,
                                         0
                                     )

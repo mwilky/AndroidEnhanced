@@ -471,6 +471,18 @@ class SystemUIApplication {
                                 param.thisObject.toString(),
                                 false
                             )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext,
+                                Utils.qsScrimAlpha,
+                                param.thisObject.toString(),
+                                1.0f
+                            )
+                            BroadcastUtils.registerBroadcastReceiver(
+                                hookedContext,
+                                Utils.notifScrimAlpha,
+                                param.thisObject.toString(),
+                                1.0f
+                            )
                         }
                     }
                 })

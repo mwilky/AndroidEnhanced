@@ -136,6 +136,8 @@
     <string name="qsIconContainerShapeDisabledTitle">Only available with \"Icon with background\" quicksettings style</string>
     <string name="qsPanelDualColorTitle">Dual tone background</string>
     <string name="qsPanelDualColorSummary">Enable material colors for the background panel. Also enables a light background if light theme is active.</string>
+    <string name="scrimAlphaTitle">Background alpha</string>
+    <string name="scrimAlphaSummary">Set the alpha level of the background scrim</string>
 
 <!--    Notifications-->
     <string name="muteScreenOnNotificationsTitle">Silent screen on notifications</string>

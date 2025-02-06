@@ -27,15 +27,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -125,6 +128,7 @@ import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
 import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
+import com.mwilky.androidenhanced.Utils.Companion.notifScrimAlpha
 import com.mwilky.androidenhanced.Utils.Companion.notifSectionHeaders
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
@@ -137,6 +141,7 @@ import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerActiveShape
 import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerInactiveShape
 import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerUnavailableShape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.Utils.Companion.qsScrimAlpha
 import com.mwilky.androidenhanced.Utils.Companion.qsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.qsTileVibration
@@ -158,6 +163,7 @@ import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeIconSwitchState
 import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 
 class Tweaks {
@@ -1753,6 +1759,28 @@ fun TweaksScrollableContent(
                     )
                 }
                 item {
+                    var sliderValue by remember { mutableFloatStateOf(sharedPreferences.getFloat(qsScrimAlpha, 1.0f)) }
+                    SettingsSlider(
+                        context = deviceProtectedStorageContext,
+                        label = deviceProtectedStorageContext.getString(R.string.scrimAlphaTitle),
+                        valueLabel = deviceProtectedStorageContext.getString(R.string.scrimAlphaSummary),
+                        value = sliderValue,
+                        onValueChange = { newValue ->
+                            sliderValue = newValue
+                        },
+                        onValueChangeFinished = { roundedValue ->
+                            // Update SharedPreferences with the new rounded value.
+                            sharedPreferences.edit().putFloat(qsScrimAlpha, roundedValue).apply()
+                            // Update the local state to the new value
+                            sliderValue = roundedValue
+                            sendBroadcast(deviceProtectedStorageContext, qsScrimAlpha, sliderValue)
+                        },
+                        valueRange = 0.0f..1.0f,  // Adjust the range as needed
+                        displayValue = { v -> String.format(Locale.UK, "%.2f", v) },
+                        roundingFn = { v -> String.format(Locale.UK, "%.2f", v).toFloat() }
+                    )
+                }
+                item {
                     TweakSwitch(
                         deviceProtectedStorageContext, stringResource(
                             R.string.qsTileClickVibrationTitle
@@ -2115,6 +2143,28 @@ fun TweaksScrollableContent(
                     )
                 }
                 item {
+                    var sliderValue by remember { mutableFloatStateOf(sharedPreferences.getFloat(notifScrimAlpha, 1.0f)) }
+                    SettingsSlider(
+                        context = deviceProtectedStorageContext,
+                        label = deviceProtectedStorageContext.getString(R.string.scrimAlphaTitle),
+                        valueLabel = deviceProtectedStorageContext.getString(R.string.scrimAlphaSummary),
+                        value = sliderValue,
+                        onValueChange = { newValue ->
+                            sliderValue = newValue
+                        },
+                        onValueChangeFinished = { roundedValue ->
+                            // Update SharedPreferences with the new rounded value.
+                            sharedPreferences.edit().putFloat(notifScrimAlpha, roundedValue).apply()
+                            // Update the local state to the new value
+                            sliderValue = roundedValue
+                            sendBroadcast(deviceProtectedStorageContext, notifScrimAlpha, sliderValue)
+                        },
+                        valueRange = 0.0f..1.0f,  // Adjust the range as needed
+                        displayValue = { v -> String.format(Locale.UK, "%.2f", v) },
+                        roundingFn = { v -> String.format(Locale.UK, "%.2f", v).toFloat() }
+                    )
+                }
+                item {
                     TweakSwitch(
                         deviceProtectedStorageContext, stringResource(
                             R.string.muteScreenOnNotificationsTitle
@@ -2342,7 +2392,6 @@ fun TweakRow(
                 }
             }
         }
-
     }
 }
 
@@ -2459,9 +2508,7 @@ fun TweakColor(
                     isColorPickerVisible = true
                 })
         }
-
     }
-
 }
 
 @Composable
@@ -2600,7 +2647,7 @@ fun TweakSelectionDialog(
                     .wrapContentHeight(),
             ) {
                 Text(
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.labelLarge,
                     text = label,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
@@ -2738,6 +2785,78 @@ fun TweakSelectionDialog(
 }
 
 @Composable
+fun SettingsSlider(
+    context: Context,
+    label: String,
+    valueLabel: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    // Converts the raw value to a display string (default: one decimal place)
+    displayValue: (Float) -> String = { v -> String.format(Locale.UK, "%.1f", v) },
+    // Rounds the value when finished (default: one decimal place)
+    roundingFn: (Float) -> Float = { v -> String.format(Locale.UK, "%.1f", v).toFloat() },
+    modifier: Modifier = Modifier,
+) {
+    var localValue by remember { mutableFloatStateOf(value) }
+
+    LaunchedEffect(value) {
+        localValue = value
+    }
+
+    ElevatedCard(modifier = Modifier
+        .padding(8.dp)
+        .fillMaxSize(),
+        shape = RoundedCornerShape(10.dp), colors = CardDefaults.elevatedCardColors()) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(
+                start = 16.dp,
+                top = 24.dp,
+                end = 4.dp
+            ),
+            fontFamily = caviarDreamsFamily
+        )
+        Text(
+            text = valueLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(
+                start = 16.dp, end = 16.dp
+            ),
+            fontFamily = caviarDreamsFamily
+        )
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
+            Slider(
+                value = localValue,
+                onValueChange = { newValue -> localValue = newValue },
+                onValueChangeFinished = {
+                    val roundedValue = roundingFn(localValue)
+                    onValueChangeFinished(roundedValue)
+                    onValueChange(roundedValue)
+                },
+                valueRange = valueRange,
+                modifier = Modifier.weight(1f)
+                    .padding(start = 16.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
+            )
+            Text(
+                text = displayValue(localValue),
+                style = MaterialTheme.typography.titleSmall,
+                fontFamily = caviarDreamsFamily,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(end = 16.dp)
+            )
+        }
+
+
+    }
+}
+
+@Composable
 fun TweakColorDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
@@ -2769,12 +2888,13 @@ fun TweakColorDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.labelLarge,
                         text = label,
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Start,
                         modifier = Modifier.padding(24.dp),
-                        fontFamily = caviarDreamsFamily
+                        fontFamily = caviarDreamsFamily,
+                        fontWeight = FontWeight.Bold
                     )
                 }
                 colorPickerController.wheelColor = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -2875,7 +2995,8 @@ fun TweakColorDialog(
                         Text(
                             text = "Dismiss",
                             style = MaterialTheme.typography.labelLarge,
-                            fontFamily = caviarDreamsFamily
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                     TextButton(
@@ -2891,7 +3012,8 @@ fun TweakColorDialog(
                         Text(
                             text = "Confirm",
                             style = MaterialTheme.typography.labelLarge,
-                            fontFamily = caviarDreamsFamily
+                            fontFamily = caviarDreamsFamily,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
