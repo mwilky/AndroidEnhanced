@@ -343,6 +343,7 @@ class Buttons {
                 "interceptPowerKeyDown",
                 KeyEvent::class.java,
                 Boolean::class.javaPrimitiveType,
+                Boolean::class.javaPrimitiveType,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
 

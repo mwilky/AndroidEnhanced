@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.LogManager
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.isDeviceSupported
 import com.mwilky.androidenhanced.Utils.Companion.supportedDevices
 
 @Composable
@@ -40,7 +41,7 @@ fun SplashScreen(navController: NavController, deviceProtectedStorageContext: Co
 
 
 fun logSupportedDevices() {
-    val isSupported = supportedDevices.any { Build.MODEL.contains(it, ignoreCase = true) }
+    val isSupported = isDeviceSupported()
 
     if (isSupported) {
         // Log that the device is supported

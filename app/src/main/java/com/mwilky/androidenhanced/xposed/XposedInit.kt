@@ -42,6 +42,7 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookInitPackageResources, IXpo
         when(lpparam?.packageName) {
             FRAMEWORK_PACKAGE -> {
                 Buttons.init(lpparam.classLoader)
+
                 Misc.init(lpparam.classLoader)
                 Lockscreen.initFramework(lpparam.classLoader)
                 Notifications.initFramework(lpparam.classLoader)

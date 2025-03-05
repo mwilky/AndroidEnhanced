@@ -115,7 +115,6 @@ class Lockscreen {
                                     param.thisObject,
                                     "performHapticFeedback",
                                     10003,
-                                    false,
                                     "Power - Long Press - Global Actions Suppressed"
                                 )
                                 param.result = null

@@ -43,6 +43,7 @@ import de.robv.android.xposed.XposedHelpers.getObjectField
 import de.robv.android.xposed.XposedHelpers.getSurroundingThis
 import de.robv.android.xposed.XposedHelpers.newInstance
 import de.robv.android.xposed.XposedHelpers.setBooleanField
+import de.robv.android.xposed.XposedHelpers.setObjectField
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -321,32 +322,36 @@ class Statusbar {
             //Clock position
             findAndHookMethod(HEADS_UP_APPEARANCE_CONTROLLER_CLASS,
                 classLoader,
-                "setShown",
-                Boolean::class.javaPrimitiveType,
+                "setPinnedStatus",
+                "com.android.systemui.statusbar.notification.headsup.PinnedStatus",
                 object : XC_MethodReplacement() {
                     override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                        val mShown = getBooleanField(param.thisObject, "mShown")
+                        val mPinnedStatus = getObjectField(param.thisObject, "mPinnedStatus")
+                        val pinnedStatus = param.args[0]
 
-                        val isShown = param.args[0] as Boolean
-                        val mView = getObjectField(param.thisObject, "mView") as View
+                        if (mPinnedStatus != pinnedStatus) {
 
-                        val mContext = mView.context
+                            setObjectField(param.thisObject, "mPinnedStatus", pinnedStatus)
 
-                        val mClockView = getObjectField(param.thisObject, "mClockView") as View
-                        val mParentClippingParams =
-                            getObjectField(param.thisObject, "mParentClippingParams")
+                            val mView = getObjectField(param.thisObject, "mView") as View
 
-                        val mOperatorNameViewOptional =
-                            getObjectField(param.thisObject, "mOperatorNameViewOptional")
+                            val isPinned = getBooleanField(pinnedStatus, "isPinned")
 
-                        val mStatusBarStateController =
-                            getObjectField(param.thisObject, "mStatusBarStateController")
+                            val mContext = mView.context
 
-                        val mCommandQueue = getObjectField(param.thisObject, "mCommandQueue")
+                            val mClockView = getObjectField(param.thisObject, "mClockView") as View
+                            val mParentClippingParams =
+                                getObjectField(param.thisObject, "mParentClippingParams")
 
-                        if (mShown != isShown) {
-                            setBooleanField(param.thisObject, "mShown", isShown)
-                            if (isShown) {
+                            val mOperatorNameViewOptional =
+                                getObjectField(param.thisObject, "mOperatorNameViewOptional")
+
+                            val mStatusBarStateController =
+                                getObjectField(param.thisObject, "mStatusBarStateController")
+
+                            val mCommandQueue = getObjectField(param.thisObject, "mCommandQueue")
+
+                            if (isPinned) {
                                 callStaticMethod(
                                     viewClippingUtil,
                                     "setClippingDeactivated",

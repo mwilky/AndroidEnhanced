@@ -215,7 +215,7 @@ class Quicksettings {
 
                         setBrightnessView(mView, mBrightnessView)
 
-                        callMethod(mQQsBrightnessSliderController, "init$9")
+                        callMethod(mQQsBrightnessSliderController, "init")
 
                         val brightnessMirrorController =
                             getObjectField(mQQsBrightnessMirrorHandler, "mirrorController")
