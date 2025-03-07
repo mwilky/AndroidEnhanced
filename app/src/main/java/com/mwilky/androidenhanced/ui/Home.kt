@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -197,8 +198,8 @@ fun HomeScreenScrollableContent(
             GridItemSpan(2)
         }) {
             //TODO: Detect username from google
-            val greetingMessage: String by currentTimeFlow().collectAsState(
-                initial = getGreetingMessage()
+            val greetingMessage: String by currentTimeFlow(deviceProtectedStorageContext).collectAsState(
+                initial = getGreetingMessage(deviceProtectedStorageContext)
             )
             WelcomeText("Matt Wilkinson (mwilky)", greetingMessage)
         }
@@ -215,7 +216,7 @@ fun HomeScreenScrollableContent(
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
-                    label = "Statusbar",
+                    label = stringResource(com.mwilky.androidenhanced.R.string.statusbar),
                 ), navController = navController
             )
         }
@@ -225,7 +226,7 @@ fun HomeScreenScrollableContent(
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
-                    label = "Quicksettings",
+                    label = stringResource(com.mwilky.androidenhanced.R.string.quicksettings),
                 ), navController = navController
             )
         }
@@ -235,7 +236,7 @@ fun HomeScreenScrollableContent(
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
-                    label = "Notifications",
+                    label = stringResource(com.mwilky.androidenhanced.R.string.notifications),
                 ), navController = navController
             )
         }
@@ -245,7 +246,7 @@ fun HomeScreenScrollableContent(
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
-                    label = "Lockscreen",
+                    label = stringResource(com.mwilky.androidenhanced.R.string.lockscreen),
                 ), navController = navController
             )
         }
@@ -255,7 +256,7 @@ fun HomeScreenScrollableContent(
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
-                    label = "Buttons",
+                    label = stringResource(com.mwilky.androidenhanced.R.string.buttons),
                 ), navController = navController
             )
         }
@@ -265,7 +266,7 @@ fun HomeScreenScrollableContent(
             TweaksItem(
                 card = TweaksCard(
                     icon = Icons.Outlined.Build,
-                    label = "Miscellaneous",
+                    label = stringResource(com.mwilky.androidenhanced.R.string.miscellaneous),
                 ), navController = navController
             )
         }
@@ -341,7 +342,7 @@ fun TweaksItem(
 }
 
 @Composable
-fun currentTimeFlow(): Flow<String> = flow {
+fun currentTimeFlow(context: Context): Flow<String> = flow {
     val calendar = Calendar.getInstance()
     var currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
@@ -352,17 +353,17 @@ fun currentTimeFlow(): Flow<String> = flow {
 
         if (newHour != currentHour) {
             currentHour = newHour
-            val greetingMessage = getGreetingMessage()
+            val greetingMessage = getGreetingMessage(context)
             emit(greetingMessage)
         }
     }
 }
 
-fun getGreetingMessage(): String {
+fun getGreetingMessage(context: Context): String {
     return when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-        in 0..11 -> "Good morning!"
-        in 12..16 -> "Good afternoon!"
-        else -> "Good evening!"
+        in 0..11 -> context.getString(R.string.goodMorning)
+        in 12..16 -> context.getString(com.mwilky.androidenhanced.R.string.goodAfternoon)
+        else -> context.getString(com.mwilky.androidenhanced.R.string.goodEvening)
     }
 }
 
@@ -382,7 +383,7 @@ fun ScaffoldHomeCenteredAppBar(
                             fontSize = 22.sp, fontWeight = FontWeight.Bold, letterSpacing = (-1).sp
                         )
                     ) {
-                        append("Android")
+                        append(stringResource(com.mwilky.androidenhanced.R.string.android))
                     }
                     withStyle(
                         style = SpanStyle(
@@ -392,7 +393,7 @@ fun ScaffoldHomeCenteredAppBar(
                             letterSpacing = (-1).sp
                         )
                     ) {
-                        append("Enhanced")
+                        append(stringResource(com.mwilky.androidenhanced.R.string.enhanced))
                     }
                 }, fontFamily = caviarDreamsFamily
             )
@@ -413,15 +414,15 @@ fun ScaffoldTweaksAppBar(
     when (screen) {
 
         "Individual statusbar icon colors" -> {
-            pageText = "Individual icon colors"
+            pageText = stringResource(R.string.individualIconColors)
         }
 
         "Individual quicksettings statusbar icon colors" -> {
-            pageText = "Individual icon colors"
+            pageText = stringResource(R.string.individualIconColors)
         }
 
         "Individual lockscreen statusbar icon colors" -> {
-            pageText = "Individual icon colors"
+            pageText = stringResource(R.string.individualIconColors)
         }
 
     }
@@ -459,7 +460,7 @@ fun AppVersion() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row {
-            Text(text = "Version: ", fontFamily = caviarDreamsFamily)
+            Text(text = "${stringResource(com.mwilky.androidenhanced.R.string.version)} ", fontFamily = caviarDreamsFamily)
             Text(text = appVersion, fontFamily = caviarDreamsFamily)
         }
         IconButton(onClick = {
