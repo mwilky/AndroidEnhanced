@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -155,7 +156,7 @@ fun SettingsScrollableContent(
         }
         item {
             Text(
-                text = "Unlock advanced features and support the developer in continuing this project.",
+                text = stringResource(R.string.licenceTitle),
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
                     .fillMaxWidth(),
@@ -208,7 +209,7 @@ fun SettingsScrollableContent(
             ) {
                 Column {
                     Text(
-                        text = "Last backup:",
+                        text = stringResource(R.string.lastBackupTitle),
                         modifier = Modifier
                             .padding(
                                 top = 16.dp,
@@ -269,7 +270,7 @@ fun ProductDetailsItem(
 
     // For subscription
     val subscriptionOffer = productDetails.subscriptionOfferDetails?.firstOrNull()
-    val freeTrialDuration = subscriptionOffer?.let { getFreeTrialDuration(it) }
+    val freeTrialDuration = subscriptionOffer?.let { getFreeTrialDuration(it, context) }
     val regularPrice = subscriptionOffer?.let { getRegularPrice(it) }
 
     // For one-time purchase
@@ -281,7 +282,7 @@ fun ProductDetailsItem(
         when (productType) {
             BillingClient.ProductType.SUBS -> {
                 Text(
-                    text = "Subscription:",
+                    text = stringResource(R.string.subscriptionTitle),
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
                         .fillMaxWidth(),
@@ -293,7 +294,7 @@ fun ProductDetailsItem(
             }
             BillingClient.ProductType.INAPP -> {
                 Text(
-                    text = "One time purchase:",
+                    text = stringResource(R.string.otpTitle),
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
                         .fillMaxWidth(),
@@ -313,7 +314,7 @@ fun ProductDetailsItem(
                 BillingClient.ProductType.SUBS -> {
                     if (isSubscription) {
                         Text(
-                            text = "Subscribed! Thank you for your support.",
+                            text = stringResource(R.string.subscriptionSuccess),
                             fontFamily = caviarDreamsFamily,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -321,14 +322,14 @@ fun ProductDetailsItem(
                     } else {
                         if (freeTrialDuration != null) {
                             Text(
-                                text = "$freeTrialDuration free trial available",
+                                text = freeTrialDuration + " " + stringResource(com.mwilky.androidenhanced.R.string.freeTrialAvailable),
                                 fontFamily = caviarDreamsFamily,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )
                             if (regularPrice != null) {
                                 Text(
-                                    text = "After trial: $regularPrice per month",
+                                    text = stringResource(R.string.afterTrial) + " " + regularPrice + " " + stringResource(R.string.perMonth),
                                     fontFamily = caviarDreamsFamily,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -337,14 +338,14 @@ fun ProductDetailsItem(
                         } else {
                             if (regularPrice != null) {
                                 Text(
-                                    text = "$regularPrice per month",
+                                    text = regularPrice + " " + stringResource(R.string.perMonth),
                                     fontFamily = caviarDreamsFamily,
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             } else {
                                 Text(
-                                    text = "Error fetching price",
+                                    text = stringResource(R.string.priceError),
                                     fontFamily = caviarDreamsFamily,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.error
@@ -356,7 +357,7 @@ fun ProductDetailsItem(
                 BillingClient.ProductType.INAPP -> {
                     if (isOneTimePurchase) {
                         Text(
-                            text = "Purchased! Thank you for your support.",
+                            text = stringResource(R.string.otpSuccess),
                             fontFamily = caviarDreamsFamily,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -371,7 +372,7 @@ fun ProductDetailsItem(
                             )
                         } else {
                             Text(
-                                text = "Error fetching price",
+                                text = stringResource(R.string.priceError),
                                 fontFamily = caviarDreamsFamily,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
@@ -397,7 +398,7 @@ fun ProductDetailsItem(
                         enabled = isSubscription
                     ) {
                         Text(
-                            "Cancel",
+                            stringResource(R.string.cancel),
                             fontFamily = caviarDreamsFamily,
                             fontWeight = FontWeight.Bold
                         )
@@ -411,7 +412,7 @@ fun ProductDetailsItem(
                             .padding(start = 16.dp)
                     ) {
                         Text(
-                            "Subscribe",
+                            stringResource(R.string.subscribe),
                             fontFamily = caviarDreamsFamily,
                             fontWeight = FontWeight.Bold
                         )
@@ -426,7 +427,7 @@ fun ProductDetailsItem(
                         modifier = Modifier
                     ) {
                         Text(
-                            "Purchase",
+                            stringResource(R.string.purchase),
                             fontFamily = caviarDreamsFamily,
                             fontWeight = FontWeight.Bold
                         )
@@ -448,13 +449,13 @@ fun ProductDetailsItem(
             },
             title = {
                 Text(
-                    text = "Change Subscription",
+                    text = stringResource(R.string.changeSubscription),
                     fontFamily = caviarDreamsFamily
                 )
             },
             text = {
                 Text(
-                    text = "Are you sure you want to change your subscription?",
+                    text = stringResource(R.string.changeSubscriptionConfirm),
                     fontFamily = caviarDreamsFamily
                 )
             },
@@ -472,7 +473,7 @@ fun ProductDetailsItem(
                             // Handle exception if the Play Store is not installed
                             Toast.makeText(
                                 context,
-                                "Google Play Store is not installed on this device.",
+                                context.getString(R.string.googlePlayError),
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -481,7 +482,7 @@ fun ProductDetailsItem(
                     }
                 ) {
                     Text(
-                        text = "Yes",
+                        text = stringResource(R.string.yes),
                         fontFamily = caviarDreamsFamily
                     )
                 }
@@ -494,7 +495,7 @@ fun ProductDetailsItem(
                     }
                 ) {
                     Text(
-                        text = "No",
+                        text = stringResource(R.string.no),
                         fontFamily = caviarDreamsFamily
                     )
                 }
@@ -506,7 +507,7 @@ fun ProductDetailsItem(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BackupButtonsRow(deviceProtectedStorageContext: Context) {
-    val mainActivity = (LocalContext.current as MainActivity)
+    val mainActivity = (LocalActivity.current as MainActivity)
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -590,26 +591,26 @@ fun convertDate(dateFromSharedPrefs: String, context: Context) : String {
 }
 
 // Helper function to parse ISO 8601 billing period to a readable format
-fun parseBillingPeriod(billingPeriod: String): String {
+fun parseBillingPeriod(billingPeriod: String, context: Context): String {
     return when {
         billingPeriod.startsWith("P") -> {
             val period = billingPeriod.removePrefix("P")
             when {
                 period.endsWith("D") -> {
                     val days = period.removeSuffix("D")
-                    "$days day${if (days != "1") "s" else ""}"
+                    "$days ${if (days != "1") context.getString(R.string.days) else context.getString(R.string.day)}"
                 }
                 period.endsWith("W") -> {
                     val weeks = period.removeSuffix("W")
-                    "$weeks week${if (weeks != "1") "s" else ""}"
+                    "$weeks ${if (weeks != "1") context.getString(R.string.weeks) else context.getString(R.string.week)}"
                 }
                 period.endsWith("M") -> {
                     val months = period.removeSuffix("M")
-                    "$months month${if (months != "1") "s" else ""}"
+                    "$months ${if (months != "1") context.getString(R.string.months) else context.getString(R.string.month)}"
                 }
                 period.endsWith("Y") -> {
                     val years = period.removeSuffix("Y")
-                    "$years year${if (years != "1") "s" else ""}"
+                    "$years ${if (years != "1") context.getString(R.string.years) else context.getString(R.string.year)}"
                 }
                 else -> billingPeriod // Fallback to original if format is unexpected
             }
@@ -619,11 +620,11 @@ fun parseBillingPeriod(billingPeriod: String): String {
 }
 
 // Helper function to extract free trial duration
-fun getFreeTrialDuration(offer: SubscriptionOfferDetails): String? {
+fun getFreeTrialDuration(offer: SubscriptionOfferDetails, context: Context): String? {
     offer.pricingPhases.pricingPhaseList.forEach { phase ->
         if (phase.priceAmountMicros == 0L) { // Identify free trial phase
             val billingPeriod = phase.billingPeriod
-            return parseBillingPeriod(billingPeriod) // e.g., "7 days"
+            return parseBillingPeriod(billingPeriod, context) // e.g., "7 days"
         }
     }
     return null // No free trial available
@@ -640,12 +641,12 @@ fun getRegularPrice(offer: SubscriptionOfferDetails): String? {
 }
 
 // Helper function to extract free trial information from SubscriptionOfferDetails
-fun getFreeTrialInfo(offer: SubscriptionOfferDetails): String? {
+fun getFreeTrialInfo(offer: SubscriptionOfferDetails, context: Context): String? {
     offer.pricingPhases.pricingPhaseList.forEach { phase ->
         if (phase.priceAmountMicros == 0L) {
             val billingPeriod = phase.billingPeriod
-            val readablePeriod = parseBillingPeriod(billingPeriod)
-            return "Free trial: $readablePeriod"
+            val readablePeriod = parseBillingPeriod(billingPeriod, context)
+            return context.getString(R.string.freeTrial) + " " + readablePeriod
         }
     }
     return null

@@ -413,15 +413,15 @@ fun ScaffoldTweaksAppBar(
 
     when (screen) {
 
-        "Individual statusbar icon colors" -> {
+        stringResource(R.string.individualStatusbarIconColors) -> {
             pageText = stringResource(R.string.individualIconColors)
         }
 
-        "Individual quicksettings statusbar icon colors" -> {
+        stringResource(R.string.individualQuicksettingsStatusbarIconColors) -> {
             pageText = stringResource(R.string.individualIconColors)
         }
 
-        "Individual lockscreen statusbar icon colors" -> {
+        stringResource(R.string.individualLockscreenStatusbarIconColors) -> {
             pageText = stringResource(R.string.individualIconColors)
         }
 
@@ -497,17 +497,17 @@ fun ScaffoldNavigationBar(
     val currentDestination = navBackStackEntry?.destination
     val navBarItemsList = listOf(
         BottomNavigationItem(
-            title = "Logs",
+            title = stringResource(R.string.logs),
             selectedIcon = Icons.Filled.Info,
             unselectedIcon = Icons.Outlined.Info,
             route = "logs"
         ), BottomNavigationItem(
-            title = "Home",
+            title = stringResource(R.string.home),
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Home,
             route = "home"
         ), BottomNavigationItem(
-            title = "Settings",
+            title = stringResource(R.string.settings),
             selectedIcon = Icons.Filled.Settings,
             unselectedIcon = Icons.Outlined.Settings,
             route = "settings"

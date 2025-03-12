@@ -802,24 +802,24 @@ fun TweaksScrollableContent(
         }
     }
 
+    val statusbar = stringResource(id = R.string.statusbar)
+    val buttons = stringResource(id = R.string.buttons)
+    val misc = stringResource(id = com.mwilky.androidenhanced.R.string.miscellaneous)
+    val lockscreen = stringResource(id = R.string.lockscreen)
+    val quicksettings = stringResource(id = R.string.quicksettings)
+    val notifications = stringResource(id = R.string.notifications)
+    val statusbarColors = stringResource(id = R.string.individualStatusbarIconColors)
+    val qsStatusbarColors = stringResource(id = R.string.individualQuicksettingsStatusbarIconColors)
+    val lsStatusbarColors = stringResource(id = R.string.individualLockscreenStatusbarIconColors)
+    val collapsedIcons = stringResource(id = R.string.hideCollapsedStatusbarIcons)
+    val allStatusbarIcons = stringResource(id = R.string.hideStatusbarIcons)
+
     LazyColumn(
         contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(top = topPadding.calculateTopPadding())
     ) {
-        val statusbar = "Statusbar"
-        val buttons = "Buttons"
-        val misc = "Miscellaneous"
-        val lockscreen = "Lockscreen"
-        val quicksettings = "Quicksettings"
-        val notifications = "Notifications"
-        val statusbarColors = "Individual statusbar icon colors"
-        val qsStatusbarColors = "Individual quicksettings statusbar icon colors"
-        val lsStatusbarColors = "Individual lockscreen statusbar icon colors"
-        val collapsedIcons = "Hide collapsed statusbar icons"
-        val allStatusbarIcons = "Hide statusbar icons"
-
         when (screen) {
             //Pages
             statusbar -> {

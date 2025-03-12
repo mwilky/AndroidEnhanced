@@ -7,6 +7,27 @@
     <string name="buttons">Buttons</string>
     <string name="miscellaneous">Miscellaneous</string>
     <string name="individualIconColors">Individual icon colors</string>
+    <string name="individualStatusbarIconColors">Individual statusbar icon colors</string>
+    <string name="individualQuicksettingsStatusbarIconColors">Individual quicksettings statusbar icon colors</string>
+    <string name="individualLockscreenStatusbarIconColors">Individual lockscreen statusbar icon colors</string>
+    <string name="hideCollapsedStatusbarIcons">Hide collapsed statusbar icons</string>
+    <string name="hideStatusbarIcons">Hide statusbar icons</string>
+
+    <!--    durations-->
+    <string name="day">day</string>
+    <string name="week">week</string>
+    <string name="month">month</string>
+    <string name="year">year</string>
+    <string name="days">days</string>
+    <string name="weeks">weeks</string>
+    <string name="months">months</string>
+    <string name="years">yearss</string>
+
+    <!--    Tweaks Screens-->
+    <string name="licenceTitle">Unlock advanced features and support the developer in continuing this project.</string>
+
+    <!--    Backup-->
+    <string name="lastBackupTitle">Last backup:</string>
 
     <!--    Greeting-->
     <string name="goodMorning">Good morning!</string>
@@ -18,10 +39,12 @@
     <string name="android">Android</string>
     <string name="enhanced">Enhanced</string>
 
-
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cancel">Cancel</string>
     <string name="app_name">Android Enhanced</string>
     <string name="settings">Settings</string>
-    <string name="logs">logs</string>
+    <string name="logs">Logs</string>
     <string name="home">Home</string>
     <string name="backup">Backup</string>
     <string name="restore">Restore</string>
@@ -47,6 +70,20 @@
     <string name="backup_restore">Backup and restore</string>
     <string name="premiumFeatures">Premium features</string>
     <string name="subscription">Premium subscription</string>
+    <string name="googlePlayError">Google Play Store is not installed on this device.</string>
+    <string name="changeSubscription">Change subscription</string>
+    <string name="changeSubscriptionConfirm">Change subscription</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="purchase">Purchase</string>
+    <string name="subscriptionTitle">Subscription:</string>
+    <string name="subscriptionSuccess">Subscribed! Thank you for your support.</string>
+    <string name="otpSuccess">Purchased! Thank you for your support.</string>
+    <string name="freeTrialAvailable">free trial available</string>
+    <string name="afterTrial">After free trial:</string>
+    <string name="freeTrial">Free trial:</string>
+    <string name="perMonth">per month</string>
+    <string name="otpTitle">One time purchase:</string>
+    <string name="priceError">Error fetching price</string>
     <string name="requires_subscription">This feature requires a premium subscription</string>
     <string name="iconManagement">Icon management</string>
     <string name="unsupportedDeviceProtection">Unsupported device protection</string>
