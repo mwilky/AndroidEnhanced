@@ -164,6 +164,7 @@ import com.mwilky.androidenhanced.ui.Tweaks.Companion.writeSwitchState
 import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import kotlinx.coroutines.launch
 import java.util.Locale
+import androidx.core.graphics.toColorInt
 
 
 class Tweaks {
@@ -2218,7 +2219,8 @@ fun TweakSwitch(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     color = if (isPremiumUnlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.6f
                     ),
@@ -2299,7 +2301,8 @@ fun TweakIconSwitch(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(
                             start = 16.dp,
@@ -2370,7 +2373,8 @@ fun TweakRow(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(
@@ -2457,7 +2461,8 @@ fun TweakColor(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     color = if (!isPremiumUnlocked || disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(
@@ -2648,6 +2653,7 @@ fun TweakSelectionDialog(
             ) {
                 Text(
                     style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
                     text = label,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
@@ -2729,6 +2735,7 @@ fun TweakSelectionDialog(
                         Text(
                             text = "Dismiss",
                             style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
                             fontFamily = caviarDreamsFamily
                         )
                     }
@@ -2769,6 +2776,7 @@ fun TweakSelectionDialog(
                         Text(
                             text = "Confirm",
                             style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
                             fontFamily = caviarDreamsFamily
                         )
                     }
@@ -2811,7 +2819,8 @@ fun SettingsSlider(
         shape = RoundedCornerShape(10.dp), colors = CardDefaults.elevatedCardColors()) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(
                 start = 16.dp,
@@ -2943,7 +2952,7 @@ fun TweakColorDialog(
                             if (isValidHexCode(newHexCode)) {
                                 selectedColorInt = hexStringToColorInt(hexCode)
                                 colorPickerController.selectByColor(
-                                    Color(android.graphics.Color.parseColor("#$hexCode")), false
+                                    Color(color = "#$hexCode".toColorInt()), false
                                 )
                             }
                         }, colors = TextFieldDefaults.colors(
@@ -3109,7 +3118,8 @@ fun TweakSelectionRow(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     color = if (disabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(
