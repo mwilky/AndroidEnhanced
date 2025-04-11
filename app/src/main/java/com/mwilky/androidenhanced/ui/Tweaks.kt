@@ -2733,7 +2733,7 @@ fun TweakSelectionDialog(
                             ),
                     ) {
                         Text(
-                            text = "Dismiss",
+                            text = stringResource(R.string.dismiss),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             fontFamily = caviarDreamsFamily
@@ -2774,7 +2774,7 @@ fun TweakSelectionDialog(
                             ),
                     ) {
                         Text(
-                            text = "Confirm",
+                            text = stringResource(R.string.confirm),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             fontFamily = caviarDreamsFamily
@@ -3002,7 +3002,7 @@ fun TweakColorDialog(
                             ),
                     ) {
                         Text(
-                            text = "Dismiss",
+                            text = stringResource(R.string.dismiss),
                             style = MaterialTheme.typography.labelLarge,
                             fontFamily = caviarDreamsFamily,
                             fontWeight = FontWeight.Bold
@@ -3019,7 +3019,7 @@ fun TweakColorDialog(
                             ),
                     ) {
                         Text(
-                            text = "Confirm",
+                            text = stringResource(R.string.confirm),
                             style = MaterialTheme.typography.labelLarge,
                             fontFamily = caviarDreamsFamily,
                             fontWeight = FontWeight.Bold

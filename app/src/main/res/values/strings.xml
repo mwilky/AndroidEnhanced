@@ -13,6 +13,9 @@
     <string name="hideCollapsedStatusbarIcons">Hide collapsed statusbar icons</string>
     <string name="hideStatusbarIcons">Hide statusbar icons</string>
 
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
+
     <!--    durations-->
     <string name="day">day</string>
     <string name="week">week</string>
@@ -21,7 +24,7 @@
     <string name="days">days</string>
     <string name="weeks">weeks</string>
     <string name="months">months</string>
-    <string name="years">yearss</string>
+    <string name="years">years</string>
 
     <!--    Tweaks Screens-->
     <string name="licenceTitle">Unlock advanced features and support the developer in continuing this project.</string>

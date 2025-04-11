@@ -26,6 +26,7 @@ import com.mwilky.androidenhanced.HookedClasses.Companion.NOTIFICATION_PANEL_VIE
 import com.mwilky.androidenhanced.HookedClasses.Companion.PHONE_STATUS_BAR_VIEW_CONTROLLER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.STATUSBAR_ICON_CONTROLLER_IMPL_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.SYSTEM_UI_APPLICATION_CLASS
+import com.mwilky.androidenhanced.Utils.Companion.findClassOrNull
 import com.mwilky.androidenhanced.xposed.SystemUIApplication.Companion.getApplicationContext
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -81,9 +82,6 @@ class Statusbar {
         private var brightnessUtilsClass: Class<*>? = null
         private var viewClippingUtil: Class<*>? = null
         private var `headsUpAppearanceController$$ExternalSyntheticLambda0`: Class<*>? = null
-        private var updateParentClipping: Class<*>? = null
-        private var `carrierTextManager$$ExternalSyntheticLambda1`: Class<*>? = null
-
 
         // Statusbar brightness control
         private var minimumBacklight: Float = 0f
@@ -120,21 +118,13 @@ class Statusbar {
                 classLoader
             )
 
-            updateParentClipping = try {
-                findClass(
-                    "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$ExternalSyntheticLambda4",
-                    classLoader
-                )
-            } catch (e: ClassNotFoundException) {
-                try {
-                    findClass(
-                        "com.android.systemui.statusbar.phone.HeadsUpAppearanceController$\$xternalSyntheticLambda2",
-                        classLoader
-                    )
-                } catch (e: ClassNotFoundException) {
-                    null // Handle the case where neither class is found
-                }
-            }
+            val updateParentClipping = findClassOrNull(
+                "com.android.systemui.statusbar.phone.HeadsUpAppearanceController\$\$ExternalSyntheticLambda4",
+                classLoader
+            ) ?: findClassOrNull(
+                "com.android.systemui.statusbar.phone.HeadsUpAppearanceController\$\$ExternalSyntheticLambda2",
+                classLoader
+            )
 
             val notificationPanelViewControllerClass =
                 findClass(NOTIFICATION_PANEL_VIEW_CONTROLLER_CLASS, classLoader)
