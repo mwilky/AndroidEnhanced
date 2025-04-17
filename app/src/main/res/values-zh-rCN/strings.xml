@@ -1,4 +1,7 @@
 <resources>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="cancel">取消</string>
     <string name="app_name">安卓增强版</string>
     <string name="settings">设置</string>
     <string name="logs">日志</string>
@@ -23,6 +26,25 @@
     <string name="individualLockscreenStatusbarIconColors">个性化锁屏状态栏图标颜色</string>
     <string name="hideCollapsedStatusbarIcons">隐藏折叠状态栏图标</string>
     <string name="hideStatusbarIcons">隐藏状态栏图标</string>
+
+    <string name="confirm">确认</string>
+    <string name="dismiss">取消</string>
+
+    <!-- durations -->
+    <string name="day">天</string>
+    <string name="week">周</string>
+    <string name="month">月</string>
+    <string name="year">年</string>
+    <string name="days">天</string>
+    <string name="weeks">周</string>
+    <string name="months">月</string>
+    <string name="years">年</string>
+
+    <!-- Tweaks Screens -->
+    <string name="licenceTitle">解锁高级功能，并支持开发者继续此项目。</string>
+
+    <!-- Backup -->
+    <string name="lastBackupTitle">上次备份：</string>
 
     <!--    Greeting-->
     <string name="goodMorning">早上好</string>
@@ -51,6 +73,20 @@
     <string name="premiumFeatures">高级功能</string>
     <string name="subscription">高级订阅</string>
     <string name="requires_subscription">此功能需要高级订阅</string>
+    <string name="googlePlayError">此设备未安装 Google Play 商店。</string>
+    <string name="changeSubscription">更改订阅</string>
+    <string name="changeSubscriptionConfirm">确认更改订阅</string>
+    <string name="subscribe">订阅</string>
+    <string name="purchase">购买</string>
+    <string name="subscriptionTitle">订阅：</string>
+    <string name="subscriptionSuccess">已订阅！感谢您的支持。</string>
+    <string name="otpSuccess">已购买！感谢您的支持。</string>
+    <string name="freeTrialAvailable">可用免费试用</string>
+    <string name="afterTrial">免费试用后：</string>
+    <string name="freeTrial">免费试用：</string>
+    <string name="perMonth">每月</string>
+    <string name="otpTitle">一次性购买：</string>
+    <string name="priceError">获取价格时出错</string>
     <string name="iconManagement">图标管理</string>
     <string name="unsupportedDeviceProtection">不受支持的设备保护</string>
     <string name="collapsedStatusbarIcons">仅在折叠状态栏中隐藏图标。图标在通知栏和锁屏状态栏中仍可见</string>
