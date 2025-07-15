@@ -4,28 +4,37 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.os.Build
-import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.navigation.NavController
-import com.mwilky.androidenhanced.BroadcastUtils.Companion.PREFS
 import com.mwilky.androidenhanced.LogManager
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
 import com.mwilky.androidenhanced.Utils.Companion.isDeviceSupported
 import com.mwilky.androidenhanced.Utils.Companion.supportedDevices
+import com.mwilky.androidenhanced.dataclasses.Screens
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SplashScreen(navController: NavController, deviceProtectedStorageContext: Context) {
     val sharedPreferences: SharedPreferences =
-        deviceProtectedStorageContext.getSharedPreferences(PREFS, MODE_PRIVATE)
+        deviceProtectedStorageContext.getSharedPreferences(SHAREDPREFS, MODE_PRIVATE)
 
     // Read once, outside LaunchedEffect
     val onboardingComplete = sharedPreferences.getBoolean(ISONBOARDINGCOMPLETEDKEY, false)
 
-    // Use LaunchedEffect to ensure this happens only once
+    // Trigger navigation after 2 seconds
     LaunchedEffect(Unit) {
-        // Log inside a side-effect, not at the top level
         logSupportedDevices()
+        delay(2000)
 
         if (onboardingComplete) {
             navController.navigate(Screens.Home.route) {
@@ -37,17 +46,23 @@ fun SplashScreen(navController: NavController, deviceProtectedStorageContext: Co
             }
         }
     }
-}
 
+    // Loading indicator
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        LoadingIndicator(modifier = Modifier.scale(2.5f))
+    }
+}
 
 fun logSupportedDevices() {
     val isSupported = isDeviceSupported()
 
     if (isSupported) {
-        // Log that the device is supported
         LogManager.log("Splash", "Device ${Build.MODEL} is supported.")
     } else {
-        // Log that the device is not supported and list supported devices
         LogManager.log("Splash", "Device ${Build.MODEL} is not supported. Supported devices are: ${supportedDevices.joinToString(", ")}")
     }
 }

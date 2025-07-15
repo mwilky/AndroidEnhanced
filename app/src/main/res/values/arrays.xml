@@ -21,6 +21,11 @@
         <item>Left side</item>
         <item>Always</item>
     </string-array>
+    <string-array name="quicksettingsBrightnessSliderPosition">
+        <item>Default (above tiles)</item>
+        <item>Below tiles</item>
+        <item>Hidden</item>
+    </string-array>
     <string-array name="qqs_rows_entries">
         <item>1</item>
         <item>2</item>
@@ -43,11 +48,6 @@
         <item>Default</item>
         <item>Icon with background</item>
         <item>Icon with no background</item>
-    </string-array>
-    <string-array name="quicksettingsBrightnessSliderPosition">
-        <item>Default (above tiles)</item>
-        <item>Below tiles</item>
-        <item>Hidden</item>
     </string-array>
     <string-array name="qsIconContainerShape">
         <item>Circle</item>

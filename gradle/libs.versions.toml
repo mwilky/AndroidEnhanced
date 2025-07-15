@@ -1,0 +1,56 @@
+[versions]
+agp = "8.11.1"
+kotlin = "2.2.0"
+compose-compiler = "2.2.0"
+coreKtx = "1.16.0"
+appcompat = "1.7.1"
+
+material = "1.9.0-beta02"
+material3 = "1.4.0-alpha17"
+
+activity-ktx = "1.10.1"
+composeBom = "2025.06.01"
+
+xposed = "82"
+colorpicker-compose = "1.1.2"
+gson = "2.13.1"
+play-auth = "21.3.0"
+navigation-compose = "2.9.1"
+coroutines = "1.10.2"
+kotlin-bom = "2.0.21"
+activity-compose = "1.10.1"
+
+
+splashscreen = "1.0.1"
+billing = "8.0.0"
+uiToolingPreviewAndroid = "1.8.3"
+uiTooling = "1.8.3"
+
+[libraries]
+colorpicker-compose = { group = "com.github.skydoves", name = "colorpicker-compose", version.ref = "colorpicker-compose" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "androidx.compose.material", name = "material", version.ref = "material" }
+xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed" }
+activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity-ktx" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+play-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-auth" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
+coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+material3 = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3" }
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
+compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
+androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "compose-compiler" }
+

@@ -1,5 +1,6 @@
 *.iml
 .gradle
+/.kotlin
 /local.properties
 /.idea/caches
 /.idea/libraries
@@ -9,10 +10,13 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+/app/build
+/app/release
+/shared/build
+/standard/build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
-/premium
 /app/src/main/java/com/mwilky/androidenhanced/BillingManager.kt
 

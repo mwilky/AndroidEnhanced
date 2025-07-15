@@ -21,14 +21,16 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mwilky.androidenhanced.BroadcastUtils
 import com.mwilky.androidenhanced.Utils.Companion.ISONBOARDINGCOMPLETEDKEY
+import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
+import com.mwilky.androidenhanced.dataclasses.Screens
+import androidx.core.content.edit
 
 @Composable
 fun OnboardingScreen(navController: NavController, deviceProtectedStorageContext: Context) {
     val sharedPreferences: SharedPreferences =
         deviceProtectedStorageContext.getSharedPreferences(
-            BroadcastUtils.PREFS, Context.MODE_PRIVATE
+            SHAREDPREFS, Context.MODE_PRIVATE
         )
 
     Column(
@@ -38,14 +40,14 @@ fun OnboardingScreen(navController: NavController, deviceProtectedStorageContext
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        //Onboarding Content
-        //Main Text
         Text(
             buildAnnotatedString {
-                withStyle(style = SpanStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp,
-                    letterSpacing = (-1).sp),
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 32.sp,
+                        letterSpacing = (-1).sp
+                    ),
                 ) {
                     append("Android ")
                 }
@@ -64,7 +66,6 @@ fun OnboardingScreen(navController: NavController, deviceProtectedStorageContext
             modifier = Modifier
                 .padding(16.dp)
         )
-        //Secondary Text
         Text(
             text = "Welcome to Android Enhanced! This app heavily relies on Xposed framework. " +
                     "Functionality will be limited without it...",
@@ -74,11 +75,10 @@ fun OnboardingScreen(navController: NavController, deviceProtectedStorageContext
             modifier = Modifier
                 .padding(16.dp)
         )
-        //Continue button
         Button(
             onClick = {
                 //Set onboarding complete
-                sharedPreferences.edit().putBoolean(ISONBOARDINGCOMPLETEDKEY, true).apply()
+                sharedPreferences.edit { putBoolean(ISONBOARDINGCOMPLETEDKEY, true) }
                 //Go to Home-screen
                 navController.navigate(Screens.Home.route) {
                     popUpTo(Screens.Onboarding.route) {

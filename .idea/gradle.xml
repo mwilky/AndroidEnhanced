@@ -9,9 +9,11 @@
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/../android-enhanced-premium/premium" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/premium" />
+            <option value="$PROJECT_DIR$/shared" />
+            <option value="$PROJECT_DIR$/standard" />
           </set>
         </option>
       </GradleProjectSettings>

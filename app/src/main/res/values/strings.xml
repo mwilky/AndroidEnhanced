@@ -7,9 +7,9 @@
     <string name="buttons">Buttons</string>
     <string name="miscellaneous">Miscellaneous</string>
     <string name="individualIconColors">Individual icon colors</string>
-    <string name="individualStatusbarIconColors">Individual statusbar icon colors</string>
-    <string name="individualQuicksettingsStatusbarIconColors">Individual quicksettings statusbar icon colors</string>
-    <string name="individualLockscreenStatusbarIconColors">Individual lockscreen statusbar icon colors</string>
+    <string name="individualStatusbarIconColors">Statusbar icon colours</string>
+    <string name="individualQuicksettingsStatusbarIconColors">Quicksettings icon colours</string>
+    <string name="individualLockscreenStatusbarIconColors">Lockscreen icon colours</string>
     <string name="hideCollapsedStatusbarIcons">Hide collapsed statusbar icons</string>
     <string name="hideStatusbarIcons">Hide statusbar icons</string>
 
@@ -55,7 +55,6 @@
     <string name="backupFailed">Backup failed!</string>
     <string name="restoreSuccess">Restore successful!</string>
     <string name="restoreFailed">Restore failed!</string>
-    <string name="never">Never</string>
 <!--    Tweaks Categories-->
     <string name="general">General</string>
     <string name="iconColors">Icon colors</string>
@@ -194,7 +193,7 @@
     <string name="qsIconContainerInactiveShapeTitle">Inactive tile background shape</string>
     <string name="qsIconContainerUnavailableShapeTitle">Unavailable tile background shape</string>
     <string name="qsIconContainerShapeDisabledTitle">Only available with \"Icon with background\" quicksettings style</string>
-    <string name="qsPanelDualColorTitle">Dual tone background</string>
+    <string name="qsPanelDualColorTitle">Material themed quicksettings panel</string>
     <string name="qsPanelDualColorSummary">Enable material colors for the background panel. Also enables a light background if light theme is active.</string>
     <string name="scrimAlphaTitle">Background alpha</string>
     <string name="scrimAlphaSummary">Set the alpha level of the background scrim</string>

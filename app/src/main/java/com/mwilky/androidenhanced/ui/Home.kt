@@ -3,25 +3,24 @@ package com.mwilky.androidenhanced.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.SystemClock
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -44,14 +43,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -69,36 +70,41 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.mwilky.androidenhanced.BillingManager
-import com.mwilky.androidenhanced.LogManager
+import androidx.navigation.compose.rememberNavController
+import com.mwilky.androidenhanced.BuildConfig
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.BOOTTIME
 import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
 import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
 import com.mwilky.androidenhanced.Utils.Companion.isDeviceSupported
 import com.mwilky.androidenhanced.dataclasses.BottomNavigationItem
+import com.mwilky.androidenhanced.dataclasses.Screens
 import com.mwilky.androidenhanced.dataclasses.TweaksCard
 import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.util.Calendar
+import kotlin.math.abs
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    deviceProtectedStorageContext: Context
+    navController: NavController, deviceProtectedStorageContext: Context
 ) {
-
     //Top App Bar
     val scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -108,10 +114,23 @@ fun HomeScreen(
         ScaffoldNavigationBar(navController = navController)
     }, content = {
         HomeScreenScrollableContent(
-            topPadding = it, bottomPadding = it, navController, deviceProtectedStorageContext = deviceProtectedStorageContext
+            topPadding = it,
+            bottomPadding = it,
+            navController,
+            deviceProtectedStorageContext = deviceProtectedStorageContext
         )
     })
 }
+
+// list of tw
+private val tweakItemIds = listOf(
+    R.string.statusbar,
+    R.string.quicksettings,
+    R.string.notifications,
+    R.string.lockscreen,
+    R.string.buttons,
+    R.string.miscellaneous
+)
 
 @Composable
 fun HomeScreenScrollableContent(
@@ -120,35 +139,9 @@ fun HomeScreenScrollableContent(
     navController: NavController,
     deviceProtectedStorageContext: Context
 ) {
-
-    val sharedPreferences = deviceProtectedStorageContext.getSharedPreferences(SHAREDPREFS, Context.MODE_PRIVATE)
-    val shouldShowUnsupportedDeviceDialog = rememberSaveable { mutableStateOf(false) }
-
-    // Check current subscription status + whether we need to show unsupported device dialog
-    LaunchedEffect(Unit) {
-
-        if (!isDeviceSupported()) {
-
-            val currentBootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime()
-            val storedBootTime = sharedPreferences.getLong(BOOTTIME, -1L)
-            val dialogShown = sharedPreferences.getBoolean(UNSUPPORTEDDEVICEDIALOGSHOWN, false)
-
-            val toleranceAmount = 5 * 60 * 1000L
-
-            if (storedBootTime == -1L || kotlin.math.abs(storedBootTime - currentBootTime) > toleranceAmount) {
-                // Device has rebooted or first run
-                sharedPreferences.edit()
-                    .putLong(BOOTTIME, currentBootTime)
-                    .putBoolean(UNSUPPORTEDDEVICEDIALOGSHOWN, false)
-                    .apply()
-                shouldShowUnsupportedDeviceDialog.value = true
-            } else if (!dialogShown) {
-                // Dialog has not been shown since last reboot
-                shouldShowUnsupportedDeviceDialog.value = true
-            }
-
-        }
-    }
+    val sharedPreferences =
+        deviceProtectedStorageContext.getSharedPreferences(SHAREDPREFS, Context.MODE_PRIVATE)
+    val shouldShowUnsupportedDeviceDialog = checkUnsupportedDeviceDialog(sharedPreferences)
 
     if (shouldShowUnsupportedDeviceDialog.value) {
         AlertDialog(
@@ -158,131 +151,88 @@ fun HomeScreenScrollableContent(
             confirmButton = {
                 Button(onClick = {
                     shouldShowUnsupportedDeviceDialog.value = false
-                    sharedPreferences.edit()
-                        .putBoolean(UNSUPPORTEDDEVICEDIALOGSHOWN, true)
-                        .apply()
+                    sharedPreferences.edit {
+                        putBoolean(UNSUPPORTEDDEVICEDIALOGSHOWN, true)
+                    }
                 }) {
                     Text("OK")
                 }
-            }
-        )
+            })
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    LazyColumn(
         contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(
                 top = topPadding.calculateTopPadding(),
                 bottom = bottomPadding.calculateBottomPadding()
-            )
+            ),
     ) {
-        // Header Logo
-        item(span = {
-            GridItemSpan(2)
-        }) {
+
+        item(key = "header") {
+            // Header Logo
             Image(
                 painter = painterResource(id = R.drawable.header_logo),
                 contentDescription = "Image Description",
                 alignment = Alignment.Center,
                 modifier = Modifier.padding(
-                        start = 64.dp, end = 64.dp, top = 16.dp, bottom = 16.dp
-                    ),
+                    start = 64.dp, end = 64.dp, top = 16.dp, bottom = 16.dp
+                ),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary, BlendMode.SrcIn),
             )
         }
 
-        // Welcome Text
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            //TODO: Detect username from google
+        item(key = "greetings") {
             val greetingMessage: String by currentTimeFlow(deviceProtectedStorageContext).collectAsState(
                 initial = getGreetingMessage(deviceProtectedStorageContext)
             )
-            WelcomeText("Matt Wilkinson (mwilky)", greetingMessage)
+            WelcomeText(greetingMessage)
         }
 
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            AppVersion()
+        item(key = "app_version") { AppVersion() }
+
+        if (!BuildConfig.HAS_PREMIUM_MODULE) {
+            item(key = "source_built") {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .background(
+                            MaterialTheme.colorScheme.errorContainer,
+                            RoundedCornerShape(32.dp)
+                        )
+                ) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
+                        text = "Android Enhanced has been built from source, premium features will be missing.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        textAlign = TextAlign.Center,
+                        fontFamily = caviarDreamsFamily
+                    )
+                }
+            }
         }
 
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            TweaksItem(
-                card = TweaksCard(
-                    icon = Icons.Outlined.Build,
-                    label = stringResource(com.mwilky.androidenhanced.R.string.statusbar),
-                ), navController = navController
-            )
+        items(tweakItemIds, key = { it }) { resId ->
+            val label = stringResource(id = resId)
+            val card = TweaksCard(Icons.Outlined.Build, label)
+            TweaksItem(card = card, navController = navController)
         }
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            TweaksItem(
-                card = TweaksCard(
-                    icon = Icons.Outlined.Build,
-                    label = stringResource(com.mwilky.androidenhanced.R.string.quicksettings),
-                ), navController = navController
-            )
-        }
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            TweaksItem(
-                card = TweaksCard(
-                    icon = Icons.Outlined.Build,
-                    label = stringResource(com.mwilky.androidenhanced.R.string.notifications),
-                ), navController = navController
-            )
-        }
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            TweaksItem(
-                card = TweaksCard(
-                    icon = Icons.Outlined.Build,
-                    label = stringResource(com.mwilky.androidenhanced.R.string.lockscreen),
-                ), navController = navController
-            )
-        }
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            TweaksItem(
-                card = TweaksCard(
-                    icon = Icons.Outlined.Build,
-                    label = stringResource(com.mwilky.androidenhanced.R.string.buttons),
-                ), navController = navController
-            )
-        }
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            TweaksItem(
-                card = TweaksCard(
-                    icon = Icons.Outlined.Build,
-                    label = stringResource(com.mwilky.androidenhanced.R.string.miscellaneous),
-                ), navController = navController
-            )
-        }
-        item(span = {
-            GridItemSpan(2)
-        }) {
-            Spacer(
-                modifier = Modifier.height(32.dp)
-            )
+
+        item(key = "spacer") {
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
 fun WelcomeText(
-    name: String, greetingMessage: String
+    greetingMessage: String
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -292,8 +242,7 @@ fun WelcomeText(
             .padding(16.dp)
     ) {
         Text(
-            //text = "$greetingMessage, $name",
-            text = "$greetingMessage",
+            text = greetingMessage,
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
             fontFamily = caviarDreamsFamily
@@ -301,20 +250,20 @@ fun WelcomeText(
     }
 }
 
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun TweaksItem(
     card: TweaksCard, navController: NavController
 ) {
-    ElevatedCard(modifier = Modifier
-        .padding(8.dp)
-        .fillMaxSize()
-        .clickable(enabled = true, onClick = {
-            navController.navigate(Screens.Tweaks.withArgs(card.label))
-        }), shape = RoundedCornerShape(10.dp), colors = CardDefaults.elevatedCardColors()) {
+    ElevatedCard(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable(enabled = true, onClick = {
+                navController.navigate(card.label.toLowerCase(Locale.current))
+            }), shape = RoundedCornerShape(10.dp), colors = CardDefaults.elevatedCardColors()
+    ) {
         Column(
             modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)
-            //verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 text = card.label,
@@ -328,9 +277,7 @@ fun TweaksItem(
                     .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                //OutlinedButton(onClick = { /*TODO*/ }) { Text(text = "Reset to defaults") }
                 Spacer(modifier = Modifier.padding(horizontal = 10.dp))
-                //OutlinedButton(onClick = { /*TODO*/ }) { Text(text = "Enter") }
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = "back",
@@ -347,7 +294,7 @@ fun currentTimeFlow(context: Context): Flow<String> = flow {
     var currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
     while (true) {
-        delay(60000) // Wait for a minute
+        delay(60000)
         calendar.timeInMillis = System.currentTimeMillis()
         val newHour = calendar.get(Calendar.HOUR_OF_DAY)
 
@@ -362,8 +309,8 @@ fun currentTimeFlow(context: Context): Flow<String> = flow {
 fun getGreetingMessage(context: Context): String {
     return when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
         in 0..11 -> context.getString(R.string.goodMorning)
-        in 12..16 -> context.getString(com.mwilky.androidenhanced.R.string.goodAfternoon)
-        else -> context.getString(com.mwilky.androidenhanced.R.string.goodEvening)
+        in 12..16 -> context.getString(R.string.goodAfternoon)
+        else -> context.getString(R.string.goodEvening)
     }
 }
 
@@ -372,10 +319,9 @@ fun getGreetingMessage(context: Context): String {
 fun ScaffoldHomeCenteredAppBar(
     scrollBehavior: TopAppBarScrollBehavior
 ) {
-    CenterAlignedTopAppBar(scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-        ),
-        title = {
+    CenterAlignedTopAppBar(
+        scrollBehavior = scrollBehavior, colors = TopAppBarDefaults.topAppBarColors(
+        ), title = {
             Text(
                 buildAnnotatedString {
                     withStyle(
@@ -383,7 +329,7 @@ fun ScaffoldHomeCenteredAppBar(
                             fontSize = 22.sp, fontWeight = FontWeight.Bold, letterSpacing = (-1).sp
                         )
                     ) {
-                        append(stringResource(com.mwilky.androidenhanced.R.string.android))
+                        append(stringResource(R.string.android))
                     }
                     withStyle(
                         style = SpanStyle(
@@ -393,7 +339,7 @@ fun ScaffoldHomeCenteredAppBar(
                             letterSpacing = (-1).sp
                         )
                     ) {
-                        append(stringResource(com.mwilky.androidenhanced.R.string.enhanced))
+                        append(stringResource(R.string.enhanced))
                     }
                 }, fontFamily = caviarDreamsFamily
             )
@@ -409,28 +355,11 @@ fun ScaffoldTweaksAppBar(
     scrollBehavior: TopAppBarScrollBehavior
 ) {
 
-    var pageText = screen
-
-    when (screen) {
-
-        stringResource(R.string.individualStatusbarIconColors) -> {
-            pageText = stringResource(R.string.individualIconColors)
-        }
-
-        stringResource(R.string.individualQuicksettingsStatusbarIconColors) -> {
-            pageText = stringResource(R.string.individualIconColors)
-        }
-
-        stringResource(R.string.individualLockscreenStatusbarIconColors) -> {
-            pageText = stringResource(R.string.individualIconColors)
-        }
-
-    }
-
-    TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
     ), scrollBehavior = scrollBehavior, title = {
         Text(
-            text = pageText,
+            text = screen,
             style = MaterialTheme.typography.titleLarge,
             fontFamily = caviarDreamsFamily
         )
@@ -448,7 +377,6 @@ fun ScaffoldTweaksAppBar(
 
 @Composable
 fun AppVersion() {
-
     val context = LocalContext.current
     val appVersion = remember { getAppVersion(context) }
 
@@ -460,11 +388,13 @@ fun AppVersion() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row {
-            Text(text = "${stringResource(com.mwilky.androidenhanced.R.string.version)} ", fontFamily = caviarDreamsFamily)
+            Text(
+                text = "${stringResource(R.string.version)} ", fontFamily = caviarDreamsFamily
+            )
             Text(text = appVersion, fontFamily = caviarDreamsFamily)
         }
         IconButton(onClick = {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/AndroidEnhanced"))
+            val intent = Intent(Intent.ACTION_VIEW, "https://t.me/AndroidEnhanced".toUri())
             context.startActivity(intent)
         }) {
             Image(
@@ -488,7 +418,7 @@ fun getAppVersion(context: Context): String {
     }
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldNavigationBar(
     navController: NavController
@@ -513,9 +443,11 @@ fun ScaffoldNavigationBar(
             route = "settings"
         )
     )
+
     NavigationBar {
         navBarItemsList.forEach { bottomNavigationItem ->
-            NavigationBarItem(selected = currentDestination?.hierarchy?.any { it.route == bottomNavigationItem.route } == true,
+            NavigationBarItem(
+                selected = currentDestination?.hierarchy?.any { it.route == bottomNavigationItem.route } == true,
                 onClick = {
                     navController.navigate(bottomNavigationItem.route) {
                         // Pop up to the home screen of the app to
@@ -541,10 +473,50 @@ fun ScaffoldNavigationBar(
                         fontFamily = caviarDreamsFamily,
                         fontWeight = FontWeight.Bold
                     )
-                },
-                colors = NavigationBarItemDefaults.colors(),
-                alwaysShowLabel = false
-            )
+                })
         }
     }
 }
+
+@Composable
+fun checkUnsupportedDeviceDialog(
+    sharedPreferences: SharedPreferences
+): MutableState<Boolean> {
+    val showDialog = rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!isDeviceSupported()) {
+            val currentBootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime()
+            val storedBootTime = sharedPreferences.getLong(BOOTTIME, -1L)
+            val dialogShown = sharedPreferences.getBoolean(UNSUPPORTEDDEVICEDIALOGSHOWN, false)
+            val tolerance = 5 * 60 * 1000L
+
+            if (storedBootTime == -1L || abs(storedBootTime - currentBootTime) > tolerance) {
+                sharedPreferences.edit {
+                    putLong(BOOTTIME, currentBootTime)
+                    putBoolean(UNSUPPORTEDDEVICEDIALOGSHOWN, false)
+                }
+                showDialog.value = true
+            } else if (!dialogShown) {
+                showDialog.value = true
+            }
+        }
+    }
+
+    return showDialog
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    val context = LocalContext.current
+    val navController = rememberNavController()
+
+    HomeScreen(
+        navController = navController,
+        deviceProtectedStorageContext = context
+    )
+}
+
+
+

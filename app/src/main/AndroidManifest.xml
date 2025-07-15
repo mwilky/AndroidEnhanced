@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
-
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
@@ -41,13 +39,22 @@
             android:name="xposedscope"
             android:resource="@array/xposed_scope" />
 
-        <receiver android:name=".BroadcastUtils"
+        <receiver
+            android:name=".BootReceiver"
             android:exported="true"
             android:directBootAware="true">
             <!-- Listening the BOOT_COMPLETED action for legacy pre-N devices -->
             <intent-filter>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".LogBroadcastReceiver"
+            android:directBootAware="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.mwilky.androidenhanced.LOG" />
             </intent-filter>
         </receiver>
     </application>
