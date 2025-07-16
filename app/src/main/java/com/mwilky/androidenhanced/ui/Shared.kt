@@ -5,12 +5,19 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +34,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -46,6 +55,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,12 +66,14 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toLowerCase
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.edit
@@ -83,6 +95,7 @@ import com.mwilky.androidenhanced.Utils.Companion.qqsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.dataclasses.Chip
 import com.mwilky.androidenhanced.ui.Shared.Companion.readIconSwitchState
 import com.mwilky.androidenhanced.ui.Shared.Companion.readSwitchState
 import com.mwilky.androidenhanced.ui.Shared.Companion.writeIconSwitchState
@@ -179,7 +192,8 @@ fun TweakSwitch(
     description: String,
     key: String,
     defaultValue: Boolean = false,
-    premiumFeature: Boolean = false
+    premiumFeature: Boolean = false,
+    extraContent: @Composable (() -> Unit)? = null,
 ) {
     var switchState by remember { mutableStateOf(readSwitchState(context, key, defaultValue)) }
 
@@ -259,6 +273,15 @@ fun TweakSwitch(
                     )
                     .size(32.dp), colors = SwitchDefaults.colors()
             )
+        }
+        AnimatedVisibility(
+            visible = switchState,
+            enter = fadeIn(animationSpec = tween(durationMillis = 500))
+                    + expandVertically(animationSpec = tween(durationMillis = 500)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                    + shrinkVertically(animationSpec = tween(durationMillis = 500))
+        ) {
+            extraContent?.invoke()
         }
     }
 }
