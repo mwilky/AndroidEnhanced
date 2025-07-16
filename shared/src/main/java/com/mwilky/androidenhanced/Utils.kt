@@ -9,7 +9,6 @@ import android.graphics.drawable.DrawableWrapper
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
-import android.os.Handler
 import android.os.PowerManager
 import android.os.SystemClock
 import android.os.Vibrator
@@ -50,6 +49,8 @@ import com.mwilky.androidenhanced.References.Companion.TouchAnimatorBuilder
 import com.mwilky.androidenhanced.References.Companion.mBrightnessMirrorHandler
 import com.mwilky.androidenhanced.References.Companion.mDefaultClockContainer
 import com.mwilky.androidenhanced.References.Companion.mQQsBrightnessMirrorHandler
+import com.mwilky.androidenhanced.Utils.Companion.WAKE_REASON_LIFT
+import com.mwilky.androidenhanced.Utils.Companion.WAKE_REASON_TAP
 import com.mwilky.androidenhanced.dataclasses.LogEntryType
 import com.mwilky.androidenhanced.shared.R
 import de.robv.android.xposed.XC_MethodHook
@@ -104,7 +105,59 @@ class Utils() {
 
         // Constants
         const val MSG_TOGGLE_TORCH = 100
-        const val WAKE_REASON_LIFT = 16
+
+        /**
+         * Wake up reason code: Waking up due to power button press.
+         * @hide
+         */
+        const val WAKE_REASON_POWER_BUTTON: Int = 1
+
+        /**
+         * Wake up reason code: Waking up because an application requested it.
+         * @hide
+         */
+        const val WAKE_REASON_APPLICATION: Int = 2
+
+        /**
+         * Wake up reason code: Waking up due to being plugged in or docked on a wireless charger.
+         * @hide
+         */
+        const val WAKE_REASON_PLUGGED_IN: Int = 3
+
+        /**
+         * Wake up reason code: Waking up due to a user performed gesture. This includes user
+         * interactions with UI on the screen such as the notification shade. This does not include
+         * [WAKE_REASON_TAP] or [WAKE_REASON_LIFT].
+         * @hide
+         */
+        const val WAKE_REASON_GESTURE: Int = 4
+
+        /**
+         * Wake up reason code: Waking up due to the camera being launched.
+         * @hide
+         */
+        const val WAKE_REASON_CAMERA_LAUNCH: Int = 5
+
+        /**
+         * Wake up reason code: Waking up due to the user single or double tapping on the screen. This
+         * wake reason is used when the user is not tapping on a specific UI element; rather, the device
+         * wakes up due to a generic tap on the screen.
+         * @hide
+         */
+        const val WAKE_REASON_TAP: Int = 15
+
+        /**
+         * Wake up reason code: Waking up due to a user performed lift gesture.
+         * @hide
+         */
+        const val WAKE_REASON_LIFT: Int = 16
+
+        /**
+         * Wake up reason code: Waking up due to a user interacting with a biometric.
+         * @hide
+         */
+        const val WAKE_REASON_BIOMETRIC: Int = 17
+
         const val MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 200
 
         //Tweaks Keys
@@ -117,6 +170,15 @@ class Utils() {
         //Framework
         const val torchPowerScreenOff = "bool_LongPressPowerTorchScreenOff"
         const val torchAutoOffScreenOn = "bool_TorchAutoOffScreenOn"
+        const val torchAutoOffScreenOnLift = "bool_TorchAutoOffScreenOnLift"
+        const val torchAutoOffScreenOnBiometric = "bool_TorchAutoOffScreenOnBiometric"
+        const val torchAutoOffScreenOnPlugIn = "bool_TorchAutoOffScreenOnPlugIn"
+        const val torchAutoOffScreenOnPowerButton = "bool_TorchAutoOffScreenOnPowerButton"
+        const val torchAutoOffScreenOnApplication = "bool_TorchAutoOffScreenOnApplication"
+        const val torchAutoOffScreenOnTap = "bool_TorchAutoOffScreenOnTap"
+        const val torchAutoOffScreenOnCameraLaunch = "bool_TorchAutoOffScreenOnCameraLaunch"
+        const val torchAutoOffScreenOnGesture = "bool_TorchAutoOffScreenOnGesture"
+        const val torchAutoOffScreenOnOther = "bool_TorchAutoOffScreenOnOther"
         const val volKeyMediaControl = "bool_VolKeyMediaControl"
         const val allowAllRotations = "bool_AllowAllRotations"
         const val disableSecureScreenshots = "bool_DisableSecureScreenshots"
@@ -239,6 +301,15 @@ class Utils() {
         var mQsIconContainerUnavailableShapeConfig: Int = 0
         var mDoubleTapSleepLauncher = false
         var mTorchPowerScreenOff = false
+        var mTorchPowerScreenOffLift = true
+        var mTorchPowerScreenOffBiometric = true
+        var mTorchPowerScreenOffPlugIn = true
+        var mTorchPowerScreenOffPowerButton = true
+        var mTorchPowerScreenOffApplication = true
+        var mTorchPowerScreenOffCameraLaunch = true
+        var mTorchPowerScreenOffGesture = true
+        var mTorchPowerScreenOffOther = true
+        var mTorchPowerScreenOffTap = true
         var mTorchAutoOff = false
         var mVolKeyMedia = false
         var mMuteScreenOnNotifications = false
@@ -1707,6 +1778,54 @@ class Utils() {
                 sendLogBroadcast(
                     SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
                 )
+            }
+        }
+
+        fun shouldAutoTurnOffTorch(wakeReason: Int): Boolean {
+            try {
+                return when (wakeReason) {
+                    WAKE_REASON_LIFT -> {
+                        mTorchPowerScreenOffLift
+                    }
+
+                    WAKE_REASON_APPLICATION -> {
+                        mTorchPowerScreenOffApplication
+                    }
+
+                    WAKE_REASON_TAP -> {
+                        mTorchPowerScreenOffTap
+                    }
+
+                    WAKE_REASON_CAMERA_LAUNCH -> {
+                        mTorchPowerScreenOffCameraLaunch
+                    }
+
+                    WAKE_REASON_GESTURE -> {
+                        mTorchPowerScreenOffGesture
+                    }
+
+                    WAKE_REASON_POWER_BUTTON -> {
+                        mTorchPowerScreenOffPowerButton
+                    }
+
+                    WAKE_REASON_PLUGGED_IN -> {
+                        mTorchPowerScreenOffPlugIn
+                    }
+
+                    WAKE_REASON_BIOMETRIC -> {
+                        mTorchPowerScreenOffBiometric
+                    }
+
+                    else -> {
+                        mTorchPowerScreenOffOther
+                    }
+                }
+            } catch (e: Exception) {
+                val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
+                sendLogBroadcast(
+                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                )
+                return true
             }
         }
     }

@@ -153,6 +153,8 @@
     <string name="longPressPowerTorchScreenOffSummary">Toggle torch by long pressing power button whilst screen is off</string>
     <string name="torchAutoOffScreenOnTitle">Torch auto off</string>
     <string name="torchAutoOffScreenOnSummary">Automatically turn the torch off when the screen is turned on</string>
+    <string name="torchAutoOffScreenOnReasonsTitle">Torch auto off wake reasons</string>
+    <string name="torchAutoOffScreenOnReasonsSummary">Please select which wake reasons will turn the torch off when the screen is turned on</string>
     <string name="volKeyMediaControlTitle">Volume key media control</string>
     <string name="volKeyMediaControlSummary">Control media playback by long pressing volume keys whilst screen is off</string>
     <string name="disableDoublePressCameraScreenOffTitle">Disable camera gesture when screen off/locked</string>

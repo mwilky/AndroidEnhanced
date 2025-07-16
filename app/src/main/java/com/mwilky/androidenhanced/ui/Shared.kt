@@ -1177,6 +1177,133 @@ fun SettingsSlider(
     }
 }
 
+@Composable
+fun ChipsFlowRow(
+    chips: List<Chip>,
+    description: String,
+    modifier: Modifier = Modifier,
+    context: Context
+) {
+    val sharedPrefs = remember {
+        context.getSharedPreferences(SHAREDPREFS, MODE_PRIVATE)
+    }
+
+    // State to track which chips are selected
+    val chipStates = remember {
+        mutableStateMapOf<String, Boolean>().apply {
+            chips.forEach { chip ->
+                this[chip.key] = sharedPrefs.getBoolean(chip.key, false)
+            }
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = 0.dp, bottom = 16.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center
+        ) {
+            if (description.isNotEmpty()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(
+                        start = 16.dp, bottom = 8.dp, end = 16.dp
+                    ),
+                    fontFamily = caviarDreamsFamily
+                )
+            }
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer
+            ) {
+                FlowRow(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    chips.forEach { chip ->
+                        val isSelected = chipStates[chip.key] ?: false
+
+                        FilterChip(
+                            onClick = {
+                                val newState = !isSelected
+                                chipStates[chip.key] = newState
+
+                                // Save to SharedPreferences
+                                sharedPrefs.edit {
+                                    putBoolean(chip.key, newState)
+                                }
+
+                                // Send broadcast
+                                BroadcastSender.send(context, chip.key, newState)
+                            },
+                            label =
+                                {
+                                    Text(
+                                        text = chip.label,
+                                        fontFamily = caviarDreamsFamily,
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.onPrimary
+                                        else
+                                            MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                            selected = isSelected,
+                            modifier = Modifier.height(32.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = if (isSelected)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    Color.Transparent
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Preview composables
+@Preview(showBackground = true)
+@Composable
+fun ChipsFlowRowPreview() {
+    val previewChips = listOf(
+        Chip("sports", "Sports"),
+        Chip("technology", "Technology"),
+        Chip("music", "Music"),
+        Chip("food", "Food"),
+        Chip("travel", "Travel"),
+        Chip("movies", "Movies"),
+        Chip("books", "Books"),
+        Chip("fitness", "Fitness"),
+        Chip("gaming", "Gaming"),
+        Chip("art", "Art & Design")
+    )
+
+    MaterialTheme {
+        ChipsFlowRow(
+            chips = previewChips,
+            stringResource(R.string.torchAutoOffScreenOnReasonsSummary),
+            modifier = Modifier.fillMaxWidth(),
+            context = LocalContext.current
+        )
+    }
+}
+
 
 
 

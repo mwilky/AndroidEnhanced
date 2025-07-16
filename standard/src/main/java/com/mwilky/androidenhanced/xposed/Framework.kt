@@ -32,7 +32,6 @@ import com.mwilky.androidenhanced.References.Companion.SystemUIContext
 import com.mwilky.androidenhanced.TorchHolder
 import com.mwilky.androidenhanced.Utils.Companion.MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK
 import com.mwilky.androidenhanced.Utils.Companion.MSG_TOGGLE_TORCH
-import com.mwilky.androidenhanced.Utils.Companion.WAKE_REASON_LIFT
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.disableCameraScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
@@ -49,7 +48,17 @@ import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.safeHookAllConstructors
 import com.mwilky.androidenhanced.Utils.Companion.safeHookMethod
 import com.mwilky.androidenhanced.Utils.Companion.sendLogBroadcast
+import com.mwilky.androidenhanced.Utils.Companion.shouldAutoTurnOffTorch
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnApplication
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnBiometric
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnCameraLaunch
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnGesture
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnLift
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnOther
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnPlugIn
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnPowerButton
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnTap
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
 import com.mwilky.androidenhanced.xposed.BroadcastReceiver.Companion.registerBroadcastReceiver
@@ -147,6 +156,68 @@ class Framework {
                             false
                         )
 
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnLift,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnBiometric,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnPlugIn,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnApplication,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnPowerButton,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnTap,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnCameraLaunch,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnGesture,
+                            param.thisObject.toString(),
+                            true
+                        )
+
+                        registerBroadcastReceiver(
+                            ServicesContext,
+                            torchAutoOffScreenOnOther,
+                            param.thisObject.toString(),
+                            true
+                        )
 
                         // Functions purely for setting references
                         safeHookAllConstructors(
@@ -199,8 +270,7 @@ class Framework {
                     val isScreenOn = callMethod(param.thisObject, "isScreenOn") as Boolean
                     val keyguardOn = callMethod(param.thisObject, "keyguardOn") as Boolean
                     val resolvedLongPressOnPowerBehavior = callMethod(
-                        param.thisObject,
-                        "getResolvedLongPressOnPowerBehavior"
+                        param.thisObject, "getResolvedLongPressOnPowerBehavior"
                     ) as Int
 
                     if (resolvedLongPressOnPowerBehavior == 1) {
@@ -492,8 +562,7 @@ class Framework {
                 String::class.java,
                 String::class.java,
                 beforeHook = { param ->
-                    //TODO: add option to determine which wake reason will turn the torch off
-                    val wakeReason = param.args[1]
+                    val wakeReason = param.args[1] as Int
 
                     val mHandler = getObjectField(param.thisObject, "mHandler") as Handler
 
@@ -502,9 +571,9 @@ class Framework {
                     ) as Int
 
                     if (recalculateGlobalWakefulnessLocked == 1) {
-                        //Do not toggle torch if woken by lifting device
-                        if (wakeReason != WAKE_REASON_LIFT) {
-                            if (mTorchAutoOff && TorchHolder.isOn) {
+                        if (mTorchAutoOff && TorchHolder.isOn) {
+                            // Check wake reason
+                            if (shouldAutoTurnOffTorch(wakeReason)) {
                                 mHandler.removeMessages(MSG_TOGGLE_TORCH)
                                 val obtainMessage: Message =
                                     mHandler.obtainMessage(MSG_TOGGLE_TORCH)
@@ -628,23 +697,16 @@ class Framework {
                         ) as Boolean
                     ) {
                         val event = param.args[0] as KeyEvent
-
                         val policyFlags = param.args[1] as Int
-
                         val keyCode = event.keyCode
-
                         val down = event.action == KeyEvent.ACTION_DOWN
-
                         val interactive = policyFlags and 2 != 0
-
                         var isWakeKey = (policyFlags and 1 != 0 || callMethod(
                             event, "isWakeKey"
                         ) as Boolean)
 
                         val isNavBarVirtKey = event.flags and KeyEvent.FLAG_VIRTUAL_HARD_KEY != 0
-
                         val displayId = callMethod(event, "getDisplayId") as Int
-
                         val isInjected = policyFlags and 0x01000000 != 0
 
                         val useHapticFeedback =
@@ -793,7 +855,7 @@ class Framework {
                                             // And *don't* pass this key thru to the current activity
                                             // (which is probably the InCallScreen.)
                                             //ACTION_PASS_TO_USER
-                                            result = result and 1.inv()
+                                            result = 0
                                         }
                                     }
                                     var audioMode = AudioManager.MODE_NORMAL

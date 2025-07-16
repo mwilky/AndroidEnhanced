@@ -152,6 +152,15 @@ import com.mwilky.androidenhanced.Utils.Companion.mStatusbarNotificationColor
 import com.mwilky.androidenhanced.Utils.Companion.mStatusbarWifiColor
 import com.mwilky.androidenhanced.Utils.Companion.mTorchAutoOff
 import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOff
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffApplication
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffBiometric
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffCameraLaunch
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffGesture
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffLift
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffOther
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffPlugIn
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffPowerButton
+import com.mwilky.androidenhanced.Utils.Companion.mTorchPowerScreenOffTap
 import com.mwilky.androidenhanced.Utils.Companion.mVolKeyMedia
 import com.mwilky.androidenhanced.Utils.Companion.muteScreenOnNotifications
 import com.mwilky.androidenhanced.Utils.Companion.notifScrimAlpha
@@ -184,6 +193,15 @@ import com.mwilky.androidenhanced.Utils.Companion.statusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.statusbarIconDarkColor
 import com.mwilky.androidenhanced.Utils.Companion.toggleFontScale
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnApplication
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnBiometric
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnCameraLaunch
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnGesture
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnLift
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnOther
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnPlugIn
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnPowerButton
+import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnTap
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.updateAllowAllRotations
 import com.mwilky.androidenhanced.Utils.Companion.updateBatteryIconColors
@@ -710,6 +728,42 @@ class BroadcastReceiver {
 
                 disableCameraScreenOff -> {
                     mDisableCameraGestureWhenLocked = value as Boolean
+                }
+
+                torchAutoOffScreenOnLift -> {
+                    mTorchPowerScreenOffLift = value as Boolean
+                }
+
+                torchAutoOffScreenOnBiometric -> {
+                    mTorchPowerScreenOffBiometric = value as Boolean
+                }
+
+                torchAutoOffScreenOnPlugIn -> {
+                    mTorchPowerScreenOffPlugIn = value as Boolean
+                }
+
+                torchAutoOffScreenOnPowerButton -> {
+                    mTorchPowerScreenOffPowerButton = value as Boolean
+                }
+
+                torchAutoOffScreenOnApplication -> {
+                    mTorchPowerScreenOffApplication = value as Boolean
+                }
+
+                torchAutoOffScreenOnTap -> {
+                    mTorchPowerScreenOffTap = value as Boolean
+                }
+
+                torchAutoOffScreenOnCameraLaunch -> {
+                    mTorchPowerScreenOffCameraLaunch = value as Boolean
+                }
+
+                torchAutoOffScreenOnGesture -> {
+                    mTorchPowerScreenOffGesture = value as Boolean
+                }
+
+                torchAutoOffScreenOnOther -> {
+                    mTorchPowerScreenOffOther = value as Boolean
                 }
             }
         }
