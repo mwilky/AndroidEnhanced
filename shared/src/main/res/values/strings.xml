@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name">Android Enhanced</string>
-    <string name="shared_hello">Hello from Shared</string>
-    <string name="welcome_message">Welcome to the app!</string>
     <string name="never">Never</string>
     <string name="backupSuccess">Backup successful!</string>
 </resources>

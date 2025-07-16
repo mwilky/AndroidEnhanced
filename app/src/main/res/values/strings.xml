@@ -51,7 +51,6 @@
     <string name="home">Home</string>
     <string name="backup">Backup</string>
     <string name="restore">Restore</string>
-    <string name="backupSuccess">Backup successful!</string>
     <string name="backupFailed">Backup failed!</string>
     <string name="restoreSuccess">Restore successful!</string>
     <string name="restoreFailed">Restore failed!</string>

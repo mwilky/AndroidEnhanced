@@ -73,8 +73,15 @@ object BackupManager {
                 )
             }
 
-            Toast.makeText(context, R.string.backupSuccess, Toast.LENGTH_LONG).show()
-            LogManager.log("Settings", context.getString(R.string.backupSuccess))
+            Toast.makeText(
+                context,
+                com.mwilky.androidenhanced.shared.R.string.backupSuccess,
+                Toast.LENGTH_LONG
+            ).show()
+            LogManager.log(
+                "Settings",
+                context.getString(com.mwilky.androidenhanced.shared.R.string.backupSuccess)
+            )
 
         } catch (e: Exception) {
             Log.e(TAG, "Backup failed: ${e.message}", e)
