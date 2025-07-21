@@ -18,7 +18,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.mwilky.androidenhanced.BuildConfig
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarGlobalIconColor
@@ -172,7 +171,11 @@ fun StatusbarScrollableContent(
                 customStatusbarGlobalIconColor,
                 globalColor.value,
                 sharedPrefs,
-                disabled = useAccentColorValue.value
+                disabled = useAccentColorValue.value,
+                description = stringResource(
+                    id = if (useAccentColorValue.value) R.string.customStatusbarColorsSummaryDisabled
+                    else R.string.customStatusbarGlobalIconColorSummary
+                )
             )
         }
         item(key = "individual icon colors") {

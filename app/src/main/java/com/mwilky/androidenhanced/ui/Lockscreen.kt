@@ -136,6 +136,10 @@ fun LockscreenScrollableContent(
                 globalColor.value,
                 sharedPrefs,
                 useAccentColorValue.value,
+                description = stringResource(
+                    id = if (useAccentColorValue.value) R.string.customStatusbarColorsSummaryDisabled
+                    else R.string.customLsStatusbarGlobalIconColorSummary
+                ),
                 premiumFeature = true
             )
         }
