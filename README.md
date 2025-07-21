@@ -64,6 +64,7 @@
 - Double tap homescreen to sleep
 - Toggle torch on long press power button whilst screen off
 - Automatically turn torch off when screen turns on
+- Select which wake reasons automatically turns torch off when screen turns on
 - Disable double press power camera gesture whilst screen off/lockscreen
 - Volume key media control (skip forwards back when long press volume keys whilst screen off)
 
