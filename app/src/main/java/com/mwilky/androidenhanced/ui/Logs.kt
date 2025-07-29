@@ -28,7 +28,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -48,22 +53,25 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Logs(navController: NavController, deviceProtectedStorageContext: Context) {
+    val logs: List<LogEntry> by LogManager.logsFlow.collectAsState()
 
-    //Top App Bar
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    // Use a key to recreate the entire composable when logs are cleared
+    key(logs.size) {
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LogsAppBar(scrollBehavior)
-        },
-        bottomBar = {
-            ScaffoldNavigationBar(navController = navController)
-        },
-        content = {
-            LogsScrollableContent(topPadding = it, bottomPadding = it)
-        }
-    )
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                LogsAppBar(scrollBehavior)
+            },
+            bottomBar = {
+                ScaffoldNavigationBar(navController = navController)
+            },
+            content = {
+                LogsScrollableContent(topPadding = it, bottomPadding = it)
+            }
+        )
+    }
 }
 @Composable
 fun LogsScrollableContent(
