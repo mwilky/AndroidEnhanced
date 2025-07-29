@@ -16,8 +16,8 @@ android {
         applicationId = "com.mwilky.androidenhanced"
         minSdk = 35
         targetSdk = 36
-        versionCode = 2201
-        versionName = "2.2.1"
+        versionCode = 2202
+        versionName = "2.2.2"
         buildConfigField("Boolean", "HAS_PREMIUM_MODULE", hasPremiumModule.toString())
 
     }
