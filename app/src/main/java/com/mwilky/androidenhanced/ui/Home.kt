@@ -44,7 +44,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -61,7 +60,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -260,7 +258,7 @@ fun TweaksItem(
             .fillMaxWidth()
             .clickable(enabled = true, onClick = {
                 navController.navigate(card.label.toLowerCase(Locale.current))
-            }), shape = RoundedCornerShape(10.dp), colors = CardDefaults.elevatedCardColors()
+            }), colors = CardDefaults.elevatedCardColors()
     ) {
         Column(
             modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)
