@@ -31,6 +31,7 @@
 
     <!--    Backup-->
     <string name="lastBackupTitle">Last backup:</string>
+    <string name="notBackedUpYet">Not backed up yet!</string>
 
     <!--    Greeting-->
     <string name="goodMorning">Good morning!</string>
@@ -73,7 +74,7 @@
     <string name="subscription">Premium subscription</string>
     <string name="googlePlayError">Google Play Store is not installed on this device.</string>
     <string name="changeSubscription">Change subscription</string>
-    <string name="changeSubscriptionConfirm">Change subscription</string>
+    <string name="changeSubscriptionConfirm">Are you sure you want to make a change to your subscription?</string>
     <string name="subscribe">Subscribe</string>
     <string name="purchase">Purchase</string>
     <string name="subscriptionTitle">Subscription:</string>

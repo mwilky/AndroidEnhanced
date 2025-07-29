@@ -7,23 +7,28 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -44,7 +49,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
@@ -52,7 +56,6 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.ProductDetails
 import com.mwilky.androidenhanced.BillingManager
 import com.mwilky.androidenhanced.BillingManager.Companion.isOneTimePurchase
-import com.mwilky.androidenhanced.BillingManager.Companion.isPremium
 import com.mwilky.androidenhanced.BillingManager.Companion.isSubscription
 import com.mwilky.androidenhanced.LogManager
 import com.mwilky.androidenhanced.MainActivity
@@ -69,34 +72,34 @@ fun Settings(
     deviceProtectedStorageContext: Context,
     billingManager: BillingManager
 ) {
-
-    //Top App Bar
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
-        ScaffoldTweaksAppBar(
-            navController = navController,
-            screen = deviceProtectedStorageContext.resources.getString(R.string.settings),
-            showBackIcon = false,
-            scrollBehavior
-        )
-    }, bottomBar = {
-        ScaffoldNavigationBar(navController = navController)
-    }, content = {
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            ScaffoldTweaksAppBar(
+                navController = navController,
+                screen = deviceProtectedStorageContext.resources.getString(R.string.settings),
+                showBackIcon = false,
+                scrollBehavior
+            )
+        },
+        bottomBar = {
+            ScaffoldNavigationBar(navController = navController)
+        }
+    ) { paddingValues ->
         SettingsScrollableContent(
-            topPadding = it,
-            bottomPadding = it,
-            navController,
-            deviceProtectedStorageContext,
-            billingManager
+            paddingValues = paddingValues,
+            navController = navController,
+            deviceProtectedStorageContext = deviceProtectedStorageContext,
+            billingManager = billingManager
         )
-    })
+    }
 }
 
 @Composable
 fun SettingsScrollableContent(
-    topPadding: PaddingValues,
-    bottomPadding: PaddingValues,
+    paddingValues: PaddingValues,
     navController: NavController,
     deviceProtectedStorageContext: Context,
     billingManager: BillingManager
@@ -107,142 +110,211 @@ fun SettingsScrollableContent(
 
     LogManager.init(deviceProtectedStorageContext)
 
-    // Create a Composable state variable that depends on the SharedPreferences value
     var dateFromSharedPrefs by remember {
         mutableStateOf(sharedPreferences.getString(LASTBACKUP, ""))
     }
 
-    // Set the listener and update the remembered value on change to force a recomposition
     val sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
             LASTBACKUP -> dateFromSharedPrefs = sharedPreferences.getString(LASTBACKUP, "")
         }
     }
 
-    val formattedDate =
-        dateFromSharedPrefs?.let { convertLastBackupDate(it, deviceProtectedStorageContext) }
+    val formattedDate = dateFromSharedPrefs?.let {
+        convertLastBackupDate(it, deviceProtectedStorageContext)
+    }
 
-    // Collect the product details from the StateFlow
     val subscriptionProductDetailsList by billingManager.subscriptionDetailsFlow.collectAsState()
-
     val oneTimeProductDetailsList by billingManager.oneTimeDetailsFlow.collectAsState()
 
     LaunchedEffect(Unit) {
-        // Check subscription status
         billingManager.checkSubscriptionStatus()
     }
 
     LazyColumn(
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                top = topPadding.calculateTopPadding(),
-                bottom = bottomPadding.calculateBottomPadding()
-            )
+            .padding(paddingValues)
     ) {
         item {
-            TweakSectionHeader(
-                label = stringResource(
-                    id = R.string.premiumFeatures
-                )
-            )
+            Spacer(modifier = Modifier.height(8.dp))
         }
+
         item {
-            Text(
-                text = stringResource(R.string.licenceTitle),
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-                    .fillMaxWidth(),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontFamily = caviarDreamsFamily
+            PremiumSection(
+                oneTimeProductDetailsList = oneTimeProductDetailsList,
+                subscriptionProductDetailsList = subscriptionProductDetailsList,
+                billingManager = billingManager,
+                isSubscription = isSubscription,
+                isOneTimePurchase = isOneTimePurchase
             )
         }
 
-        // Display One-Time Purchase Products
-        items(oneTimeProductDetailsList) { product ->
-            ProductDetailsItem(
-                productDetails = product,
-                billingManager = billingManager,
-                isPremium = isPremium,
-                isSubscription = isSubscription,
-                isOneTimePurchase = isOneTimePurchase
-            )
-        }
-        // Display Subscription Products
-        items(subscriptionProductDetailsList) { product ->
-            ProductDetailsItem(
-                productDetails = product,
-                billingManager = billingManager,
-                isPremium = isPremium,
-                isSubscription = isSubscription,
-                isOneTimePurchase = isOneTimePurchase
-            )
-        }
         item {
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
+            BackupSection(
+                deviceProtectedStorageContext = deviceProtectedStorageContext,
+                formattedDate = formattedDate
             )
-        }
-        item {
-            TweakSectionHeader(
-                label = stringResource(
-                    id = R.string.backup_restore
-                )
-            )
-        }
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.lastBackupTitle),
-                        modifier = Modifier
-                            .padding(
-                                top = 16.dp, start = 16.dp, end = 16.dp
-                            )
-                            .fillMaxWidth(0.5f),
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = caviarDreamsFamily
-                    )
-                    if (formattedDate != null) {
-                        Text(
-                            text = formattedDate,
-                            modifier = Modifier
-                                .padding(
-                                    bottom = 16.dp, start = 16.dp, end = 16.dp
-                                )
-                                .fillMaxWidth(0.5f),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = caviarDreamsFamily
-                        )
-                    }
-                }
-            }
-        }
-        item {
-            BackupButtonsRow(deviceProtectedStorageContext = deviceProtectedStorageContext)
         }
     }
 
-    // Add the listener when this Composable is first composed
     DisposableEffect(Unit) {
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
-
-        // Remove the listener when the Composable is disposed
         onDispose {
             sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferencesListener)
+        }
+    }
+}
+
+@Composable
+private fun PremiumSection(
+    oneTimeProductDetailsList: List<ProductDetails>,
+    subscriptionProductDetailsList: List<ProductDetails>,
+    billingManager: BillingManager,
+    isSubscription: Boolean,
+    isOneTimePurchase: Boolean
+) {
+    SettingsSectionCard(
+        title = stringResource(id = R.string.premiumFeatures)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.licenceTitle),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontFamily = caviarDreamsFamily,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+
+            // One-Time Purchase Products
+            oneTimeProductDetailsList.forEach { product ->
+                ProductDetailsItem(
+                    productDetails = product,
+                    billingManager = billingManager,
+                    isSubscription = isSubscription,
+                    isOneTimePurchase = isOneTimePurchase
+                )
+            }
+
+            // Subscription Products
+            subscriptionProductDetailsList.forEach { product ->
+                ProductDetailsItem(
+                    productDetails = product,
+                    billingManager = billingManager,
+                    isSubscription = isSubscription,
+                    isOneTimePurchase = isOneTimePurchase
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BackupSection(
+    deviceProtectedStorageContext: Context,
+    formattedDate: String?
+) {
+    SettingsSectionCard(
+        title = stringResource(id = R.string.backup_restore)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            // Last Backup Info
+            BackupInfoCard(formattedDate = formattedDate)
+
+            // Backup Actions
+            BackupButtonsRow(deviceProtectedStorageContext = deviceProtectedStorageContext)
+        }
+    }
+}
+
+@Composable
+private fun SettingsSectionCard(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontFamily = caviarDreamsFamily,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            content()
+        }
+    }
+}
+
+@Composable
+private fun BackupInfoCard(formattedDate: String?) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.lastBackupTitle),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    fontFamily = caviarDreamsFamily
+                )
+            }
+
+            if (formattedDate != null) {
+                Text(
+                    text = formattedDate,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    fontFamily = caviarDreamsFamily,
+                    fontWeight = FontWeight.Medium
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.notBackedUpYet),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    fontFamily = caviarDreamsFamily
+                )
+            }
         }
     }
 }
@@ -251,124 +323,191 @@ fun SettingsScrollableContent(
 fun ProductDetailsItem(
     productDetails: ProductDetails,
     billingManager: BillingManager,
-    isPremium: Boolean,
     isSubscription: Boolean,
     isOneTimePurchase: Boolean
 ) {
     val productType = productDetails.productType
     val context = LocalContext.current
 
-    // For subscription
-    val subscriptionOffer =
-        productDetails.subscriptionOfferDetails?.firstOrNull { it.offerToken.isNotBlank() && it.pricingPhases.pricingPhaseList.isNotEmpty() }
+    val subscriptionOffer = productDetails.subscriptionOfferDetails?.firstOrNull {
+        it.offerToken.isNotBlank() && it.pricingPhases.pricingPhaseList.isNotEmpty()
+    }
 
-    val freeTrialDuration =
-        subscriptionOffer?.let { billingManager.getFreeTrialDuration(it, context) }
+    val freeTrialDuration = subscriptionOffer?.let {
+        billingManager.getFreeTrialDuration(it, context)
+    }
     val regularPrice = subscriptionOffer?.let { billingManager.getRegularPrice(it) }
-
-    // For one-time purchase
     val oneTimePrice = productDetails.oneTimePurchaseOfferDetails?.formattedPrice
 
     var showDialog by remember { mutableStateOf(false) }
 
-    Column {
-        when (productType) {
-            BillingClient.ProductType.SUBS -> {
-                Text(
-                    text = stringResource(R.string.subscriptionTitle),
-                    modifier = Modifier
-                        .padding(
-                            start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp
-                        )
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = caviarDreamsFamily
+    // Determine card color and text/icon colors based on product type and purchase status
+    val (cardContainerColor, textColor, iconColor) = when (productType) {
+        BillingClient.ProductType.SUBS -> {
+            if (isSubscription) {
+                Triple(
+                    if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerHighest,
+                    MaterialTheme.colorScheme.onSurface,
+                    MaterialTheme.colorScheme.onSurface
                 )
-            }
-
-            BillingClient.ProductType.INAPP -> {
-                Text(
-                    text = stringResource(R.string.otpTitle),
-                    modifier = Modifier
-                        .padding(
-                            start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp
-                        )
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = caviarDreamsFamily
+            } else {
+                Triple(
+                    if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerLow,
+                    MaterialTheme.colorScheme.onSurface,
+                    MaterialTheme.colorScheme.primary
                 )
             }
         }
-        // Display product details based on type and premium status
+
+        BillingClient.ProductType.INAPP -> {
+            if (isOneTimePurchase) {
+                Triple(
+                    if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerHighest,
+                    MaterialTheme.colorScheme.onSurface,
+                    MaterialTheme.colorScheme.onSurface
+                )
+            } else {
+                Triple(
+                    if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerLow,
+                    MaterialTheme.colorScheme.onSurface,
+                    MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        else -> Triple(
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.onSurface,
+            MaterialTheme.colorScheme.primary
+        )
+    }
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = cardContainerColor
+        )
+    ) {
         Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            when (productType) {
-                BillingClient.ProductType.SUBS -> {
-                    if (isSubscription) {
-                        Text(
-                            text = stringResource(R.string.subscriptionSuccess),
-                            fontFamily = caviarDreamsFamily,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    } else {
-                        if (freeTrialDuration != null) {
-                            Text(
-                                text = "$freeTrialDuration ${stringResource(R.string.freeTrialAvailable)}",
-                                fontFamily = caviarDreamsFamily,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            if (regularPrice != null) {
-                                Text(
-                                    text = stringResource(R.string.afterTrial) + " " + regularPrice + " " + stringResource(
-                                        R.string.perMonth
-                                    ),
-                                    fontFamily = caviarDreamsFamily,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        } else {
-                            if (regularPrice != null) {
-                                Text(
-                                    text = regularPrice + " " + stringResource(R.string.perMonth),
-                                    fontFamily = caviarDreamsFamily,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            } else {
-                                Text(
-                                    text = stringResource(R.string.priceError),
-                                    fontFamily = caviarDreamsFamily,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
+            // Product Type Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val (typeTitle, isActive) = when (productType) {
+                    BillingClient.ProductType.SUBS -> Pair(
+                        stringResource(R.string.subscriptionTitle),
+                        isSubscription
+                    )
+
+                    BillingClient.ProductType.INAPP -> Pair(
+                        stringResource(R.string.otpTitle),
+                        isOneTimePurchase
+                    )
+
+                    else -> Pair("", false)
                 }
 
-                BillingClient.ProductType.INAPP -> {
-                    if (isOneTimePurchase) {
+                if (isActive) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = iconColor
+                    )
+                }
+
+                Text(
+                    text = typeTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = textColor,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = caviarDreamsFamily
+                )
+            }
+
+            // Product Details Content
+            ProductDetailsContent(
+                productType = productType,
+                isSubscription = isSubscription,
+                isOneTimePurchase = isOneTimePurchase,
+                freeTrialDuration = freeTrialDuration,
+                regularPrice = regularPrice,
+                oneTimePrice = oneTimePrice
+            )
+
+            // Action Buttons
+            ProductActionButtons(
+                productType = productType,
+                productDetails = productDetails,
+                billingManager = billingManager,
+                isSubscription = isSubscription,
+                isOneTimePurchase = isOneTimePurchase,
+                onShowDialog = { showDialog = true }
+            )
+        }
+    }
+
+    // Subscription Cancel Dialog
+    if (showDialog) {
+        SubscriptionCancelDialog(
+            productDetails = productDetails,
+            onDismiss = { showDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun ProductDetailsContent(
+    productType: String,
+    isSubscription: Boolean,
+    isOneTimePurchase: Boolean,
+    freeTrialDuration: String?,
+    regularPrice: String?,
+    oneTimePrice: String?
+) {
+    when (productType) {
+        BillingClient.ProductType.SUBS -> {
+            if (isSubscription) {
+                Text(
+                    text = stringResource(R.string.subscriptionSuccess),
+                    fontFamily = caviarDreamsFamily,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (freeTrialDuration != null) {
                         Text(
-                            text = stringResource(R.string.otpSuccess),
+                            text = "$freeTrialDuration ${stringResource(R.string.freeTrialAvailable)}",
                             fontFamily = caviarDreamsFamily,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
                         )
-                    } else {
-                        if (oneTimePrice != null) {
+                        if (regularPrice != null) {
                             Text(
-                                text = oneTimePrice,
+                                text = "${stringResource(R.string.afterTrial)} $regularPrice ${
+                                    stringResource(
+                                        R.string.perMonth
+                                    )
+                                }",
+                                fontFamily = caviarDreamsFamily,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        if (regularPrice != null) {
+                            Text(
+                                text = "$regularPrice ${stringResource(R.string.perMonth)}",
                                 fontFamily = caviarDreamsFamily,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Medium
                             )
                         } else {
                             Text(
@@ -380,82 +519,124 @@ fun ProductDetailsItem(
                         }
                     }
                 }
-
-                else -> {
-                    // Handle other product types if any
-                }
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            when (productType) {
-                BillingClient.ProductType.SUBS -> {
-                    OutlinedButton(
-                        onClick = { showDialog = true }, enabled = isSubscription
-                    ) {
-                        Text(
-                            stringResource(R.string.cancel),
-                            fontFamily = caviarDreamsFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Button(
-                        onClick = {
-                            billingManager.launchSubscriptionPurchaseFlow(productDetails)
-                        }, enabled = !isSubscription, modifier = Modifier.padding(start = 16.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.subscribe),
-                            fontFamily = caviarDreamsFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
 
-                BillingClient.ProductType.INAPP -> {
-                    Button(
-                        onClick = {
-                            billingManager.launchOneTimePurchaseFlow(productDetails)
-                        }, enabled = !isOneTimePurchase, modifier = Modifier
-                    ) {
-                        Text(
-                            stringResource(R.string.purchase),
-                            fontFamily = caviarDreamsFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                else -> {
-                    // Handle other product types if any
+        BillingClient.ProductType.INAPP -> {
+            if (isOneTimePurchase) {
+                Text(
+                    text = stringResource(R.string.otpSuccess),
+                    fontFamily = caviarDreamsFamily,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            } else {
+                if (oneTimePrice != null) {
+                    Text(
+                        text = oneTimePrice,
+                        fontFamily = caviarDreamsFamily,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.priceError),
+                        fontFamily = caviarDreamsFamily,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
     }
+}
 
-    // Display the AlertDialog when showDialog is true (only for subscriptions)
-    if (showDialog) {
-        AlertDialog(onDismissRequest = {
-            // Dismiss the dialog when the user taps outside or presses the back button
-            showDialog = false
-        }, title = {
+@Composable
+private fun ProductActionButtons(
+    productType: String,
+    productDetails: ProductDetails,
+    billingManager: BillingManager,
+    isSubscription: Boolean,
+    isOneTimePurchase: Boolean,
+    onShowDialog: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        when (productType) {
+            BillingClient.ProductType.SUBS -> {
+                OutlinedButton(
+                    onClick = onShowDialog,
+                    enabled = isSubscription,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        stringResource(R.string.cancel),
+                        fontFamily = caviarDreamsFamily,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Button(
+                    onClick = { billingManager.launchSubscriptionPurchaseFlow(productDetails) },
+                    enabled = !isSubscription,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        stringResource(R.string.subscribe),
+                        fontFamily = caviarDreamsFamily,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            BillingClient.ProductType.INAPP -> {
+                Button(
+                    onClick = { billingManager.launchOneTimePurchaseFlow(productDetails) },
+                    enabled = !isOneTimePurchase,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        stringResource(R.string.purchase),
+                        fontFamily = caviarDreamsFamily,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubscriptionCancelDialog(
+    productDetails: ProductDetails,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
             Text(
+                style = MaterialTheme.typography.labelLarge,
                 text = stringResource(R.string.changeSubscription),
-                fontFamily = caviarDreamsFamily
+                fontFamily = caviarDreamsFamily,
+                fontWeight = FontWeight.Bold,
             )
-        }, text = {
+        },
+        text = {
             Text(
                 text = stringResource(R.string.changeSubscriptionConfirm),
                 fontFamily = caviarDreamsFamily
             )
-        }, confirmButton = {
+        },
+        confirmButton = {
             TextButton(
                 onClick = {
-                    // User confirmed, proceed to launch the Play Store intent
                     val intent = Intent(Intent.ACTION_VIEW).apply {
                         data =
                             "https://play.google.com/store/account/subscriptions?package=com.mwilky.androidenhanced&sku=${productDetails.productId}".toUri()
@@ -464,82 +645,70 @@ fun ProductDetailsItem(
                     try {
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        // Handle exception if the Play Store is not installed
                         Toast.makeText(
                             context,
                             context.getString(R.string.googlePlayError),
                             Toast.LENGTH_LONG
                         ).show()
                     }
-                    // Dismiss the dialog after action
-                    showDialog = false
-                }) {
+                    onDismiss()
+                }
+            ) {
                 Text(
-                    text = stringResource(R.string.yes), fontFamily = caviarDreamsFamily
+                    text = stringResource(R.string.yes),
+                    fontFamily = caviarDreamsFamily,
+                    fontWeight = FontWeight.Bold,
                 )
             }
-        }, dismissButton = {
-            Button(
-                onClick = {
-                    // User canceled the action, just dismiss the dialog
-                    showDialog = false
-                }) {
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
                 Text(
-                    text = stringResource(R.string.no), fontFamily = caviarDreamsFamily
+                    text = stringResource(R.string.no),
+                    fontFamily = caviarDreamsFamily,
+                    fontWeight = FontWeight.Bold,
                 )
             }
-        })
-    }
+        }
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BackupButtonsRow(deviceProtectedStorageContext: Context) {
     val mainActivity = (LocalActivity.current as MainActivity)
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(22.dp),
-        horizontalArrangement = Arrangement.Center
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        ElevatedCard(
-            modifier = Modifier
-                .padding(end = 24.dp, start = 8.dp)
-                .clickable(
-                    enabled = true, onClick = {
-                        mainActivity.createBackup()
-                    }),
-            shape = CardDefaults.elevatedShape,
-            colors = CardDefaults.elevatedCardColors(),
-            elevation = CardDefaults.elevatedCardElevation()
+        FilledTonalButton(
+            onClick = { mainActivity.createBackup() },
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            )
         ) {
             Text(
                 text = deviceProtectedStorageContext.resources.getString(R.string.backup),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(vertical = 16.dp, horizontal = 32.dp),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontFamily = caviarDreamsFamily
+                fontFamily = caviarDreamsFamily,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
             )
         }
-        ElevatedCard(
-            modifier = Modifier
-                .padding(start = 24.dp, end = 8.dp)
-                .clickable(
-                    enabled = true, onClick = {
-                        mainActivity.restoreBackup()
-                    }),
-            shape = CardDefaults.elevatedShape,
-            colors = CardDefaults.elevatedCardColors(),
-            elevation = CardDefaults.elevatedCardElevation()
+
+        FilledTonalButton(
+            onClick = { mainActivity.restoreBackup() },
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            )
         ) {
             Text(
                 text = deviceProtectedStorageContext.resources.getString(R.string.restore),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(vertical = 16.dp, horizontal = 32.dp),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontFamily = caviarDreamsFamily
+                fontFamily = caviarDreamsFamily,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
             )
         }
     }
