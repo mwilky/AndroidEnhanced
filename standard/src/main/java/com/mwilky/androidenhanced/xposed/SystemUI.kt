@@ -1036,7 +1036,6 @@ class SystemUI {
                         clockPositionHooks(classLoader)
                         clockSecondsHooks(classLoader)
                         doubleTapToSleepHooks(classLoader)
-                        //TODO: fix long press as this now expands shade in A16
                         statusbarBrightnessControlHooks(classLoader)
                         autoExpandFirstNotificationHooks(classLoader)
                         notificationSectionHeadersHooks(classLoader)
@@ -2993,6 +2992,18 @@ class SystemUI {
         }
 
         fun statusbarBrightnessControlHooks(classLoader: ClassLoader) {
+            // In Android 16 long pressing statusbar expands the shade, we need to disable this if brightness control is enabled
+            safeHookMethod(
+                context = SystemUIContext,
+                NOTIFICATION_PANEL_VIEW_CONTROLLER_CLASS,
+                classLoader,
+                "onStatusBarLongPress",
+                MotionEvent::class.java,
+                beforeHook = { param ->
+                    if (mStatusbarBrightnessControl)
+                        param.result = null
+                })
+
             safeHookMethod(
                 context = SystemUIContext,
                 CENTRAL_SURFACES_IMPL_CLASS,
