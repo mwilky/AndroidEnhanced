@@ -22,22 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.navigation.NavController
+import com.mwilky.androidenhanced.BroadcastSender
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
-import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
-import com.mwilky.androidenhanced.Utils.Companion.qsClickVibration
-
-import java.util.Locale
-import androidx.core.content.edit
-import com.mwilky.androidenhanced.BroadcastSender
 import com.mwilky.androidenhanced.Utils.Companion.customQsStatusbarGlobalIconColor
 import com.mwilky.androidenhanced.Utils.Companion.dualToneQsPanel
+import com.mwilky.androidenhanced.Utils.Companion.hideQsFooterBuildNumber
 import com.mwilky.androidenhanced.Utils.Companion.qqsBrightnessSlider
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qqsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qqsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsBrightnessSliderPosition
+import com.mwilky.androidenhanced.Utils.Companion.qsClickVibration
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qsIconContainerActiveShape
@@ -49,7 +47,9 @@ import com.mwilky.androidenhanced.Utils.Companion.qsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.qsStyle
 import com.mwilky.androidenhanced.Utils.Companion.quickPulldown
 import com.mwilky.androidenhanced.Utils.Companion.smartPulldown
+import com.mwilky.androidenhanced.dataclasses.Chip
 import java.lang.String.format
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,54 +78,12 @@ fun QuicksettingsScrollableContent(
     val sharedPreferences =
         deviceProtectedStorageContext.getSharedPreferences(SHAREDPREFS, MODE_PRIVATE)
 
-    val smartPullDown =
-        rememberIntPreference(sharedPreferences, smartPulldown, 0)
-    val smartPulldownEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.smart_pulldown_entries)
-    val quickPullDown =
-        rememberIntPreference(sharedPreferences, quickPulldown, 0)
-    val quickPulldownEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.quick_pulldown_entries)
-    val qsBrightnessSlider =
-        rememberIntPreference(sharedPreferences, qsBrightnessSliderPosition, 0)
-    val qsBrightnessSliderPositionEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsBrightnessSliderPosition)
-    val qqsRowsValue =
-        rememberIntPreference(sharedPreferences, qqsRows, 2)
-    val qqsRowsEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.qqs_rows_entries)
-    val qqsColumnsValue =
-        rememberIntPreference(sharedPreferences, qqsColumns, 2)
-    val qqsColumnsEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns)
-    val qqsColumnsLandscapeValue =
-        rememberIntPreference(sharedPreferences, qqsColumnsLandscape, 4)
-    val qsColumnsValue =
-        rememberIntPreference(sharedPreferences, qsColumns, 2)
-    val qsColumnsEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns)
-    val qsColumnsLandscapeValue =
-        rememberIntPreference(sharedPreferences, qsColumnsLandscape, 4)
-    val qsRowsValue =
-        rememberIntPreference(sharedPreferences, qsRows, 4)
-    val qsRowsEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.qs_rows_entries)
+    val resources = deviceProtectedStorageContext.resources
+
     val qsStyleValue =
         rememberIntPreference(sharedPreferences, qsStyle, 0)
     val qsStyleEntries =
         deviceProtectedStorageContext.resources.getStringArray(R.array.quicksettingsStyle)
-    val qsActiveShapeValue =
-        rememberIntPreference(sharedPreferences, qsIconContainerActiveShape, 0)
-    val qsActiveShapeEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.qsIconContainerShape)
-    val qsInactiveShapeValue =
-        rememberIntPreference(sharedPreferences, qsIconContainerInactiveShape, 0)
-    val qsInactiveShapeEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.qsIconContainerShape)
-    val qsUnavailableShapeValue =
-        rememberIntPreference(sharedPreferences, qsIconContainerUnavailableShape, 0)
-    val qsUnavailableShapeEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.qsIconContainerShape)
 
     val globalIconColorValue =
         rememberIntPreference(
@@ -211,32 +169,35 @@ fun QuicksettingsScrollableContent(
                 )
             )
         }
+        val smartPulldownChips = listOf(
+            Chip(resources.getString(R.string.never)),
+            Chip(resources.getString(R.string.noImportantNotifications)),
+            Chip(resources.getString(R.string.noNotifications)),
+        )
         item(key = smartPulldown) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.smartPulldownTitle
-                ),
-                description = smartPulldownEntries[smartPullDown.value],
+            SingleSelectionChipsFlowRow(
+                chips = smartPulldownChips,
+                label = stringResource(R.string.smartPulldownTitle),
+                description = stringResource(R.string.smartPulldownSummary),
                 key = smartPulldown,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.smart_pulldown_entries
-                ),
-                0,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
+        val quickPulldownChips = listOf(
+            Chip(resources.getString(R.string.never)),
+            Chip(resources.getString(R.string.right)),
+            Chip(resources.getString(R.string.left)),
+            Chip(resources.getString(R.string.always)),
+        )
         item(key = quickPulldown) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.quickPulldownTitle
-                ),
-                description = quickPulldownEntries[quickPullDown.value],
+            SingleSelectionChipsFlowRow(
+                chips = quickPulldownChips,
+                label = stringResource(R.string.quickPulldownTitle),
+                description = stringResource(R.string.quickPulldownSummary),
                 key = quickPulldown,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.quick_pulldown_entries
-                ),
-                0,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = "slider header") {
@@ -255,18 +216,19 @@ fun QuicksettingsScrollableContent(
                 ), qqsBrightnessSlider
             )
         }
+        val brightnessSliderPositionChips = listOf(
+            Chip(resources.getString(R.string.above)),
+            Chip(resources.getString(R.string.below)),
+            Chip(resources.getString(R.string.hidden)),
+        )
         item(key = qsBrightnessSliderPosition) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qsBrightnessSliderPositionTitle
-                ),
-                description = qsBrightnessSliderPositionEntries[qsBrightnessSlider.value],
+            SingleSelectionChipsFlowRow(
+                chips = brightnessSliderPositionChips,
+                label = stringResource(R.string.qsBrightnessSliderPositionTitle),
+                description = "",
                 key = qsBrightnessSliderPosition,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.quicksettingsBrightnessSliderPosition
-                ),
-                0,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = "tile layout header") {
@@ -299,58 +261,39 @@ fun QuicksettingsScrollableContent(
 
             )
         }
+        val tileShapeChips = listOf(
+            Chip(resources.getString(R.string.circle)),
+            Chip(resources.getString(R.string.roundedSquare)),
+            Chip(resources.getString(R.string.square)),
+        )
         item(key = qsIconContainerActiveShape) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qsIconContainerActiveShapeTitle
-                ),
-                description = if (qsStyleValue.value == 1) qsActiveShapeEntries[qsActiveShapeValue.value]
-                else stringResource(
-                    id = R.string.qsIconContainerShapeDisabledTitle
-                ),
+            SingleSelectionChipsFlowRow(
+                chips = tileShapeChips,
+                label = stringResource(if (qsStyleValue.value == 1) R.string.qsIconContainerActiveShapeTitle else R.string.qsIconContainerShapeDisabledTitle),
+                description = "",
                 key = qsIconContainerActiveShape,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.qsIconContainerShape
-                ),
-                0,
-                disabled = qsStyleValue.value != 1,
-                deviceProtectedStorageContext = deviceProtectedStorageContext,
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = qsIconContainerInactiveShape) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qsIconContainerInactiveShapeTitle
-                ),
-                description = if (qsStyleValue.value == 1) qsInactiveShapeEntries[qsInactiveShapeValue.value]
-                else stringResource(
-                    id = R.string.qsIconContainerShapeDisabledTitle
-                ),
+            SingleSelectionChipsFlowRow(
+                chips = tileShapeChips,
+                label = stringResource(if (qsStyleValue.value == 1) R.string.qsIconContainerInactiveShapeTitle else R.string.qsIconContainerShapeDisabledTitle),
+                description = "",
                 key = qsIconContainerInactiveShape,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.qsIconContainerShape
-                ),
-                0,
-                disabled = qsStyleValue.value != 1,
-                deviceProtectedStorageContext = deviceProtectedStorageContext,
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = qsIconContainerUnavailableShape) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qsIconContainerUnavailableShapeTitle
-                ),
-                description = if (qsStyleValue.value == 1) qsUnavailableShapeEntries[qsUnavailableShapeValue.value]
-                else stringResource(
-                    id = R.string.qsIconContainerShapeDisabledTitle
-                ),
+            SingleSelectionChipsFlowRow(
+                chips = tileShapeChips,
+                label = stringResource(if (qsStyleValue.value == 1) R.string.qsIconContainerUnavailableShapeTitle else R.string.qsIconContainerShapeDisabledTitle),
+                description = "",
                 key = qsIconContainerUnavailableShape,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.qsIconContainerShape
-                ),
-                0,
-                disabled = qsStyleValue.value != 1,
-                deviceProtectedStorageContext = deviceProtectedStorageContext,
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = "row header") {
@@ -360,32 +303,35 @@ fun QuicksettingsScrollableContent(
                 )
             )
         }
+        val qqsRowsChips = listOf(
+            Chip(resources.getString(R.string.one)),
+            Chip(resources.getString(R.string.two)),
+        )
         item(key = qqsRows) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qqsRowsTitle
-                ),
-                description = qqsRowsEntries[qqsRowsValue.value - 1],
+            SingleSelectionChipsFlowRow(
+                chips = qqsRowsChips,
+                label = stringResource(R.string.qqsRowsTitle),
+                description = "",
                 key = qqsRows,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.qqs_rows_entries
-                ),
-                1,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 1,
+                context = deviceProtectedStorageContext
             )
         }
+        val qsRowsChips = listOf(
+            Chip(resources.getString(R.string.two)),
+            Chip(resources.getString(R.string.three)),
+            Chip(resources.getString(R.string.four)),
+            Chip(resources.getString(R.string.five)),
+            Chip(resources.getString(R.string.six)),
+        )
         item(key = qsRows) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qsRowsTitle
-                ),
-                description = qsRowsEntries[qsRowsValue.value - 2],
+            SingleSelectionChipsFlowRow(
+                chips = qsRowsChips,
+                label = stringResource(R.string.qsRowsTitle),
+                description = "",
                 key = qsRows,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.qs_rows_entries
-                ),
-                2,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 1,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = "column header") {
@@ -395,32 +341,38 @@ fun QuicksettingsScrollableContent(
                 )
             )
         }
+        val qqsColumnsChips = listOf(
+            Chip(resources.getString(R.string.two)),
+            Chip(resources.getString(R.string.three)),
+            Chip(resources.getString(R.string.four)),
+            Chip(resources.getString(R.string.five)),
+            Chip(resources.getString(R.string.six)),
+        )
         item(key = qqsColumns) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qqsColumnsTitle
-                ),
-                description = qqsColumnsEntries[qqsColumnsValue.value - 2],
+            SingleSelectionChipsFlowRow(
+                chips = qqsColumnsChips,
+                label = stringResource(R.string.qqsColumnsTitle),
+                description = "",
                 key = qqsColumns,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.qs_columns
-                ),
-                0,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
+        val qsColumnsChips = listOf(
+            Chip(resources.getString(R.string.two)),
+            Chip(resources.getString(R.string.three)),
+            Chip(resources.getString(R.string.four)),
+            Chip(resources.getString(R.string.five)),
+            Chip(resources.getString(R.string.six)),
+        )
         item(key = qsColumns) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qsColumnsTitle
-                ),
-                description = qsColumnsEntries[qsColumnsValue.value - 2],
+            SingleSelectionChipsFlowRow(
+                chips = qsColumnsChips,
+                label = stringResource(R.string.qsColumnsTitle),
+                description = "",
                 key = qsColumns,
-                entries = deviceProtectedStorageContext.resources.getStringArray(
-                    R.array.qs_columns
-                ),
-                0,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 0,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = "landscape column header") {
@@ -430,28 +382,38 @@ fun QuicksettingsScrollableContent(
                 )
             )
         }
+        val qqsColumnsLandscapeChips = listOf(
+            Chip(resources.getString(R.string.two)),
+            Chip(resources.getString(R.string.three)),
+            Chip(resources.getString(R.string.four)),
+            Chip(resources.getString(R.string.five)),
+            Chip(resources.getString(R.string.six)),
+        )
         item(key = qqsColumnsLandscape) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qqsColumnsLandscapeTitle
-                ),
-                description = qsColumnsEntries[qqsColumnsLandscapeValue.value - 2],
+            SingleSelectionChipsFlowRow(
+                chips = qqsColumnsLandscapeChips,
+                label = stringResource(R.string.qqsColumnsLandscapeTitle),
+                description = "",
                 key = qqsColumnsLandscape,
-                entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
-                2,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 2,
+                context = deviceProtectedStorageContext
             )
         }
+        val qsColumnsLandscapeChips = listOf(
+            Chip(resources.getString(R.string.two)),
+            Chip(resources.getString(R.string.three)),
+            Chip(resources.getString(R.string.four)),
+            Chip(resources.getString(R.string.five)),
+            Chip(resources.getString(R.string.six)),
+        )
         item(key = qsColumnsLandscape) {
-            TweakSelectionRow(
-                label = stringResource(
-                    id = R.string.qsColumnsLandscapeTitle
-                ),
-                description = qsColumnsEntries[qsColumnsLandscapeValue.value - 2],
+            SingleSelectionChipsFlowRow(
+                chips = qsColumnsLandscapeChips,
+                label = stringResource(R.string.qsColumnsLandscapeTitle),
+                description = "",
                 key = qsColumnsLandscape,
-                entries = deviceProtectedStorageContext.resources.getStringArray(R.array.qs_columns),
-                2,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                defaultIndex = 2,
+                context = deviceProtectedStorageContext
             )
         }
         item(key = "icon color header") {

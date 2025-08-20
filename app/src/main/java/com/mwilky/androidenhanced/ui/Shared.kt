@@ -95,6 +95,7 @@ import com.mwilky.androidenhanced.Utils.Companion.qqsRows
 import com.mwilky.androidenhanced.Utils.Companion.qsColumns
 import com.mwilky.androidenhanced.Utils.Companion.qsColumnsLandscape
 import com.mwilky.androidenhanced.Utils.Companion.qsRows
+import com.mwilky.androidenhanced.Utils.Companion.statusBarClockPosition
 import com.mwilky.androidenhanced.dataclasses.Chip
 import com.mwilky.androidenhanced.ui.Shared.Companion.readIconSwitchState
 import com.mwilky.androidenhanced.ui.Shared.Companion.readSwitchState
@@ -207,7 +208,7 @@ fun TweakSwitch(
                 Toast.makeText(
                     context, context.getString(R.string.requires_subscription), Toast.LENGTH_SHORT
                 ).show()
-            }), shape = RoundedCornerShape(10.dp), colors = CardDefaults.elevatedCardColors()
+            }), colors = CardDefaults.elevatedCardColors()
     ) {
 
         Row(
@@ -316,7 +317,6 @@ fun TweakRow(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxSize(),
-        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.elevatedCardColors()
     ) {
 
@@ -418,7 +418,6 @@ fun TweakSelectionRow(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxSize(),
-        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.elevatedCardColors()
     ) {
 
@@ -743,7 +742,7 @@ fun TweakColor(
                     deviceProtectedStorageContext.getString(R.string.requires_subscription),
                     Toast.LENGTH_SHORT
                 ).show()
-            }), shape = RoundedCornerShape(10.dp), colors = CardDefaults.elevatedCardColors()
+            }), colors = CardDefaults.elevatedCardColors()
     ) {
         Row(
             modifier = Modifier
@@ -1046,7 +1045,6 @@ fun TweakIconSwitch(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxSize(),
-        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.elevatedCardColors()
     ) {
 
@@ -1126,7 +1124,6 @@ fun SettingsSlider(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxSize(),
-        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.elevatedCardColors()
     ) {
         Text(
@@ -1192,7 +1189,9 @@ fun ChipsFlowRow(
     val chipStates = remember {
         mutableStateMapOf<String, Boolean>().apply {
             chips.forEach { chip ->
-                this[chip.key] = sharedPrefs.getBoolean(chip.key, false)
+                chip.key?.let { key ->
+                    this[key] = sharedPrefs.getBoolean(key, false)
+                }
             }
         }
     }
@@ -1240,7 +1239,9 @@ fun ChipsFlowRow(
                         FilterChip(
                             onClick = {
                                 val newState = !isSelected
-                                chipStates[chip.key] = newState
+                                chip.key?.let { key ->
+                                    chipStates[key]
+                                }
 
                                 // Save to SharedPreferences
                                 sharedPrefs.edit {
@@ -1248,7 +1249,9 @@ fun ChipsFlowRow(
                                 }
 
                                 // Send broadcast
-                                BroadcastSender.send(context, chip.key, newState)
+                                chip.key?.let { key ->
+                                    BroadcastSender.send(context, key, newState)
+                                }
                             },
                             label =
                                 {
@@ -1277,31 +1280,178 @@ fun ChipsFlowRow(
     }
 }
 
+@Composable
+fun SingleSelectionChipsFlowRow(
+    chips: List<Chip>,
+    label: String,
+    description: String,
+    key: String,
+    modifier: Modifier = Modifier,
+    defaultIndex: Int = 0,
+    context: Context
+) {
+    val sharedPrefs = remember {
+        context.getSharedPreferences(SHAREDPREFS, MODE_PRIVATE)
+    }
+
+    // State to track which chip is selected (by index)
+    var selectedIndex by remember {
+        mutableIntStateOf(
+            run {
+                val rawValue = sharedPrefs.getInt(key, defaultIndex)
+                when (key) {
+                    qqsRows -> {
+                        if (sharedPrefs.contains(key)) {
+                            rawValue - 1
+                        } else {
+                            rawValue
+                        }
+                    }
+
+                    qsColumns, qsColumnsLandscape, qqsColumns, qqsColumnsLandscape, qsRows -> {
+                        if (sharedPrefs.contains(key)) {
+                            rawValue - 2
+                        } else {
+                            rawValue
+                        }
+                    }
+
+                    else -> rawValue
+                }
+            }
+        )
+    }
+
+    ElevatedCard(
+        modifier = Modifier
+            .padding(8.dp),
+        colors = CardDefaults.elevatedCardColors()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = 16.dp, bottom = 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        top = 8.dp,
+                        bottom = if (description.isNotEmpty()) 0.dp else 8.dp,
+                        end = 4.dp
+                    ),
+                    fontFamily = caviarDreamsFamily
+                )
+                if (description.isNotEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(
+                            start = 16.dp, bottom = 8.dp, end = 16.dp
+                        ),
+                        fontFamily = caviarDreamsFamily
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        FlowRow(
+                            modifier = modifier
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                space = 8.dp,
+                                alignment = Alignment.Start
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            chips.forEachIndexed { index, chip ->
+                                val isSelected = selectedIndex == index
+
+                                FilterChip(
+                                    onClick = {
+                                        selectedIndex = index
+
+                                        // Apply offset when saving (same as TweakSelectionDialog)
+                                        val valueToSave = index + when (key) {
+                                            qqsRows -> 1
+                                            qsColumns, qsColumnsLandscape, qqsColumns, qqsColumnsLandscape, qsRows -> 2
+                                            else -> 0
+                                        }
+
+                                        // Save to SharedPreferences
+                                        sharedPrefs.edit {
+                                            putInt(key, valueToSave)
+                                        }
+
+                                        // Send broadcast with the offset value
+                                        BroadcastSender.send(context, key, valueToSave)
+                                    },
+                                    label = {
+                                        Text(
+                                            text = chip.label,
+                                            fontFamily = caviarDreamsFamily,
+                                            color = if (isSelected)
+                                                MaterialTheme.colorScheme.onPrimary
+                                            else
+                                                MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    selected = isSelected,
+                                    modifier = Modifier.height(32.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = if (isSelected)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            Color.Transparent
+                                    ),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 // Preview composables
 @Preview(showBackground = true)
 @Composable
 fun ChipsFlowRowPreview() {
-    val previewChips = listOf(
-        Chip("sports", "Sports"),
-        Chip("technology", "Technology"),
-        Chip("music", "Music"),
-        Chip("food", "Food"),
-        Chip("travel", "Travel"),
-        Chip("movies", "Movies"),
-        Chip("books", "Books"),
-        Chip("fitness", "Fitness"),
-        Chip("gaming", "Gaming"),
-        Chip("art", "Art & Design")
+    val clockPositionChips = listOf(
+        Chip("Left"),
+        Chip("Right"),
+        Chip("Hidden")
     )
-
-    MaterialTheme {
-        ChipsFlowRow(
-            chips = previewChips,
-            stringResource(R.string.torchAutoOffScreenOnReasonsSummary),
-            modifier = Modifier.fillMaxWidth(),
-            context = LocalContext.current
-        )
-    }
+    SingleSelectionChipsFlowRow(
+        chips = clockPositionChips,
+        label = "Clock position",
+        description = "Select the position of the statusbar clock",
+        key = statusBarClockPosition,
+        defaultIndex = 0,
+        context = LocalContext.current
+    )
 }
 
 

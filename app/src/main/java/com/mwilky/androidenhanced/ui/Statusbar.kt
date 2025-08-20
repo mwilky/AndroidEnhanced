@@ -28,6 +28,7 @@ import com.mwilky.androidenhanced.Utils.Companion.statusbarBrightnessControl
 import com.mwilky.androidenhanced.Utils.Companion.statusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.statusbarIconDarkColor
 import com.mwilky.androidenhanced.Utils.Companion.useDualStatusbarColors
+import com.mwilky.androidenhanced.dataclasses.Chip
 
 class Statusbar {}
 
@@ -56,9 +57,6 @@ fun StatusbarScrollableContent(
 ) {
 
     val sharedPrefs = deviceProtectedStorageContext.getSharedPreferences(SHAREDPREFS, MODE_PRIVATE)
-    val clockPositionValues = rememberIntPreference(sharedPrefs, statusBarClockPosition, 0)
-    val clockPositionEntries =
-        deviceProtectedStorageContext.resources.getStringArray(R.array.statusbar_clock_position_entries)
 
     val globalColor =
         rememberIntPreference(
@@ -115,28 +113,24 @@ fun StatusbarScrollableContent(
                 )
             )
         }
-//        item {
-//            SingleSelectConnectedButtonGroup(
-//                entries = clockPositionEntries,
-//                defaultIndex = 0,
-//                key = statusBarClockPosition,
-//                deviceProtectedStorageContext = deviceProtectedStorageContext,
-//                onSelectionChanged = { index ->
-//                    // Handle selection change
-//                }
-//            )
-//        }
 
+        val resources = deviceProtectedStorageContext.resources
+        val clockPositionChips = listOf(
+            Chip(resources.getString(R.string.left)),
+            Chip(resources.getString(R.string.right)),
+            Chip(resources.getString(R.string.hidden))
+        )
         item(key = statusBarClockPosition) {
-            TweakSelectionRow(
+            SingleSelectionChipsFlowRow(
+                chips = clockPositionChips,
                 label = stringResource(R.string.statusbarClockPositionTitle),
-                description = clockPositionEntries[clockPositionValues.value],
+                description = stringResource(R.string.statusbarClockPositionSummary),
                 key = statusBarClockPosition,
-                entries = clockPositionEntries,
                 defaultIndex = 0,
-                deviceProtectedStorageContext = deviceProtectedStorageContext
+                context = deviceProtectedStorageContext
             )
         }
+
         item(key = statusBarClockSeconds) {
             TweakSwitch(
                 deviceProtectedStorageContext, stringResource(

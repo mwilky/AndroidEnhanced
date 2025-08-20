@@ -16,6 +16,32 @@
     <string name="confirm">Confirm</string>
     <string name="dismiss">Dismiss</string>
 
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="hidden">Hidden</string>
+    <string name="one">One</string>
+    <string name="two">Two</string>
+    <string name="three">Three</string>
+    <string name="four">Four</string>
+    <string name="five">Five</string>
+    <string name="six">Six</string>
+
+    <string name="above">Above</string>
+    <string name="below">Below</string>
+    <string name="Hidden">Hidden</string>
+
+    <string name="noNotifications">No notifications</string>
+    <string name="noImportantNotifications">No important notifications</string>
+
+    <string name="disabled">Disabled</string>
+    <string name="always">Always</string>
+    <string name="never">Never</string>
+
+    <string name="circle">Circle</string>
+    <string name="roundedSquare">Rounded square</string>
+    <string name="square">Square</string>
+
+
     <!--    durations-->
     <string name="day">day</string>
     <string name="week">week</string>
@@ -98,6 +124,7 @@
     <string name="statusbarBrightnessControlTitle">Brightness control</string>
     <string name="statusbarBrightnessControlSummary">Control the brightness of the device via sliding or long pressing on the statusbar</string>
     <string name="statusbarClockPositionTitle">Clock position</string>
+    <string name="statusbarClockPositionSummary">Set the position of the clock in the statusbar</string>
     <string name="statusbarClockSecondsTitle">Clock seconds</string>
     <string name="statusbarClockSecondsSummary">Display seconds in the statusbar clock</string>
     <string name="customStatusbarColorsTitle">Custom icon colors</string>
@@ -180,12 +207,14 @@
     <string name="hideQsFooterBuildNumberTitle">Hide footer build number</string>
     <string name="hideQsFooterBuildNumberSummary">Hides the build number in the quicksettings footer if dev options have been enabled</string>
     <string name="smartPulldownTitle">Smart pulldown</string>
+    <string name="smartPulldownSummary">Expand straight to quicksettings due to the below condition.</string>
     <string name="quickPulldownTitle">Quick pulldown</string>
+    <string name="quickPulldownSummary">Expand straight to quicksettings when dragged from certain position.</string>
     <string name="qsStyleTitle">Style</string>
     <string name="qqsRowsTitle">QQS row count</string>
-    <string name="qsRowsTitle">Row count</string>
-    <string name="qsColumnsTitle">Column count</string>
-    <string name="qsColumnsLandscapeTitle">Landscape column count</string>
+    <string name="qsRowsTitle">QS Row count</string>
+    <string name="qsColumnsTitle">QS Column count</string>
+    <string name="qsColumnsLandscapeTitle">QS Landscape column count</string>
     <string name="qqsColumnsTitle">QQS column count</string>
     <string name="qqsColumnsLandscapeTitle">QQS landscape column count</string>
     <string name="qsBrightnessSliderPositionTitle">Brightness slider position</string>

@@ -5,53 +5,9 @@
         <item>android</item>
         <item>com.google.android.apps.nexuslauncher</item>
     </string-array>
-    <string-array name="statusbar_clock_position_entries">
-        <item>Default (left)</item>
-        <item>Right</item>
-        <item>Hidden</item>
-    </string-array>
-    <string-array name="smart_pulldown_entries">
-        <item>Disabled</item>
-        <item>Go straight to quicksettings if there are no high priority notifications</item>
-        <item>Go straight to quicksettings if there are no notifications</item>
-    </string-array>
-    <string-array name="quick_pulldown_entries">
-        <item>Disabled</item>
-        <item>Right side</item>
-        <item>Left side</item>
-        <item>Always</item>
-    </string-array>
-    <string-array name="quicksettingsBrightnessSliderPosition">
-        <item>Default (above tiles)</item>
-        <item>Below tiles</item>
-        <item>Hidden</item>
-    </string-array>
-    <string-array name="qqs_rows_entries">
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-    <string-array name="qs_columns">
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-    </string-array>
-    <string-array name="qs_rows_entries">
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-    </string-array>
     <string-array name="quicksettingsStyle">
         <item>Default</item>
         <item>Icon with background</item>
         <item>Icon with no background</item>
-    </string-array>
-    <string-array name="qsIconContainerShape">
-        <item>Circle</item>
-        <item>Rounded square</item>
-        <item>Square</item>
     </string-array>
 </resources>
