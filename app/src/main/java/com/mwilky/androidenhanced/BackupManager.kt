@@ -15,6 +15,7 @@ import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
 import com.mwilky.androidenhanced.Utils.Companion.TAG
 import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.OutputStreamWriter
@@ -111,17 +112,51 @@ object BackupManager {
                 for (i in 0 until sharedPreferencesData.length()) {
                     val entry = sharedPreferencesData.getJSONObject(i)
                     val key = entry.optString("key")
-                    val value = entry.opt("value")
-                    if (!key.isNullOrBlank() && value != null) {
-                        when (value) {
-                            is String -> putString(key, value)
-                            is Int -> putInt(key, value)
-                            is Long -> putLong(key, value)
-                            is Float -> putFloat(key, value)
-                            is Boolean -> putBoolean(key, value)
-                            else -> Log.w(TAG, "Unsupported type for key: $key")
+                    val raw = entry.opt("value")
+
+                    if (!key.isNullOrBlank() && raw != null) {
+                        // Normalize types that org.json returns
+                        val valueForPrefs: Any? = when (raw) {
+                            is String -> {
+                                putString(key, raw); raw
+                            }
+
+                            is Int -> {
+                                putInt(key, raw); raw
+                            }
+
+                            is Long -> {
+                                putLong(key, raw); raw
+                            }
+
+                            is Float -> {
+                                putFloat(key, raw); raw
+                            }
+
+                            is Double -> { // This is needed as org.jsn parses any number with a decimal point as a double rather than float
+                                val f = raw.toFloat()
+                                putFloat(key, f)
+                                f
+                            }
+
+                            is Boolean -> {
+                                putBoolean(key, raw); raw
+                            }
+
+                            else -> {
+                                LogManager.log(
+                                    "Settings",
+                                    "Unsupported type for key: $key, value: $raw",
+                                    LogEntryType.ERROR
+                                )
+                                null
+                            }
                         }
-                        BroadcastSender.send(context, key, value)
+
+                        if (valueForPrefs != null) {
+                            // Broadcast the normalized value (Float instead of Double, etc.)
+                            BroadcastSender.send(context, key, valueForPrefs)
+                        }
                     }
                 }
             }
@@ -135,4 +170,5 @@ object BackupManager {
             LogManager.log("Settings", "${context.getString(R.string.restoreFailed)}: ${e.message}")
         }
     }
+
 }
