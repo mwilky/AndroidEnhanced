@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,7 +36,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -44,6 +49,7 @@ import androidx.navigation.NavController
 import com.mwilky.androidenhanced.LogManager
 import com.mwilky.androidenhanced.MainActivity
 import com.mwilky.androidenhanced.dataclasses.LogEntry
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 import com.mwilky.androidenhanced.ui.theme.caviarDreamsFamily
 import com.mwilky.androidenhanced.ui.theme.getLogEntryTypeColor
 import java.text.SimpleDateFormat
@@ -54,6 +60,16 @@ import java.util.Locale
 @Composable
 fun Logs(navController: NavController, deviceProtectedStorageContext: Context) {
     val logs: List<LogEntry> by LogManager.logsFlow.collectAsState()
+    var selectedFilter by remember { mutableStateOf<LogEntryType?>(LogEntryType.INFO) }
+
+    // Filter logs based on selected filter
+    val filteredLogs = remember(logs, selectedFilter) {
+        if (selectedFilter == null) {
+            logs
+        } else {
+            logs.filter { it.type == selectedFilter }
+        }
+    }
 
     // Use a key to recreate the entire composable when logs are cleared
     key(logs.size) {
@@ -62,24 +78,32 @@ fun Logs(navController: NavController, deviceProtectedStorageContext: Context) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                LogsAppBar(scrollBehavior)
+                LogsAppBar(
+                    scrollBehavior = scrollBehavior,
+                    selectedFilter = selectedFilter,
+                    onFilterSelected = { selectedFilter = it }
+                )
             },
             bottomBar = {
                 ScaffoldNavigationBar(navController = navController)
             },
             content = {
-                LogsScrollableContent(topPadding = it, bottomPadding = it)
+                LogsScrollableContent(
+                    topPadding = it,
+                    bottomPadding = it,
+                    filteredLogs = filteredLogs
+                )
             }
         )
     }
 }
+
 @Composable
 fun LogsScrollableContent(
     topPadding: PaddingValues,
     bottomPadding: PaddingValues,
+    filteredLogs: List<LogEntry>
 ) {
-    val logs: List<LogEntry> by LogManager.logsFlow.collectAsState()
-
     LaunchedEffect(Unit) {
         LogManager.reloadLogs()
     }
@@ -94,7 +118,7 @@ fun LogsScrollableContent(
     ) {
 
         LazyColumn {
-            items(logs.reversed()) { logEntry ->
+            items(filteredLogs.reversed()) { logEntry ->
                 LogEntryItem(log = logEntry)
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             }
@@ -151,39 +175,99 @@ fun LogEntryItem(log: LogEntry) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogsAppBar(
-    scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior,
+    selectedFilter: LogEntryType?,
+    onFilterSelected: (LogEntryType?) -> Unit
 ) {
     val mainActivity = (LocalActivity.current as MainActivity)
+    var showFilterMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
         ),
         scrollBehavior = scrollBehavior,
         title = {
+            val titleText = when (selectedFilter) {
+                LogEntryType.INFO -> "Logs"
+                null -> "Logs (All)"
+                else -> "Logs (${
+                    selectedFilter.name.lowercase().replaceFirstChar { it.uppercase() }
+                })"
+            }
             Text(
-                text = "Logs",
+                text = titleText,
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = caviarDreamsFamily
             )
         },
         actions = {
-            IconButton(
-                onClick = { mainActivity.createLogBackup() }
-            ) {
-                Icon(
-                    painter = painterResource(id = com.mwilky.androidenhanced.R.drawable.ic_save),
-                    contentDescription = "back",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
-            }
+            // Clear logs button
             IconButton(
                 onClick = { LogManager.clearAllLogs() }
             ) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = "back",
+                    contentDescription = "Clear logs",
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
+            // Backup button
+            IconButton(
+                onClick = { mainActivity.createLogBackup() }
+            ) {
+                Icon(
+                    painter = painterResource(id = com.mwilky.androidenhanced.R.drawable.ic_save),
+                    contentDescription = "Save logs",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            // Filter button with dropdown menu
+            Box {
+                IconButton(
+                    onClick = { showFilterMenu = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = "Filter logs",
+                        tint = if (selectedFilter != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showFilterMenu,
+                    onDismissRequest = { showFilterMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("All", fontFamily = caviarDreamsFamily) },
+                        onClick = {
+                            onFilterSelected(null)
+                            showFilterMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Default", fontFamily = caviarDreamsFamily) },
+                        onClick = {
+                            onFilterSelected(LogEntryType.INFO)
+                            showFilterMenu = false
+                        }
+                    )
+                    LogEntryType.entries.filter { it != LogEntryType.INFO }.forEach { type ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    type.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    fontFamily = caviarDreamsFamily
+                                )
+                            },
+                            onClick = {
+                                onFilterSelected(type)
+                                showFilterMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
         }
     )
 }
