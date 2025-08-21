@@ -209,6 +209,7 @@ import com.mwilky.androidenhanced.Utils.Companion.setBrighnessSliderMargins
 import com.mwilky.androidenhanced.Utils.Companion.setBrightnessView
 import com.mwilky.androidenhanced.Utils.Companion.setStatusbarClockPosition
 import com.mwilky.androidenhanced.Utils.Companion.updateStatusbarIconColors
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 import com.mwilky.androidenhanced.xposed.BroadcastReceiver.Companion.registerBroadcastReceiver
 import com.mwilky.androidenhanced.xposed.premium.SystemUI.Companion.qsStyleHooks
 import com.mwilky.androidenhanced.xposed.premium.SystemUI.Companion.statusbarIconColorHooks
@@ -285,8 +286,9 @@ class SystemUI {
 
                         sendLogBroadcast(
                             SystemUIContext,
-                            "Hook Info",
-                            "${SystemUIContext.packageName} hooked successfully!"
+                            "Hook Success",
+                            "${SystemUIContext.packageName} hooked successfully!",
+                            LogEntryType.HOOKS
                         )
 
                         // Register receivers
@@ -3220,7 +3222,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3270,7 +3275,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3282,7 +3290,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return false
             }
@@ -3295,7 +3306,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3358,7 +3372,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return getColorAttrDefaultColor(
                     context,
@@ -3403,7 +3420,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3461,7 +3481,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3479,7 +3502,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return null
             }
@@ -3498,7 +3524,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return null
             }
@@ -3510,7 +3539,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return false
             }
@@ -3524,7 +3556,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return 0
             }
@@ -3540,7 +3575,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return 0
             }
@@ -3569,7 +3607,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3580,7 +3621,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return 0f
             }
@@ -3595,7 +3639,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return 0
             }
@@ -3619,7 +3666,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return 4
             }
@@ -3643,7 +3693,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return 2
             }
@@ -3712,7 +3765,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3726,7 +3782,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return 0
             }
@@ -3741,7 +3800,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return false
             }
@@ -3926,7 +3988,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -3971,7 +4036,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -4009,7 +4077,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -4043,7 +4114,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -4098,7 +4172,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -4113,7 +4190,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -4137,7 +4217,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -4158,7 +4241,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return -1
             }
@@ -4174,7 +4260,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return state2
             }
@@ -4202,7 +4291,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return false
             }
@@ -4225,7 +4317,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return false
             }
@@ -4242,7 +4337,10 @@ class SystemUI {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }

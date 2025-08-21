@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.core.os.UserManagerCompat
 import com.mwilky.androidenhanced.BillingManager.Companion.resetPremiumTweaks
 import com.mwilky.androidenhanced.Utils.Companion.BOOTCOMPLETED
@@ -18,6 +17,7 @@ import com.mwilky.androidenhanced.Utils.Companion.LASTBACKUP
 import com.mwilky.androidenhanced.Utils.Companion.LOGSKEY
 import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
 import com.mwilky.androidenhanced.Utils.Companion.UNSUPPORTEDDEVICEDIALOGSHOWN
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 
 class BootReceiver : BroadcastReceiver() {
 
@@ -25,9 +25,11 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val bootCompleted: Boolean
         val action = intent.action
-        Log.i(
-            "BroadcastReceiver",
-            "Received action: $action, user unlocked: " + UserManagerCompat.isUserUnlocked(context)
+
+        LogManager.log(
+            "BootReceiver",
+            "Received action: $action, user unlocked: " + UserManagerCompat.isUserUnlocked(context),
+            LogEntryType.DEBUG
         )
 
         bootCompleted = Intent.ACTION_LOCKED_BOOT_COMPLETED == action
@@ -68,7 +70,7 @@ class BootReceiver : BroadcastReceiver() {
         val isPremium = sharedPreferences.getBoolean(ISPREMIUM, false)
         if (!isPremium) resetPremiumTweaks(context)
 
-        LogManager.log("BroadcastUtils", "Applied all settings at boot")
+        LogManager.log("BootReceiver", "Applied all settings at boot", LogEntryType.DEBUG)
         BroadcastSender.send(deviceProtectedStorageContext, BOOTCOMPLETED, true)
     }
 }

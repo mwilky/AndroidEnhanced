@@ -61,6 +61,7 @@ import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnPowerButto
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnTap
 import com.mwilky.androidenhanced.Utils.Companion.torchPowerScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 import com.mwilky.androidenhanced.xposed.BroadcastReceiver.Companion.registerBroadcastReceiver
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers.callMethod
@@ -95,8 +96,9 @@ class Framework {
 
                         sendLogBroadcast(
                             ServicesContext,
-                            "Hook Info",
-                            "${ServicesContext.packageName} hooked successfully!"
+                            "Hook Success",
+                            "${ServicesContext.packageName} hooked successfully!",
+                            LogEntryType.HOOKS
                         )
 
                         MediaSessionLegacyHelper = findClass(
@@ -998,7 +1000,10 @@ class Framework {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -1019,7 +1024,10 @@ class Framework {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
                 return false
             }
@@ -1041,7 +1049,10 @@ class Framework {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }
@@ -1065,7 +1076,10 @@ class Framework {
             } catch (e: Exception) {
                 val funcName = object {}.javaClass.enclosingMethod?.name ?: "unknown"
                 sendLogBroadcast(
-                    SystemUIContext, "Function Error", "$funcName - ${e.toString()}"
+                    SystemUIContext,
+                    "Function Error",
+                    "$funcName - ${e.toString()}",
+                    LogEntryType.ERROR
                 )
             }
         }

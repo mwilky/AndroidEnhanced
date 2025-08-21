@@ -87,7 +87,11 @@ object BackupManager {
         } catch (e: Exception) {
             Log.e(TAG, "Backup failed: ${e.message}", e)
             Toast.makeText(context, R.string.backupFailed, Toast.LENGTH_LONG).show()
-            LogManager.log("Settings", "${context.getString(R.string.backupFailed)}: ${e.message}")
+            LogManager.log(
+                "Settings",
+                "${context.getString(R.string.backupFailed)}: ${e.message}",
+                LogEntryType.ERROR
+            )
         }
     }
 
@@ -100,7 +104,11 @@ object BackupManager {
             if (!backupData.has("sharedPreferencesData")) {
                 Toast.makeText(context, "Invalid or corrupted backup file", Toast.LENGTH_LONG)
                     .show()
-                Log.e(TAG, "Invalid backup file: missing 'sharedPreferencesData'")
+                LogManager.log(
+                    "Settings",
+                    "Invalid backup file: missing 'sharedPreferencesData'",
+                    LogEntryType.ERROR
+                )
                 return
             }
 
@@ -167,7 +175,11 @@ object BackupManager {
         } catch (e: Exception) {
             Log.e(TAG, "Restore failed: ${e.message}", e)
             Toast.makeText(context, R.string.restoreFailed, Toast.LENGTH_LONG).show()
-            LogManager.log("Settings", "${context.getString(R.string.restoreFailed)}: ${e.message}")
+            LogManager.log(
+                "Settings",
+                "${context.getString(R.string.restoreFailed)}: ${e.message}",
+                LogEntryType.ERROR
+            )
         }
     }
 

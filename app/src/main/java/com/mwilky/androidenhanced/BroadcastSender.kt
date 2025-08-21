@@ -2,6 +2,7 @@ package com.mwilky.androidenhanced
 
 import android.content.Context
 import android.content.Intent
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 
 object BroadcastSender {
     fun <T> send(context: Context, key: String, value: T) {
@@ -15,7 +16,7 @@ object BroadcastSender {
             }
         }
         context.sendBroadcast(intent)
-        LogManager.log("BroadcastSender", "Sent $key = $value")
+        LogManager.log("BroadcastSender", "Sent $key = $value", LogEntryType.DEBUG)
     }
 }
 

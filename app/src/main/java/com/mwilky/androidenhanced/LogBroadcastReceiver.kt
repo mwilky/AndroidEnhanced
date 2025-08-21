@@ -11,7 +11,7 @@ class LogBroadcastReceiver : BroadcastReceiver() {
         val title = intent.getStringExtra("title") ?: return
         val summary = intent.getStringExtra("summary") ?: return
         val type =
-            intent.getSerializableExtra("type", LogEntryType::class.java) ?: LogEntryType.DEFAULT
+            intent.getSerializableExtra("type", LogEntryType::class.java) ?: LogEntryType.INFO
 
         val appContext = try {
             context.createPackageContext(

@@ -13,10 +13,10 @@ import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
 import com.mwilky.androidenhanced.Utils.Companion.gestureSleep
 import com.mwilky.androidenhanced.Utils.Companion.mDoubleTapSleepLauncher
 import com.mwilky.androidenhanced.Utils.Companion.sendLogBroadcast
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 import com.mwilky.androidenhanced.xposed.BroadcastReceiver.Companion.registerBroadcastReceiver
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge.hookAllConstructors
-import de.robv.android.xposed.XposedBridge.log
 import de.robv.android.xposed.XposedHelpers.callMethod
 import de.robv.android.xposed.XposedHelpers.findAndHookMethod
 import de.robv.android.xposed.XposedHelpers.findClass
@@ -37,8 +37,9 @@ class Launcher {
 
                         sendLogBroadcast(
                             LauncherContext,
-                            "Hook Info",
-                            "${LauncherContext.packageName} hooked successfully!"
+                            "Hook Success",
+                            "${LauncherContext.packageName} hooked successfully!",
+                            LogEntryType.HOOKS
                         )
 
                         registerBroadcastReceiver(
@@ -77,8 +78,6 @@ class Launcher {
                             }
 
                             override fun onDoubleTap(e: MotionEvent): Boolean {
-                                log("👆 Double tap detected at (${e.x}, ${e.y}) on ${System.currentTimeMillis()}")
-
                                 if (mDoubleTapSleepLauncher) {
                                     sendDoubleTapBroadcast(mContext)
                                     return true

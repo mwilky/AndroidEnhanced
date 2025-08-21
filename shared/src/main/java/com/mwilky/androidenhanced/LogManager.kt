@@ -18,7 +18,6 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.collections.plus
 
 object LogManager {
 
@@ -44,7 +43,7 @@ object LogManager {
         _logsFlow.value = loadLogs()
     }
 
-    fun log(title: String, summary: String, type: LogEntryType = LogEntryType.DEFAULT) {
+    fun log(title: String, summary: String, type: LogEntryType = LogEntryType.INFO) {
         if (!this::sharedPreferences.isInitialized) {
             throw IllegalStateException("LogManager not initialized. Call LogManager.init(context) first.")
         }
@@ -134,7 +133,7 @@ object LogManager {
             e.printStackTrace()
             Toast.makeText(context, "Logs backup failed", Toast.LENGTH_LONG).show()
             Log.e(Utils.TAG, "Logs backup failed: ${e.message}", e)
-            log("Logs", "Logs backup failed: ${e.message}")
+            log("Logs", "Logs backup failed: ${e.message}", LogEntryType.ERROR)
         }
     }
 

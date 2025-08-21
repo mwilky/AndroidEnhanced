@@ -212,6 +212,7 @@ import com.mwilky.androidenhanced.Utils.Companion.updateStatusbarIconColors
 import com.mwilky.androidenhanced.Utils.Companion.updateSystemUIAfterBootComplete
 import com.mwilky.androidenhanced.Utils.Companion.useDualStatusbarColors
 import com.mwilky.androidenhanced.Utils.Companion.volKeyMediaControl
+import com.mwilky.androidenhanced.dataclasses.LogEntryType
 import com.mwilky.androidenhanced.xposed.Framework.Companion.updateSupportLongPressPowerWhenNonInteractive
 import com.mwilky.androidenhanced.xposed.SystemUI.Companion.updateFirstNotificationExpansion
 import com.mwilky.androidenhanced.xposed.SystemUI.Companion.updateNotificationExpansion
@@ -236,8 +237,9 @@ class BroadcastReceiver {
 
                     sendLogBroadcast(
                         mContext,
-                        "Broadcast Receiver",
-                        "Received $key in $registeredClass, value = $rawValue"
+                        "BroadcastReceiver",
+                        "Received $key in $registeredClass, value = $rawValue",
+                        LogEntryType.DEBUG
                     )
 
                     when (rawValue) {
@@ -262,8 +264,9 @@ class BroadcastReceiver {
             mContext.registerReceiver(myReceiver, intentFilter, RECEIVER_EXPORTED)
 
             sendLogBroadcast(
-                mContext, "Broadcast Receiver",
-                "Registered $key in $registeredClass, default value = $defaultValue"
+                mContext, "BroadcastReceiver",
+                "Registered $key in $registeredClass, default value = $defaultValue",
+                LogEntryType.DEBUG
             )
         }
 

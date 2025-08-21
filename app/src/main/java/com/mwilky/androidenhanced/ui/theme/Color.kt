@@ -47,7 +47,7 @@ val AmberA700 = Color(0xFFFFAB00)
 @Composable
 fun getLogEntryTypeColor(type: LogEntryType): Color {
     return when (type) {
-        LogEntryType.SUCCESS -> if (isSystemInDarkTheme()) {
+        LogEntryType.HOOKS -> if (isSystemInDarkTheme()) {
             Green300
         } else {
             Green700
