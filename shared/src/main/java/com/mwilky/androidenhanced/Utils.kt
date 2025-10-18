@@ -87,7 +87,8 @@ class Utils() {
         var TAG = "Android Enhanced:"
         const val SHAREDPREFS = "prefs"
 
-        val supportedDevices: List<String> = listOf("Pixel 9", "Pixel 8", "Pixel 7", "Pixel 6")
+        val supportedDevices: List<String> =
+            listOf("Pixel 10", "Pixel 9", "Pixel 8", "Pixel 7", "Pixel 6")
         var mIsInitialBoot = true
 
         // App related Keys
