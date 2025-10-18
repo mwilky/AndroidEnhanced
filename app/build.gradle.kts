@@ -16,8 +16,8 @@ android {
         applicationId = "com.mwilky.androidenhanced"
         minSdk = 35
         targetSdk = 36
-        versionCode = 2202
-        versionName = "2.2.2"
+        versionCode = 2203
+        versionName = "2.2.3"
         buildConfigField("Boolean", "HAS_PREMIUM_MODULE", hasPremiumModule.toString())
 
     }
@@ -72,7 +72,6 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.navigation.compose)
     implementation(libs.material3)
-    implementation(libs.material)
     implementation(libs.splashscreen)
     implementation(libs.gson)
     implementation(libs.billing.ktx)
