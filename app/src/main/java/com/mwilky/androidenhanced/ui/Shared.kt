@@ -1240,7 +1240,7 @@ fun ChipsFlowRow(
                             onClick = {
                                 val newState = !isSelected
                                 chip.key?.let { key ->
-                                    chipStates[key]
+                                    chipStates[key] = newState
                                 }
 
                                 // Save to SharedPreferences
