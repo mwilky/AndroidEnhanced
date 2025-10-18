@@ -183,7 +183,6 @@ class Utils() {
         const val volKeyMediaControl = "bool_VolKeyMediaControl"
         const val allowAllRotations = "bool_AllowAllRotations"
         const val disableSecureScreenshots = "bool_DisableSecureScreenshots"
-        const val disableCameraScreenOff = "bool_DisableCameraScreenOff"
 
         //SystemUI
         const val doubleTapToSleep = "bool_DoubleTapToSleep"
@@ -280,7 +279,6 @@ class Utils() {
         var mHideLockscreenStatusbar = false
         var mScrambleKeypad = false
         var mHideQsFooterBuildNumber: Boolean = false
-        var mDisableCameraGestureWhenLocked: Boolean = false
         var mDisableSecureScreenshots = false
         var mAllowAllRotations = false
         var mDisableLockscreenPowerMenu = false

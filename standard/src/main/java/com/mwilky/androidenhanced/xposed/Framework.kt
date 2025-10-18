@@ -13,11 +13,9 @@ import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.ViewConfiguration
 import com.mwilky.androidenhanced.HookedClasses.Companion.DISPLAY_ROTATION_CLASS
-import com.mwilky.androidenhanced.HookedClasses.Companion.GESTURE_LAUNCHER_SERVICE_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.MEDIA_SESSIONS_LEGACY_HELPER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.NOTIFICATION_ATTENTION_HELPER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.NOTIFICATION_RECORD_CLASS
-import com.mwilky.androidenhanced.HookedClasses.Companion.PHONE_WINDOW_MANAGER_9_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.PHONE_WINDOW_MANAGER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.PHONE_WINDOW_MANAGER_POLICY_HANDLER_CLASS
 import com.mwilky.androidenhanced.HookedClasses.Companion.PHONE_WINDOW_MANAGER_POWER_KEY_RULE_CLASS
@@ -33,11 +31,9 @@ import com.mwilky.androidenhanced.TorchHolder
 import com.mwilky.androidenhanced.Utils.Companion.MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK
 import com.mwilky.androidenhanced.Utils.Companion.MSG_TOGGLE_TORCH
 import com.mwilky.androidenhanced.Utils.Companion.allowAllRotations
-import com.mwilky.androidenhanced.Utils.Companion.disableCameraScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.mAllowAllRotations
-import com.mwilky.androidenhanced.Utils.Companion.mDisableCameraGestureWhenLocked
 import com.mwilky.androidenhanced.Utils.Companion.mDisableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.mDisableSecureScreenshots
 import com.mwilky.androidenhanced.Utils.Companion.mMuteScreenOnNotifications
@@ -153,13 +149,6 @@ class Framework {
 
                         registerBroadcastReceiver(
                             ServicesContext,
-                            disableCameraScreenOff,
-                            param.thisObject.toString(),
-                            false
-                        )
-
-                        registerBroadcastReceiver(
-                            ServicesContext,
                             torchAutoOffScreenOnLift,
                             param.thisObject.toString(),
                             true
@@ -236,7 +225,6 @@ class Framework {
                         buttonHooks(classLoader)
                         muteScreenOnNotificationsHooks(classLoader)
                         disableLockscreenPowerMenuHooks(classLoader)
-                        disableCameraScreenOffHooks(classLoader)
                     }
                 })
         }
@@ -290,58 +278,35 @@ class Framework {
                 })
 
             // This handles power + volume press
-            safeHookMethod(
-                context = ServicesContext,
-                PHONE_WINDOW_MANAGER_9_CLASS,
-                classLoader,
-                "execute",
-                beforeHook = { param ->
-                    val isScreenOn = callMethod(
-                        getSurroundingThis(param.thisObject), "isScreenOn"
-                    ) as Boolean
-
-                    val keyguardOn = callMethod(
-                        getSurroundingThis(param.thisObject), "keyguardOn"
-                    ) as Boolean
-
-                    val mPowerVolUpBehavior = getIntField(
-                        getSurroundingThis(param.thisObject), "mPowerVolUpBehavior"
-                    )
-                    if (mPowerVolUpBehavior == 2) {
-                        if (mDisableLockscreenPowerMenu && isScreenOn && keyguardOn) {
-                            callMethod(
-                                getSurroundingThis(param.thisObject),
-                                "performHapticFeedback",
-                                10003,
-                                "Power + Volume Up - Global Actions Suppressed"
-                            )
-                            param.result = null
-                        }
-                    }
-                })
-        }
-
-        fun disableCameraScreenOffHooks(classLoader: ClassLoader) {
-            safeHookMethod(
-                context = ServicesContext,
-                GESTURE_LAUNCHER_SERVICE_CLASS,
-                classLoader,
-                "handleCameraGesture",
-                Boolean::class.javaPrimitiveType,
-                Int::class.javaPrimitiveType,
-                beforeHook = { param ->
-                    val useWakeLock = param.args[0] as Boolean
-                    val source = param.args[1] as Int
-
-                    val mWindowManagerInternal =
-                        getObjectField(param.thisObject, "mWindowManagerInternal")
-                    val isKeyguardLocked =
-                        callMethod(mWindowManagerInternal, "isKeyguardLocked") as Boolean
-
-                    if (!useWakeLock && source == 1 && mDisableCameraGestureWhenLocked && isKeyguardLocked) {
-                        param.result = false
-                    }
-                })
+//            safeHookMethod(
+//                context = ServicesContext,
+//                PHONE_WINDOW_MANAGER_9_CLASS,
+//                classLoader,
+//                "execute",
+//                beforeHook = { param ->
+//                    val isScreenOn = callMethod(
+//                        getSurroundingThis(param.thisObject), "isScreenOn"
+//                    ) as Boolean
+//
+//                    val keyguardOn = callMethod(
+//                        getSurroundingThis(param.thisObject), "keyguardOn"
+//                    ) as Boolean
+//
+//                    val mPowerVolUpBehavior = getIntField(
+//                        getSurroundingThis(param.thisObject), "mPowerVolUpBehavior"
+//                    )
+//                    if (mPowerVolUpBehavior == 2) {
+//                        if (mDisableLockscreenPowerMenu && isScreenOn && keyguardOn) {
+//                            callMethod(
+//                                getSurroundingThis(param.thisObject),
+//                                "performHapticFeedback",
+//                                10003,
+//                                "Power + Volume Up - Global Actions Suppressed"
+//                            )
+//                            param.result = null
+//                        }
+//                    }
+//                })
         }
 
         fun allowAllRotationsHooks(classLoader: ClassLoader) {
@@ -388,19 +353,31 @@ class Framework {
                 PHONE_WINDOW_MANAGER_POWER_KEY_RULE_CLASS,
                 classLoader,
                 "onLongPress",
-                Long::class.javaPrimitiveType,
-                replaceWith = lambda@{ param ->
-                    val mHandler = getObjectField(
-                        getSurroundingThis(param.thisObject), "mHandler"
-                    ) as Handler
+                findClass("com.android.server.policy.SingleKeyGestureEvent", classLoader),
+                beforeHook = { param ->
+                    val singleKeyGestureEvent = param.args[0]
+                    val isScreenOn =
+                        callMethod(getSurroundingThis(param.thisObject), "isScreenOn") as Boolean
+                    val dreamManager: Any =
+                        callStaticMethod(
+                            findClass(PHONE_WINDOW_MANAGER_CLASS, classLoader), "getDreamManager"
+                        )
+                    val isDreaming =
+                        callMethod(dreamManager, "isDreaming") as Boolean
+                    val mSupportLongPressPowerWhenNonInteractive =
+                        getBooleanField(
+                            getSurroundingThis(param.thisObject),
+                            "mSupportLongPressPowerWhenNonInteractive"
+                        )
+                    val action =
+                        callMethod(singleKeyGestureEvent, "getAction") as Int
 
-                    if (callMethod(
-                            getObjectField(
-                                getSurroundingThis(param.thisObject), "mSingleKeyGestureDetector"
-                            ), "beganFromNonInteractive"
-                        ) as Boolean
-                    ) {
-                        if (mTorchPowerScreenOff) {
+                    // This triggers for single press now too, so we have to check for action 1 (complete) before toggling the torch, as single press triggers on action 2 (cancel)
+                    if (mTorchPowerScreenOff && (!isScreenOn || isDreaming) && mSupportLongPressPowerWhenNonInteractive && action == 1) {
+                        val mHandler = getObjectField(
+                            getSurroundingThis(param.thisObject), "mHandler"
+                        ) as Handler
+
                             mHandler.removeMessages(
                                 MSG_TOGGLE_TORCH
                             )
@@ -415,24 +392,8 @@ class Framework {
                                 0,
                                 "Power - Long Press - Torch"
                             )
-                            return@lambda null
+                        param.result = null
                         }
-                        if (!getBooleanField(
-                                getSurroundingThis(param.thisObject),
-                                "mSupportLongPressPowerWhenNonInteractive"
-                            )
-                        ) {
-                            Log.v(
-                                "WindowManager",
-                                "Not support long press power when device is not interactive."
-                            )
-                            return@lambda null
-                        }
-                    }
-                    callMethod(
-                        getSurroundingThis(param.thisObject), "powerLongPress", param.args[0]
-                    )
-                    return@lambda null
                 })
 
 
@@ -504,9 +465,8 @@ class Framework {
                 Boolean::class.javaPrimitiveType,
                 beforeHook = { param ->
                     val event = param.args[0] as KeyEvent
-
                     val interactive = param.args[1] as Boolean
-
+                    val isKeyGestureTriggered = param.args[2] as Boolean
                     val mIncallPowerBehavior = getIntField(param.thisObject, "mIncallPowerBehavior")
 
                     val telecomManager = callMethod(
@@ -532,12 +492,10 @@ class Framework {
 
                     var mPowerKeyHandled = getBooleanField(param.thisObject, "mPowerKeyHandled")
 
+                    callMethod(param.thisObject, "sendSystemKeyToStatusBarAsync", event)
+
                     mPowerKeyHandled =
-                        (mPowerKeyHandled || hungUp || handledByPowerManager || callMethod(
-                            getObjectField(
-                                param.thisObject, "mKeyCombinationManager"
-                            ), "isPowerKeyIntercepted"
-                        ) as Boolean)
+                        (mPowerKeyHandled || hungUp || handledByPowerManager || isKeyGestureTriggered)
 
                     if (!mPowerKeyHandled) {
                         if (!interactive) {
@@ -911,6 +869,12 @@ class Framework {
 
                                                 scheduleLongPressKeyEvent(
                                                     event, newKeyCode
+                                                )
+                                                callMethod(
+                                                    param.thisObject,
+                                                    "performHapticFeedback",
+                                                    HapticFeedbackConstants.VIRTUAL_KEY,
+                                                    "Volume Key - Long Press"
                                                 )
                                                 // Consume key down events of all presses.
                                             } else {

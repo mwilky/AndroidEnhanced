@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mwilky.androidenhanced.R
 import com.mwilky.androidenhanced.Utils.Companion.SHAREDPREFS
-import com.mwilky.androidenhanced.Utils.Companion.disableCameraScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.doubleTapToSleepLauncher
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOn
 import com.mwilky.androidenhanced.Utils.Companion.torchAutoOffScreenOnApplication
@@ -130,15 +129,6 @@ fun ButtonsScrollableContent(
                         deviceProtectedStorageContext
                     )
                 }
-            )
-        }
-        item(key = disableCameraScreenOff) {
-            TweakSwitch(
-                deviceProtectedStorageContext, stringResource(
-                    R.string.disableDoublePressCameraScreenOffTitle
-                ), stringResource(
-                    R.string.disableDoublePressCameraScreenOffSummary
-                ), disableCameraScreenOff
             )
         }
         item(key = "volume_header") {

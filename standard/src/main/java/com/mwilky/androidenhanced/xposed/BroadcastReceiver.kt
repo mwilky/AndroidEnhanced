@@ -53,7 +53,6 @@ import com.mwilky.androidenhanced.Utils.Companion.customStatusbarMobileIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarNotificationIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarOtherIconColor
 import com.mwilky.androidenhanced.Utils.Companion.customStatusbarWifiIconColor
-import com.mwilky.androidenhanced.Utils.Companion.disableCameraScreenOff
 import com.mwilky.androidenhanced.Utils.Companion.disableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.disableQsLockscreen
 import com.mwilky.androidenhanced.Utils.Companion.disableSecureScreenshots
@@ -71,7 +70,6 @@ import com.mwilky.androidenhanced.Utils.Companion.iconBlacklist
 import com.mwilky.androidenhanced.Utils.Companion.lockDevice
 import com.mwilky.androidenhanced.Utils.Companion.lsStatusbarIconAccentColor
 import com.mwilky.androidenhanced.Utils.Companion.mAllowAllRotations
-import com.mwilky.androidenhanced.Utils.Companion.mDisableCameraGestureWhenLocked
 import com.mwilky.androidenhanced.Utils.Companion.mDisableLockscreenPowerMenu
 import com.mwilky.androidenhanced.Utils.Companion.mDisableLockscreenQuicksettings
 import com.mwilky.androidenhanced.Utils.Companion.mDisableSecureScreenshots
@@ -727,10 +725,6 @@ class BroadcastReceiver {
                         ), "mSentAllBootPrefs", true
                     )
                     updateSystemUIAfterBootComplete()
-                }
-
-                disableCameraScreenOff -> {
-                    mDisableCameraGestureWhenLocked = value as Boolean
                 }
 
                 torchAutoOffScreenOnLift -> {
